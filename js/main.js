@@ -39,15 +39,36 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 各モジュールの初期化
     // theme.jsの初期化
-    if (typeof initTheme === 'function') {
-        initTheme();
-    }
+    if (typeof initTheme === 'function') initTheme();
+    if (typeof initToolSearch === 'function') initToolSearch();
+    if (typeof initScrollTopButton === 'function') initScrollTopButton();
+    if (typeof initFadeAnime === 'function') initFadeAnime();
 
     // イベントリスナーの設定
     // テーマ切替ボタンのイベントリスナー
     if (themeToggle && typeof toggleTheme === 'function') {
         themeToggle.addEventListener('click', toggleTheme);
     }
+
+    // スクロールトップボタンの表示切替
+        checkScrollTopButton();
+    });
+    
+    // 明示的にスクロールトップボタンの初期チェックを行う
+    checkScrollTopButton();
+});
+
+// スクロールトップボタン表示チェック
+function checkScrollTopButton() {
+    const scrollTopButton = document.getElementById('scroll-top-button');
+    if (!scrollTopButton) return;
+    
+    if (window.pageYOffset > 300) {
+        scrollTopButton.classList.add('visible');
+    } else {
+        scrollTopButton.classList.remove('visible');
+    }
+}
     
     // モバイルテーマ切替ボタンのイベントリスナー
     if (mobileThemeToggle && typeof toggleTheme === 'function') {
