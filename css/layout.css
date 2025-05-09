@@ -187,6 +187,19 @@ header {
 }
 
 /* レスポンシブ対応 */
+/* メディアクエリの修正 */
+@media (min-width: 901px) {
+    /* PCサイズでは常にモバイルメニューを非表示に */
+    .mobile-menu {
+        display: none !important;
+    }
+    
+    /* PCサイズではメニューボタンも非表示 */
+    .menu-button {
+        display: none !important;
+    }
+}
+
 @media (max-width: 900px) {
     .header-nav {
         display: none;
