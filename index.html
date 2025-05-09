@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二十一世紀症候群 VRChatツールリポジトリ</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        :root {
+            --primary-color: #475bf5;
+            --primary-light: rgba(71, 91, 245, 0.1);
+            --primary-hover: #3649ca;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --text-secondary: #767676;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --info-background: rgba(71, 91, 245, 0.05);
+            --tab-inactive: #f0f0f0;
+            --tab-active: #ffffff;
+            --tab-border: #dddddd;
+            --header-height: 64px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-color: #5c6efd;
+                --primary-light: rgba(92, 110, 253, 0.1);
+                --primary-hover: #7987fd;
+                --background-color: #111111;
+                --card-background: #222222;
+                --text-color: #f0f0f0;
+                --text-secondary: #b0b0b0;
+                --border-color: #333333;
+                --shadow-color: rgba(0, 0, 0, 0.3);
+                --info-background: rgba(92, 110, 253, 0.1);
+                --tab-inactive: #1a1a1a;
+                --tab-active: #222222;
+                --tab-border: #333333;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: all 0.3s ease;
+            scroll-padding-top: var(--header-height);
+        }
+
+        /* 固定ヘッダー */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background-color: var(--card-background);
+            box-shadow: 0 2px 8px var(--shadow-color);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .site-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .header-nav {
+            display: flex;
+            margin-left: 2rem;
+        }
+
+        .header-nav-item {
+            margin: 0 1rem;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+        }
+
+        .header-nav-item:hover, .header-nav-item.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-search {
+            position: relative;
+            margin-right: 1rem;
+        }
+
+        .header-search-input {
+            padding: 0.5rem 0.5rem 0.5rem 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            width: 200px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .header-search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            width: 240px;
+        }
+
+        .header-search-icon {
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .header-search-icon svg {
+            width: 1rem;
+            height: 1rem;
+            fill: var(--text-secondary);
+        }
+
+        .menu-button {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .menu-button svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            fill: var(--text-secondary);
+        }
+
+        .menu-button:hover svg {
+            fill: var(--primary-color);
+        }
+
+        /* モバイルメニュー */
+        .mobile-menu {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: 100%;
+            background-color: var(--card-background);
+            box-shadow: 0 4px 8px var(--shadow-color);
+            z-index: 999;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+        }
+
+        .mobile-menu-search {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mobile-menu-search-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .mobile-menu-nav {
+            padding: 1rem 0;
+        }
+
+        .mobile-menu-nav-item {
+            display: block;
+            padding: 0.8rem 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .mobile-menu-nav-item:hover, .mobile-menu-nav-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-left-color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            padding-top: calc(var(--header-height) + 2rem);
+        }
+
+        header {
+            padding: 1rem 0 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 1.5rem;
+            background-color: var(--primary-color);
+            margin-right: 0.75rem;
+            border-radius: 2px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.6rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(71, 91, 245, 0.2);
+        }
+
+        .button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(71, 91, 245, 0.3);
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 0 0 3rem;
+        }
+
+        .add-vcc-button {
+            font-size: 1.1rem;
+            padding: 1rem 2rem;
+        }
+
+        .tools-content {
+            background-color: var(--card-background);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 16px var(--shadow-color);
+            margin-bottom: 2rem;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--card-background);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+        }
+
+        #search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .search-icon svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            fill: var(--text-secondary);
+        }
+
+        .tool-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tool-card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 16px var(--shadow-color);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px var(--shadow-color);
+        }
+
+        .tool-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--primary-light);
+        }
+
+        .tool-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--primary-color);
+        }
+
+        .tool-version {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .tool-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .tool-description {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .tool-specs {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .tool-specs h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .tool-specs ul {
+            list-style: none;
+            padding-left: 0.5rem;
+        }
+
+        .tool-specs li {
+            margin-bottom: 0.3rem;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .tool-specs li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+        }
+
+        .tool-footer {
+            padding: 1.25rem 1.5rem;
+            background-color: var(--primary-light);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .info-box {
+            background-color: var(--card-background);
+            border-radius: 16px;
+            padding: 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 16px var(--shadow-color);
+            overflow: hidden;
+        }
+
+        .info-content {
+            padding: 1.5rem;
+        }
+
+        .install-note {
+            background-color: var(--info-background);
+            padding: 1rem 1.5rem;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+
+        .install-steps {
+            margin: 1.5rem 0;
+        }
+
+        .install-steps h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .install-steps ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .install-steps li {
+            margin-bottom: 0.5rem;
+        }
+
+        pre {
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9rem;
+        }
+
+        /* 改良されたタブデザイン */
+        .tabs {
+            display: flex;
+            background-color: var(--tab-inactive);
+            margin-bottom: -1px;
+            position: relative;
+            z-index: 1;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            overflow: hidden;
+        }
+
+        .tab {
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            text-align: center;
+            flex: 1;
+            background-color: var(--tab-inactive);
+            position: relative;
+            color: var(--text-secondary);
+            border: none;
+        }
+
+        .tab:hover {
+            background-color: rgba(71, 91, 245, 0.05);
+        }
+
+        .tab.active {
+            background-color: var(--tab-active);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            background-color: var(--tab-active);
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .social-links {
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            margin: 0 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .social-links a:hover {
+            color: var(--primary-hover);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* トップスクロールボタン */
+        .scroll-top-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(71, 91, 245, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+
+        .scroll-top-button.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-top-button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-5px);
+        }
+
+        .scroll-top-button svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        /* レスポンシブ対応 */
+        @media (max-width: 900px) {
+            .header-nav {
+                display: none;
+            }
+
+            .header-search {
+                display: none;
+            }
+
+            .menu-button {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+                padding-top: calc(var(--header-height) + 1.5rem);
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .tool-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 固定ヘッダー -->
+    <header class="header">
+        <div class="header-left">
+            <a href="#" class="site-title">二十一世紀症候群</a>
+            <nav class="header-nav">
+                <a href="#tools-section" class="header-nav-item active">ツール</a>
+                <a href="#install-section" class="header-nav-item">インストール方法</a>
+                <a href="#contact-section" class="header-nav-item">お問い合わせ</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="header-search">
+                <div class="header-search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
+                    </svg>
+                </div>
+                <input type="text" class="header-search-input" placeholder="サイト内検索...">
+            </div>
+            <button class="menu-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- モバイルメニュー -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-search">
+            <input type="text" class="mobile-menu-search-input" placeholder="サイト内検索...">
+        </div>
+        <nav class="mobile-menu-nav">
+            <a href="#tools-section" class="mobile-menu-nav-item active">ツール</a>
+            <a href="#install-section" class="mobile-menu-nav-item">インストール方法</a>
+            <a href="#contact-section" class="mobile-menu-nav-item">お問い合わせ</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>二十一世紀症候群 VRChatツール</h1>
+            <p class="subtitle">アバター改変を効率化する洗練されたツールコレクション</p>
+            
+            <div class="button-container">
+                <a href="vcc://vpm/addRepo?url=https://i21i.github.io/vpm-repos/vpm.json" class="button add-vcc-button">VCC/ALCOMに追加する</a>
+            </div>
+        </header>
+
+        <section id="tools-section">
+            <h2 class="section-title">利用可能なツール</h2>
+            
+            <div class="tools-content">
+                <div class="search-container">
+                    <div class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
+                        </svg>
+                    </div>
+                    <input type="text" id="search-input" placeholder="ツールを検索...">
+                </div>
+                
+                <div class="tool-cards" id="tools-container">
+                    <!-- AAO Merge Helper -->
+                    <div class="tool-card" data-name="AAO Merge Helper" data-tags="AAO,Avatar Optimizer,MergeSkinnedMesh,MergePhysBone,最適化">
+                        <div class="tool-header">
+                            <h3 class="tool-name">AAO Merge Helper</h3>
+                            <div class="tool-version">v1.0.4</div>
+                        </div>
+                        <div class="tool-body">
+                            <p class="tool-description">Avatar OptimizerのMergeSkinnedMeshとMergePhysBoneを簡単に設定するツールです。オブジェクトのトグル制御にも対応し、アバター改変の軽量化作業を効率化します。</p>
+                            
+                            <div class="tool-specs">
+                                <h4>主な機能</h4>
+                                <ul>
+                                    <li>AAOのMergeSkinnedMeshとMergePhysBoneを自動でセット</li>
+                                    <li>オブジェクトのトグル制御のフィルタに対応(一部ツール)</li>
+                                    <li>改変軽量化作業の効率化</li>
+                                </ul>
+                                
+                                <h4>動作環境</h4>
+                                <ul>
+                                    <li>Unity 2022.3.22f1</li>
+                                    <li>VRCSDK3 3.8.1-beta.1</li>
+                                    <li>Avatar Optimizer 1.8.10以上</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="tool-footer">
+                            <a href="https://i21i.github.io/AAOMergeHelper/" class="button">詳細を見る</a>
+                        </div>
+                    </div>
+
+                    <!-- 将来的なツール追加用テンプレート -->
+                    <!--
+                    <div class="tool-card" data-name="ツール名" data-tags="タグ1,タグ2,タグ3">
+                        <div class="tool-header">
+                            <h3 class="tool-name">ツール名</h3>
+                            <div class="tool-version">vx.x.x</div>
+                        </div>
+                        <div class="tool-body">
+                            <p class="tool-description">ツールの説明文をここに記載します。</p>
+                            
+                            <div class="tool-specs">
+                                <h4>主な機能</h4>
+                                <ul>
+                                    <li>機能1</li>
+                                    <li>機能2</li>
+                                    <li>機能3</li>
+                                </ul>
+                                
+                                <h4>動作環境</h4>
+                                <ul>
+                                    <li>Unity 2022.3.x</li>
+                                    <li>VRCSDK3 x.x.x</li>
+                                    <li>その他の依存パッケージ</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="tool-footer">
+                            <a href="#" class="button">詳細を見る</a>
+                        </div>
+                    </div>
+                    -->
+                </div>
+                
+                <div id="no-results-message" class="no-results hidden">
+                    検索条件に一致するツールが見つかりませんでした。
+                </div>
+            </div>
+        </section>
+
+        <section id="install-section">
+            <h2 class="section-title">手動インストール方法</h2>
+            <div class="info-box">
+                <div class="install-note">
+                    <strong>補足：</strong> 上部の「VCC/ALCOMに追加する」ボタンで簡単にリポジトリを追加できます。ブラウザによってはボタンが機能しない場合があります。その場合は以下の方法をお試しください。
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="vcc">VCC</div>
+                    <div class="tab" data-tab="alcom">ALCOM</div>
+                </div>
+
+                <div class="tab-content active" id="vcc-tab">
+                    <div class="install-steps">
+                        <ol>
+                            <li>VCCを開き、「Settings」タブを選択</li>
+                            <li>「Packages」タブをクリック</li>
+                            <li>「Add Repository」ボタンをクリック</li>
+                            <li>以下のURLを入力：</li>
+                        </ol>
+                        <pre>https://i21i.github.io/vpm-repos/vpm.json</pre>
+                        <ol start="5">
+                            <li>「Add」ボタンをクリック</li>
+                            <li>「I Understand, Add Repository」をクリックして確認</li>
+                            <li>プロジェクトを開き、「Manage Project」からツールをインストール</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="alcom-tab">
+                    <div class="install-steps">
+                        <ol>
+                            <li>ALCOMを開き、「パッケージ管理」タブを選択</li>
+                            <li>「VPMリポジトリを追加」ボタンをクリック</li>
+                            <li>以下のURLを入力：</li>
+                        </ol>
+                        <pre>https://i21i.github.io/vpm-repos/vpm.json</pre>
+                        <ol start="4">
+                            <li>「VPMリポジトリを追加」ボタンをクリック</li>
+                            <li>再度「VPMリポジトリを追加」ボタンをクリック</li>
+                            <li>「プロジェクト」タブを開き、「管理」からツールをインストール</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact-section">
+            <h2 class="section-title">お問い合わせ</h2>
+            <div class="info-box">
+                <div class="info-content">
+                    <p>不具合や機能のリクエスト、その他のお問い合わせについては、以下のリンクからお願いします。</p>
+                    <div class="social-links">
+                        <a href="https://x.com/pnpnrkgk" target="_blank">X / Twitter</a> | 
+                        <a href="https://l21l.booth.pm/" target="_blank">Booth</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025 二十一世紀症候群</p>
+        </footer>
+    </div>
+
+    <!-- トップへスクロールするボタン -->
+    <div class="scroll-top-button" id="scrollTopButton">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M12 10.828l-4.95 4.95-1.414-1.414L12 8l6.364 6.364-1.414 1.414z"/>
+        </svg>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ナビゲーション項目のアクティブ状態管理
+            const navItems = document.querySelectorAll('.header-nav-item, .mobile-menu-nav-item');
+            const sections = document.querySelectorAll('section[id]');
+            
+            function setActiveNavItem() {
+                let scrollY = window.pageYOffset;
+                
+                sections.forEach(section => {
+                    const sectionHeight = section.offsetHeight;
+                    const sectionTop = section.offsetTop - 100;
+                    const sectionId = section.getAttribute('id');
+                    
+                    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                        navItems.forEach(item => {
+                            item.classList.remove('active');
+                            if (item.getAttribute('href') === '#' + sectionId) {
+                                item.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', setActiveNavItem);
+            
+            // スムーススクロール
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                    
+                    // モバイルメニューを閉じる
+                    document.querySelector('.mobile-menu').classList.remove('active');
+                });
+            });
+            
+            // モバイルメニュートグル
+            const menuButton = document.querySelector('.menu-button');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            
+            menuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('active');
+            });
+            
+            // タブ切り替え機能（ぷるぷる動きを修正）
+            const tabs = document.querySelectorAll('.tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // すでにアクティブなタブをクリックした場合は何もしない
+                    if (this.classList.contains('active')) {
+                        return;
+                    }
+                    
+                    // タブの切り替え
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // コンテンツの切り替え
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(tabId + '-tab').classList.add('active');
+                });
+            });
+
+            // 検索機能
+            const searchInput = document.getElementById('search-input');
+            const headerSearchInput = document.querySelector('.header-search-input');
+            const mobileSearchInput = document.querySelector('.mobile-menu-search-input');
+            const toolCards = document.querySelectorAll('.tool-card');
+            const noResultsMessage = document.getElementById('no-results-message');
+            
+            function performSearch(searchTerm) {
+                let hasResults = false;
+                searchTerm = searchTerm.toLowerCase();
+                
+                toolCards.forEach(card => {
+                    const name = card.getAttribute('data-name').toLowerCase();
+                    const tags = card.getAttribute('data-tags').toLowerCase();
+                    const description = card.querySelector('.tool-description').textContent.toLowerCase();
+                    
+                    if (name.includes(searchTerm) || tags.includes(searchTerm) || description.includes(searchTerm)) {
+                        card.classList.remove('hidden');
+                        hasResults = true;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+                
+                // 結果がない場合のメッセージ表示
+                if (!hasResults && searchTerm !== '') {
+                    noResultsMessage.classList.remove('hidden');
+                    
+                    // ツールセクションにスクロール
+                    if (searchTerm !== '') {
+                        const toolsSection = document.getElementById('tools-section');
+                        window.scrollTo({
+                            top: toolsSection.offsetTop - 70,
+                            behavior: 'smooth'
+                        });
+                    }
+                } else {
+                    noResultsMessage.classList.add('hidden');
+                }
+            }
+            
+            searchInput.addEventListener('input', function() {
+                performSearch(this.value);
+                
+                // 他の検索フィールドも同期
+                headerSearchInput.value = this.value;
+                mobileSearchInput.value = this.value;
+            });
+            
+            headerSearchInput.addEventListener('input', function() {
+                performSearch(this.value);
+                
+                // 他の検索フィールドも同期
+                searchInput.value = this.value;
+                mobileSearchInput.value = this.value;
+            });
+            
+            mobileSearchInput.addEventListener('input', function() {
+                performSearch(this.value);
+                
+                // 他の検索フィールドも同期
+                searchInput.value = this.value;
+                headerSearchInput.value = this.value;
+            });
+
+            // トップへスクロールするボタン
+            const scrollTopButton = document.getElementById('scrollTopButton');
+            
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    scrollTopButton.classList.add('visible');
+                } else {
+                    scrollTopButton.classList.remove('visible');
+                }
+            });
+            
+            scrollTopButton.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // ツールカードの数が多い場合のためのトップスクロールボタン表示チェック
+            const toolsContainer = document.getElementById('tools-container');
+            
+            // ページ読み込み時に一度チェック
+            if (toolsContainer.offsetHeight > window.innerHeight) {
+                scrollTopButton.classList.add('visible');
+            }
+        });
+    </script>
+</body>
+</html>
