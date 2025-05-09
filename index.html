@@ -21,6 +21,7 @@
             --tab-active: #ffffff;
             --tab-border: #dddddd;
             --header-height: 64px;
+            --menu-transition: 0.3s;
         }
 
         body.dark-theme {
@@ -114,53 +115,70 @@
 
         /* テーマ切替ボタン */
         .theme-toggle {
-            margin-right: 1rem;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 36px;
             height: 36px;
+            margin-right: 1rem;
             border-radius: 50%;
             background-color: var(--background-color);
             border: 1px solid var(--border-color);
             cursor: pointer;
             transition: all 0.3s ease;
+            overflow: hidden;
         }
 
         .theme-toggle:hover {
             background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle-inner {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            transition: transform 0.5s ease;
         }
 
         .theme-toggle svg {
             width: 20px;
             height: 20px;
             fill: var(--text-color);
-            transition: all 0.3s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
         .theme-toggle .sun-icon {
-            display: block;
+            opacity: 1;
+            transform: rotate(0);
         }
 
         .theme-toggle .moon-icon {
-            display: none;
+            opacity: 0;
+            transform: rotate(90deg);
         }
 
         body.dark-theme .theme-toggle .sun-icon {
-            display: none;
+            opacity: 0;
+            transform: rotate(-90deg);
         }
 
         body.dark-theme .theme-toggle .moon-icon {
-            display: block;
+            opacity: 1;
+            transform: rotate(0);
         }
 
-        .header-search {
+        /* サイト内検索 */
+        .site-search-container {
             position: relative;
             margin-right: 1rem;
         }
 
-        .header-search-input {
-            padding: 0.5rem 0.5rem 0.5rem 2rem;
+        .site-search-input {
+            padding: 0.5rem 0.5rem 0.5rem 2.2rem;
             border-radius: 20px;
             border: 1px solid var(--border-color);
             background-color: var(--background-color);
@@ -170,23 +188,160 @@
             transition: all 0.3s ease;
         }
 
-        .header-search-input:focus {
+        .site-search-input:focus {
             outline: none;
             border-color: var(--primary-color);
             width: 240px;
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
-        .header-search-icon {
+        .site-search-icon {
             position: absolute;
-            left: 0.5rem;
+            left: 0.7rem;
             top: 50%;
             transform: translateY(-50%);
         }
 
-        .header-search-icon svg {
+        .site-search-icon svg {
             width: 1rem;
             height: 1rem;
             fill: var(--text-secondary);
+            transition: fill 0.2s ease;
+        }
+
+        .site-search-input:focus + .site-search-icon svg {
+            fill: var(--primary-color);
+        }
+
+        /* 検索結果モーダル */
+        .search-results-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .search-results-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .search-results-container {
+            position: relative;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            margin: auto;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .search-results-modal.active .search-results-container {
+            transform: translateY(0);
+        }
+
+        .search-results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-results-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .search-query {
+            color: var(--primary-color);
+        }
+
+        .search-close-btn {
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .search-close-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .search-close-btn svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            fill: currentColor;
+        }
+
+        .search-results-body {
+            padding: 1rem 1.5rem;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .search-results-list {
+            list-style: none;
+        }
+
+        .search-result-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .search-result-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .search-result-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-result-title a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .search-result-title a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        .search-result-content {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-result-path {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .search-no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
         }
 
         .menu-button {
@@ -217,7 +372,7 @@
             box-shadow: 0 4px 8px var(--shadow-color);
             z-index: 999;
             transform: translateY(-100%);
-            transition: transform 0.3s ease;
+            transition: transform var(--menu-transition) ease;
         }
 
         .mobile-menu.active {
@@ -227,15 +382,35 @@
         .mobile-menu-search {
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
+            position: relative;
         }
 
         .mobile-menu-search-input {
             width: 100%;
-            padding: 0.8rem 1rem;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
             border-radius: 8px;
             border: 1px solid var(--border-color);
             background-color: var(--background-color);
             color: var(--text-color);
+        }
+
+        .mobile-menu-search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .mobile-search-icon {
+            position: absolute;
+            left: 1.7rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .mobile-search-icon svg {
+            width: 1rem;
+            height: 1rem;
+            fill: var(--text-secondary);
         }
 
         .mobile-menu-nav {
@@ -275,27 +450,48 @@
             background-color: var(--background-color);
             border: 1px solid var(--border-color);
             cursor: pointer;
+            overflow: hidden;
+        }
+
+        .mobile-theme-toggle-inner {
+            position: relative;
+            width: 20px;
+            height: 20px;
+        }
+
+        .mobile-theme-toggle-button svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-color);
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .mobile-theme-toggle-button .sun-icon {
+            opacity: 1;
+            transform: rotate(0);
+        }
+
+        .mobile-theme-toggle-button .moon-icon {
+            opacity: 0;
+            transform: rotate(90deg);
+        }
+
+        body.dark-theme .mobile-theme-toggle-button .sun-icon {
+            opacity: 0;
+            transform: rotate(-90deg);
+        }
+
+        body.dark-theme .mobile-theme-toggle-button .moon-icon {
+            opacity: 1;
+            transform: rotate(0);
         }
 
         .mobile-theme-toggle-label {
-            margin-left: 0.5rem;
+            margin-left: 0.8rem;
             color: var(--text-color);
-        }
-
-        .mobile-theme-toggle .sun-icon {
-            display: block;
-        }
-
-        .mobile-theme-toggle .moon-icon {
-            display: none;
-        }
-
-        body.dark-theme .mobile-theme-toggle .sun-icon {
-            display: none;
-        }
-
-        body.dark-theme .mobile-theme-toggle .moon-icon {
-            display: block;
         }
 
         .container {
@@ -700,7 +896,7 @@
                 display: none;
             }
 
-            .header-search {
+            .site-search-container {
                 display: none;
             }
 
@@ -730,10 +926,34 @@
             .tool-cards {
                 grid-template-columns: 1fr;
             }
+
+            .search-results-container {
+                width: 95%;
+                max-height: 85vh;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- サイト内検索モーダル -->
+    <div class="search-results-modal" id="searchResultsModal">
+        <div class="search-results-container">
+            <div class="search-results-header">
+                <h3 class="search-results-title">「<span class="search-query" id="searchQuery"></span>」の検索結果</h3>
+                <button class="search-close-btn" id="searchCloseBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="search-results-body">
+                <div id="searchResults">
+                    <!-- 検索結果がここに表示されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 固定ヘッダー -->
     <header class="header">
         <div class="header-left">
@@ -746,20 +966,22 @@
         </div>
         <div class="header-right">
             <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
-                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/>
-                </svg>
-                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z"/>
-                </svg>
+                <div class="theme-toggle-inner">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/>
+                    </svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z"/>
+                    </svg>
+                </div>
             </button>
-            <div class="header-search">
-                <div class="header-search-icon">
+            <div class="site-search-container">
+                <input type="text" class="site-search-input" id="siteSearchInput" placeholder="サイト内検索...">
+                <div class="site-search-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
                     </svg>
                 </div>
-                <input type="text" class="header-search-input" id="site-search-input" placeholder="サイト内検索...">
             </div>
             <button class="menu-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -772,7 +994,12 @@
     <!-- モバイルメニュー -->
     <div class="mobile-menu">
         <div class="mobile-menu-search">
-            <input type="text" class="mobile-menu-search-input" id="mobile-site-search-input" placeholder="サイト内検索...">
+            <input type="text" class="mobile-menu-search-input" id="mobileSiteSearchInput" placeholder="サイト内検索...">
+            <div class="mobile-search-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
+                </svg>
+            </div>
         </div>
         <nav class="mobile-menu-nav">
             <a href="#tools-section" class="mobile-menu-nav-item active">ツール</a>
@@ -781,12 +1008,14 @@
         </nav>
         <div class="mobile-theme-toggle">
             <button class="mobile-theme-toggle-button" id="mobileThemeToggle" aria-label="テーマ切替">
-                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/>
-                </svg>
-                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z"/>
-                </svg>
+                <div class="mobile-theme-toggle-inner">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/>
+                    </svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z"/>
+                    </svg>
+                </div>
             </button>
             <span class="mobile-theme-toggle-label">ダーク/ライトモード切替</span>
         </div>
@@ -810,7 +1039,7 @@
                     <div class="search-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
-                            </svg>
+                        </svg>
                     </div>
                     <input type="text" id="search-input" placeholder="ツールを検索...">
                 </div>
@@ -962,10 +1191,16 @@
             // テーマ切り替え機能
             const themeToggle = document.getElementById('themeToggle');
             const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+            const searchModal = document.getElementById('searchResultsModal');
+            const searchCloseBtn = document.getElementById('searchCloseBtn');
+            const searchQuery = document.getElementById('searchQuery');
+            const searchResults = document.getElementById('searchResults');
+            const siteSearchInput = document.getElementById('siteSearchInput');
+            const mobileSiteSearchInput = document.getElementById('mobileSiteSearchInput');
             
             // ローカルストレージからテーマ設定を読み込む
             const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
+            if (savedTheme === 'dark' || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !savedTheme)) {
                 document.body.classList.add('dark-theme');
             }
             
@@ -981,6 +1216,94 @@
             
             themeToggle.addEventListener('click', toggleTheme);
             mobileThemeToggle.addEventListener('click', toggleTheme);
+            
+            // サイト内検索機能
+            function performSiteSearch(query) {
+                if (query.trim() === '') return;
+                
+                searchQuery.textContent = query;
+                
+                // 検索結果データの例（実際はAPIやバックエンドから取得するかJSONデータを使用します）
+                // 本番では、実際のコンテンツに基づいた検索結果を表示します
+                const mockResults = [
+                    {
+                        title: 'AAO Merge Helper',
+                        url: 'https://i21i.github.io/AAOMergeHelper/',
+                        content: 'Avatar OptimizerのMergeSkinnedMeshとMergePhysBoneを簡単に設定するツールです。オブジェクトのトグル制御にも対応し、アバター改変の軽量化作業を効率化します。',
+                        path: 'ツール > AAO Merge Helper'
+                    },
+                    {
+                        title: 'インストール方法',
+                        url: '#install-section',
+                        content: 'VCCやALCOMでのリポジトリの追加方法を解説しています。上部の「VCC/ALCOMに追加する」ボタンで簡単にリポジトリを追加できます。',
+                        path: 'インストール方法'
+                    }
+                ];
+                
+                // 検索結果のフィルタリング（実際にはバックエンド側で処理されることが多い）
+                const filteredResults = mockResults.filter(result => 
+                    result.title.toLowerCase().includes(query.toLowerCase()) || 
+                    result.content.toLowerCase().includes(query.toLowerCase())
+                );
+                
+                // 検索結果の表示
+                let resultsHTML = '';
+                
+                if (filteredResults.length > 0) {
+                    resultsHTML += '<ul class="search-results-list">';
+                    filteredResults.forEach(result => {
+                        resultsHTML += `
+                            <li class="search-result-item">
+                                <h4 class="search-result-title"><a href="${result.url}">${result.title}</a></h4>
+                                <p class="search-result-content">${result.content}</p>
+                                <p class="search-result-path">${result.path}</p>
+                            </li>
+                        `;
+                    });
+                    resultsHTML += '</ul>';
+                } else {
+                    resultsHTML = '<div class="search-no-results">検索条件に一致する結果が見つかりませんでした。別のキーワードをお試しください。</div>';
+                }
+                
+                searchResults.innerHTML = resultsHTML;
+                searchModal.classList.add('active');
+                
+                // モバイルメニューを閉じる
+                document.querySelector('.mobile-menu').classList.remove('active');
+            }
+            
+            siteSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSiteSearch(this.value);
+                    this.blur(); // フォーカスを外す
+                }
+            });
+            
+            mobileSiteSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSiteSearch(this.value);
+                    this.blur(); // フォーカスを外す
+                }
+            });
+            
+            // 検索モーダルを閉じる
+            searchCloseBtn.addEventListener('click', function() {
+                searchModal.classList.remove('active');
+            });
+            
+            // モーダル外をクリックしても閉じる
+            searchModal.addEventListener('click', function(e) {
+                if (e.target === searchModal) {
+                    searchModal.classList.remove('active');
+                }
+            });
+            
+            // ESCキーでモーダルを閉じる
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && searchModal.classList.contains('active')) {
+                    searchModal.classList.remove('active');
+                }
+            });
             
             // ナビゲーション項目のアクティブ状態管理
             const navItems = document.querySelectorAll('.header-nav-item, .mobile-menu-nav-item');
@@ -1088,35 +1411,6 @@
             
             searchInput.addEventListener('input', function() {
                 performToolSearch(this.value);
-            });
-            
-            // サイト内検索機能
-            const siteSearchInput = document.getElementById('site-search-input');
-            const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
-            
-            function performSiteSearch(searchTerm) {
-                if (searchTerm.trim() === '') return;
-                
-                // サイト内検索のロジックをここに実装
-                // 例: 検索クエリをURLパラメータとして特定のページに遷移
-                const searchUrl = 'https://i21i.github.io/search?q=' + encodeURIComponent(searchTerm);
-                window.location.href = searchUrl;
-                
-                // または、Google Custom Search などの検索プロバイダーを使用する場合:
-                // const searchUrl = 'https://www.google.com/search?q=site:i21i.github.io+' + encodeURIComponent(searchTerm);
-                // window.open(searchUrl, '_blank');
-            }
-            
-            siteSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    performSiteSearch(this.value);
-                }
-            });
-            
-            mobileSiteSearchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    performSiteSearch(this.value);
-                }
             });
 
             // トップへスクロールするボタン
