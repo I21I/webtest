@@ -56,8 +56,6 @@ function initScrollTopButton() {
     if (scrollTopButton) {
         scrollTopButton.addEventListener('click', scrollToTop);
     }
-    
-    window.addEventListener('scroll', handleScroll);
 }
 
 // フェードアニメーション初期化
@@ -89,13 +87,3 @@ function setupMutationObserver() {
         observer.observe(container, config);
     }
 }
-
-// イベントリスナーの設定
-document.addEventListener('DOMContentLoaded', function() {
-    initFadeAnime();
-    
-    const scrollTopButton = document.getElementById('scroll-top-button');
-    if (scrollTopButton) {
-        scrollTopButton.addEventListener('click', scrollToTop);
-    }
-});
