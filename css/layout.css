@@ -116,16 +116,8 @@ header {
     background-color: var(--card-background);
     box-shadow: 0 4px 8px var(--shadow-color);
     z-index: 999;
-    transform: translateY(-100%); /* ここを変更 */
-    opacity: 0; /* 追加 */
-    visibility: hidden; /* 追加 */
-    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease; /* 変更 */
-}
-
-.mobile-menu.active {
-    transform: translateY(0);
-    opacity: 1; /* 追加 */
-    visibility: visible; /* 追加 */
+    transform: translateY(-100%);
+    transition: transform var(--menu-transition) ease;
 }
 
 .mobile-menu-search {
@@ -157,9 +149,7 @@ header {
 }
 
 .mobile-menu-nav {
-    padding: 0; /* パディングを減らす */
-    margin: 0;
-    list-style: none;
+    padding: 1rem 0;
 }
 
 .mobile-menu-nav-item {
@@ -169,14 +159,9 @@ header {
     text-decoration: none;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
-    margin: 0; /* マージンを0に */
-    width: 100%; /* 幅を100%に */
-    box-sizing: border-box;
 }
 
-.mobile-menu-nav-item:hover, 
-    
-.mobile-menu-nav-item.active {
+.mobile-menu-nav-item:hover, .mobile-menu-nav-item.active {
     background-color: var(--primary-light);
     color: var(--primary-color);
     border-left-color: var(--primary-color);
@@ -221,34 +206,20 @@ header {
 }
 
 @media (max-width: 768px) {
-    .header {
-        padding: 0 1rem; /* ヘッダーの横パディングを減らす */
+    .container {
+        padding: 1.5rem;
+        padding-top: calc(var(--header-height) + 1.5rem);
     }
 
-    .site-title {
-        font-size: 1rem; /* サイト名のフォントサイズを小さく */
+    h1 {
+        font-size: 2rem;
     }
 
-    /* サイト内検索ボックスのサイズを調整 */
-    .site-search-input {
-        width: 150px; /* 幅を小さく */
+    .subtitle {
+        font-size: 1rem;
     }
 
-    .site-search-input:focus {
-        width: 180px; /* フォーカス時の幅を小さく */
-    }
-}
-
-@media (max-width: 480px) {
-    /* 極小画面での調整 */
-    .header {
-        padding: 0 0.5rem;
-    }
-
-    .site-title {
-        max-width: 150px; /* サイト名の最大幅を制限 */
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    .tool-cards {
+        grid-template-columns: 1fr;
     }
 }
