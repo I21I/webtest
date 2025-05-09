@@ -46,12 +46,6 @@ section {
 }
 
 /* カードのスタイル */
-.tool-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
 .tool-card {
     background-color: var(--card-background);
     border-radius: 12px;
@@ -61,6 +55,27 @@ section {
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
+    height: 100%; /* カードの高さを確保 */
+}
+
+.tool-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--primary-light);
+    flex-shrink: 0; /* サイズ固定 */
+}
+
+.tool-body {
+    padding: 1.5rem;
+    flex-grow: 1; /* 本文部分が伸びる */
+}
+
+.tool-footer {
+    padding: 1.25rem 1.5rem;
+    background-color: var(--primary-light);
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0; /* サイズ固定 */
 }
 
 .tool-card:hover {
@@ -78,6 +93,7 @@ section {
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     overflow: hidden;
+    width: 100%; /* 幅を100%に設定 */
 }
 
 .tab {
@@ -91,6 +107,9 @@ section {
     position: relative;
     color: var(--text-secondary);
     border: none;
+    white-space: nowrap; /* テキスト改行しない */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .tab:hover {
@@ -121,6 +140,8 @@ section {
     background-color: var(--tab-active);
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .tab-content.active {
