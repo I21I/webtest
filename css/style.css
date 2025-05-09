@@ -34,8 +34,9 @@ body {
     -moz-osx-font-smoothing: grayscale;
     transition: all 0.3s ease;
     scroll-padding-top: var(--header-height);
+}
 
-    /* 一般的な調整 */
+/* 一般的な調整 */
 img, svg {
     max-width: 100%;
     height: auto;
@@ -46,6 +47,24 @@ img, svg {
 }
 
 /* アニメーション */
+.fadeUp {
+    animation-name: fadeUpAnime;
+    animation-duration: 0.6s;
+    animation-fill-mode: forwards;
+    opacity: 0;
+}
+
+@keyframes fadeUpAnime {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .scroll-top-button.visible {
     opacity: 1;
     visibility: visible;
@@ -66,4 +85,153 @@ img, svg {
     outline: 2px solid var(--primary-color);
     outline-offset: 2px;
 }
+
+/* インフォボックス */
+.info-box {
+    background-color: var(--card-background);
+    border-radius: 16px;
+    padding: 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    overflow: hidden;
+}
+
+.info-content {
+    padding: 1.5rem;
+}
+
+.install-note {
+    background-color: var(--info-background);
+    padding: 1rem 1.5rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+}
+
+/* ツール内容 */
+.tools-content {
+    background-color: var(--card-background);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px var(--shadow-color);
+    margin-bottom: 2rem;
+}
+
+/* 検索コンテナ */
+.search-container {
+    position: relative;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+#search-input {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 3rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: var(--card-background);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    -webkit-appearance: none;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    letter-spacing: -0.02em;
+}
+
+.subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-weight: 300;
+}
+
+.button-container {
+    text-align: center;
+    margin: 0 0 3rem;
+}
+
+.add-vcc-button {
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+}
+
+.no-results {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.install-steps {
+    margin: 1.5rem 0;
+}
+
+.install-steps h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.install-steps ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.install-steps li {
+    margin-bottom: 0.5rem;
+}
+
+pre {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1rem 0;
+    font-family: SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.9rem;
+}
+
+.social-links {
+    margin-top: 1rem;
+}
+
+.social-links a {
+    margin: 0 1rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.social-links a:hover {
+    color: var(--primary-hover);
+}
+
+footer {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 3rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border-color);
 }
