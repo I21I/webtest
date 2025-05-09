@@ -22,16 +22,22 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+.site-search-icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+/* SVGアイコンの統一スタイル */
 .site-search-icon svg,
 .search-icon svg,
 .mobile-search-icon svg {
-    width: 1.2rem !important;
-    height: 1.2rem !important;
-    min-width: 1.2rem !important;
-    max-width: 1.2rem !important;
-    min-height: 1.2rem !important;
-    max-height: 1.2rem !important;
-    flex: 0 0 1.2rem !important;
+    width: 1.2rem;
+    height: 1.2rem;
+    fill: var(--text-secondary);
+    transition: fill 0.2s ease;
 }
 
 .site-search-input:focus + .site-search-icon svg {
@@ -39,130 +45,108 @@
 }
 
 /* 検索結果 */
-        #search-results {
-        position: fixed;
-        top: var(--header-height);
-        left: 0;
-        width: 100%;
-        background-color: var(--card-background);
-        box-shadow: 0 6px 16px var(--shadow-color);
-        z-index: 999;
-        padding: 1rem;
-        transform: translateY(-100%);
-        transition: transform 0.3s ease;
-        max-height: calc(80vh - var(--header-height));
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        box-sizing: border-box;
-        }
+#search-results {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: 100%;
+    background-color: var(--card-background);
+    box-shadow: 0 6px 16px var(--shadow-color);
+    z-index: 999;
+    padding: 1rem;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    max-height: calc(80vh - var(--header-height));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+}
 
-        #search-results.active {
-            transform: translateY(0);
-        }
+.search-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
 
-        .search-results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
+.search-results-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
 
-        .search-results-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-color);
-        }
+.search-query {
+    color: var(--primary-color);
+}
 
-        .search-query {
-            color: var(--primary-color);
-        }
+.search-close {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
 
-        .search-close {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
+.search-close:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
 
-        .search-close:hover {
-            background-color: var(--primary-light);
-            color: var(--primary-color);
-        }
+.search-close svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    fill: currentColor;
+}
 
-        .search-close svg {
-            width: 1.2rem;
-            height: 1.2rem;
-            fill: currentColor;
-        }
+.search-result-list {
+    list-style: none;
+}
 
-        .search-result-list {
-            list-style: none;
-        }
+.search-result-item {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
 
-        .search-result-item {
-        padding: 1rem;
-        margin-bottom: 0.5rem;
-        border-radius: 8px;
-        transition: background-color 0.2s;
-        width: 100%;
-        box-sizing: border-box;
-        }
+.search-result-item:hover {
+    background-color: var(--primary-light);
+}
 
-        .search-result-item:hover {
-            background-color: var(--primary-light);
-        }
+.search-result-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
 
-        .search-result-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+.search-result-title a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
 
-        .search-result-title a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
+.search-result-title a:hover {
+    text-decoration: underline;
+}
 
-        .search-result-title a:hover {
-            text-decoration: underline;
-        }
+.search-result-snippet {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
 
-        .search-result-snippet {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-        }
+.search-result-path {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
 
-        .search-result-path {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .search-no-results {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-secondary);
-        }
-
-        .menu-button {
-            display: none;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-
-        .menu-button svg {
-            width: 1.5rem;
-            height: 1.5rem;
-            fill: var(--text-secondary);
-        }
-
-        .menu-button:hover svg {
-            fill: var(--primary-color);
-        }
+.search-no-results {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+}
