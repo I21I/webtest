@@ -1,13 +1,54 @@
+.tool-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+}
+
+/* コンテナ設定 */
 .container {
     max-width: 1000px;
     margin: 0 auto;
     padding: 2rem;
     padding-top: calc(var(--header-height) + 2rem);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 header {
     padding: 1rem 0 2rem;
     text-align: center;
+}
+
+/* スクロールトップボタン */
+.scroll-top-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background-color: var(--primary-color);
+    color: white;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(71, 91, 245, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1000;
+}
+
+.scroll-top-button svg {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    fill: white;
 }
 
 /* 固定ヘッダー */
