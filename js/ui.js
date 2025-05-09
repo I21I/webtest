@@ -84,3 +84,8 @@ document.addEventListener('DOMContentLoaded', function() {
         item.addEventListener('click', handleNavClick);
     });
 });
+
+window.toggleMobileMenu = toggleMobileMenu;
+window.handleTabClick = handleTabClick;
+window.handleNavClick = handleNavClick;
+window.handleScroll = handleScroll;
