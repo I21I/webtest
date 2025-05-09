@@ -221,20 +221,34 @@ header {
 }
 
 @media (max-width: 768px) {
-    .container {
-        padding: 1.5rem;
-        padding-top: calc(var(--header-height) + 1.5rem);
+    .header {
+        padding: 0 1rem; /* ヘッダーの横パディングを減らす */
     }
 
-    h1 {
-        font-size: 2rem;
+    .site-title {
+        font-size: 1rem; /* サイト名のフォントサイズを小さく */
     }
 
-    .subtitle {
-        font-size: 1rem;
+    /* サイト内検索ボックスのサイズを調整 */
+    .site-search-input {
+        width: 150px; /* 幅を小さく */
     }
 
-    .tool-cards {
-        grid-template-columns: 1fr;
+    .site-search-input:focus {
+        width: 180px; /* フォーカス時の幅を小さく */
+    }
+}
+
+@media (max-width: 480px) {
+    /* 極小画面での調整 */
+    .header {
+        padding: 0 0.5rem;
+    }
+
+    .site-title {
+        max-width: 150px; /* サイト名の最大幅を制限 */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
