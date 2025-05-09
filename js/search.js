@@ -14,6 +14,8 @@ function performSiteSearch(query) {
     const searchResultsContent = document.getElementById('search-results-content');
     const searchQuery = document.getElementById('search-query');
     
+    if (!searchResultsContent || !searchQuery || !window.searchIndex) return;
+    
     searchQuery.textContent = query;
     query = query.toLowerCase();
     
@@ -62,48 +64,16 @@ function performSiteSearch(query) {
     document.getElementById('search-results').classList.add('active');
     
     // モバイルメニューを閉じる
-    document.getElementById('mobile-menu').classList.remove('active');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu) {
+        mobileMenu.classList.remove('active');
+    }
 }
 
 // 検索結果を閉じる
 function closeSearchResults() {
-    document.getElementById('search-results').classList.remove('active');
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.classList.remove('active');
+    }
 }
-
-// イベントリスナーの設定
-document.addEventListener('DOMContentLoaded', function() {
-    const siteSearchInput = document.getElementById('site-search-input');
-    const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
-    const searchClose = document.getElementById('search-close');
-    
-    if (siteSearchInput) {
-        siteSearchInput.addEventListener('keypress', handleSiteSearch);
-    }
-    
-    if (mobileSiteSearchInput) {
-        mobileSiteSearchInput.addEventListener('keypress', handleSiteSearch);
-    }
-    
-    if (searchClose) {
-        searchClose.addEventListener('click', closeSearchResults);
-    }
-    
-    // 検索結果外クリックでの閉じる
-    document.addEventListener('click', function(e) {
-        const searchResults = document.getElementById('search-results');
-        if (searchResults && searchResults.classList.contains('active') && 
-            !searchResults.contains(e.target) && 
-            e.target !== siteSearchInput && 
-            e.target !== mobileSiteSearchInput) {
-            closeSearchResults();
-        }
-    });
-    
-    // ESC キーでの閉じる
-    document.addEventListener('keydown', function(e) {
-        const searchResults = document.getElementById('search-results');
-        if (e.key === 'Escape' && searchResults && searchResults.classList.contains('active')) {
-            closeSearchResults();
-        }
-    });
-});
