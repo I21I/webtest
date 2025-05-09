@@ -57,7 +57,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // メニューボタンのイベントリスナー
     const menuButton = document.getElementById('menu-button');
     if (menuButton && typeof toggleMobileMenu === 'function') {
-        menuButton.addEventListener('click', toggleMobileMenu);
+        menuButton.addEventListener('click', function() {
+            // 画面幅チェックを追加
+            if (window.innerWidth <= 900) {
+                toggleMobileMenu();
+            }
+        });
     }
     
     // タブのイベントリスナー
@@ -109,12 +114,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // ESC キーでの閉じる
+    // ESC キーでの閉じる（検索結果とモバイルメニュー両方）
     document.addEventListener('keydown', function(e) {
-        const searchResults = document.getElementById('search-results');
-        if (e.key === 'Escape' && searchResults && searchResults.classList.contains('active') &&
-            typeof closeSearchResults === 'function') {
-            closeSearchResults();
+        if (e.key === 'Escape') {
+            // 検索結果を閉じる
+            const searchResults = document.getElementById('search-results');
+            if (searchResults && searchResults.classList.contains('active') &&
+                typeof closeSearchResults === 'function') {
+                closeSearchResults();
+            }
+            
+            // モバイルメニューを閉じる
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
+            }
         }
     });
     
@@ -129,4 +143,15 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof checkScrollTopButton === 'function') {
         checkScrollTopButton();
     }
+    
+    // リサイズイベント追加 - 画面サイズ変更時の処理
+    window.addEventListener('resize', function() {
+        // PC幅になったらモバイルメニューを非表示に
+        if (window.innerWidth > 900) {
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
+            }
+        }
+    });
 });
