@@ -65,27 +65,3 @@ function handleNavClick(e) {
     // モバイルメニューを閉じる
     document.getElementById('mobile-menu').classList.remove('active');
 }
-
-// イベントリスナーの設定
-document.addEventListener('DOMContentLoaded', function() {
-    // メニューボタンのイベントリスナー
-    const menuButton = document.getElementById('menu-button');
-    if (menuButton) {
-        menuButton.addEventListener('click', toggleMobileMenu);
-    }
-    
-    // タブのイベントリスナー
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', handleTabClick);
-    });
-    
-    // ナビゲーションのイベントリスナー
-    document.querySelectorAll('.header-nav-item, .mobile-menu-nav-item').forEach(item => {
-        item.addEventListener('click', handleNavClick);
-    });
-});
-
-window.toggleMobileMenu = toggleMobileMenu;
-window.handleTabClick = handleTabClick;
-window.handleNavClick = handleNavClick;
-window.handleScroll = handleScroll;
