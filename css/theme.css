@@ -1,3 +1,4 @@
+/* ダークテーマ変数 */
 body.dark-theme {
     --primary-color: #5c6efd;
     --primary-light: rgba(92, 110, 253, 0.1);
@@ -62,4 +63,63 @@ body.dark-theme .theme-toggle svg.sun {
 body.dark-theme .theme-toggle svg.moon {
     opacity: 1;
     transform: rotate(0) scale(1);
+}
+
+/* モバイルテーマトグル */
+.mobile-theme-toggle {
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+}
+
+.mobile-theme-toggle-button {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    border-radius: 50%;
+}
+
+.mobile-theme-toggle-button:hover {
+    background-color: var(--primary-light);
+}
+
+.mobile-theme-toggle-button svg {
+    width: 22px;
+    height: 22px;
+    fill: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+.mobile-theme-toggle-button svg.sun {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+    position: absolute;
+}
+
+.mobile-theme-toggle-button svg.moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+    position: absolute;
+}
+
+body.dark-theme .mobile-theme-toggle-button svg.sun {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+}
+
+body.dark-theme .mobile-theme-toggle-button svg.moon {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+.mobile-theme-toggle-label {
+    margin-left: 0.8rem;
+    color: var(--text-color);
 }
