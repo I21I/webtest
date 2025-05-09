@@ -34,4 +34,36 @@ body {
     -moz-osx-font-smoothing: grayscale;
     transition: all 0.3s ease;
     scroll-padding-top: var(--header-height);
+
+    /* 一般的な調整 */
+img, svg {
+    max-width: 100%;
+    height: auto;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* アニメーション */
+.scroll-top-button.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-menu.active {
+    transform: translateY(0);
+}
+
+#search-results.active {
+    transform: translateY(0);
+}
+
+/* ボタン押下時のアクセシビリティ */
+.button:focus, 
+.tab:focus, 
+.search-close:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
 }
