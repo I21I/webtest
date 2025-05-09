@@ -142,8 +142,9 @@ section {
     border-bottom-right-radius: 8px;
     width: 100%;
     box-sizing: border-box;
+    display: none;
 }
 
 .tab-content.active {
-    display: block;
+    display: block !important;
 }
