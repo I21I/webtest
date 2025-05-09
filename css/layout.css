@@ -116,8 +116,16 @@ header {
     background-color: var(--card-background);
     box-shadow: 0 4px 8px var(--shadow-color);
     z-index: 999;
-    transform: translateY(-100%);
-    transition: transform var(--menu-transition) ease;
+    transform: translateY(-100%); /* ここを変更 */
+    opacity: 0; /* 追加 */
+    visibility: hidden; /* 追加 */
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease; /* 変更 */
+}
+
+.mobile-menu.active {
+    transform: translateY(0);
+    opacity: 1; /* 追加 */
+    visibility: visible; /* 追加 */
 }
 
 .mobile-menu-search {
@@ -149,7 +157,9 @@ header {
 }
 
 .mobile-menu-nav {
-    padding: 1rem 0;
+    padding: 0; /* パディングを減らす */
+    margin: 0;
+    list-style: none;
 }
 
 .mobile-menu-nav-item {
@@ -159,9 +169,14 @@ header {
     text-decoration: none;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
+    margin: 0; /* マージンを0に */
+    width: 100%; /* 幅を100%に */
+    box-sizing: border-box;
 }
 
-.mobile-menu-nav-item:hover, .mobile-menu-nav-item.active {
+.mobile-menu-nav-item:hover, 
+    
+.mobile-menu-nav-item.active {
     background-color: var(--primary-light);
     color: var(--primary-color);
     border-left-color: var(--primary-color);
