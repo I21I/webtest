@@ -23,22 +23,20 @@
             --header-height: 64px;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --primary-color: #5c6efd;
-                --primary-light: rgba(92, 110, 253, 0.1);
-                --primary-hover: #7987fd;
-                --background-color: #111111;
-                --card-background: #222222;
-                --text-color: #f0f0f0;
-                --text-secondary: #b0b0b0;
-                --border-color: #333333;
-                --shadow-color: rgba(0, 0, 0, 0.3);
-                --info-background: rgba(92, 110, 253, 0.1);
-                --tab-inactive: #1a1a1a;
-                --tab-active: #222222;
-                --tab-border: #333333;
-            }
+        body.dark-theme {
+            --primary-color: #5c6efd;
+            --primary-light: rgba(92, 110, 253, 0.1);
+            --primary-hover: #7987fd;
+            --background-color: #111111;
+            --card-background: #222222;
+            --text-color: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --border-color: #333333;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --info-background: rgba(92, 110, 253, 0.1);
+            --tab-inactive: #1a1a1a;
+            --tab-active: #222222;
+            --tab-border: #333333;
         }
 
         * {
@@ -112,6 +110,48 @@
         .header-right {
             display: flex;
             align-items: center;
+        }
+
+        /* テーマ切替ボタン */
+        .theme-toggle {
+            margin-right: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--primary-light);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle .sun-icon {
+            display: block;
+        }
+
+        .theme-toggle .moon-icon {
+            display: none;
+        }
+
+        body.dark-theme .theme-toggle .sun-icon {
+            display: none;
+        }
+
+        body.dark-theme .theme-toggle .moon-icon {
+            display: block;
         }
 
         .header-search {
@@ -215,6 +255,47 @@
             background-color: var(--primary-light);
             color: var(--primary-color);
             border-left-color: var(--primary-color);
+        }
+
+        /* モバイルテーマトグル */
+        .mobile-theme-toggle {
+            padding: 0.8rem 1rem;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .mobile-theme-toggle-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+
+        .mobile-theme-toggle-label {
+            margin-left: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .mobile-theme-toggle .sun-icon {
+            display: block;
+        }
+
+        .mobile-theme-toggle .moon-icon {
+            display: none;
+        }
+
+        body.dark-theme .mobile-theme-toggle .sun-icon {
+            display: none;
+        }
+
+        body.dark-theme .mobile-theme-toggle .moon-icon {
+            display: block;
         }
 
         .container {
@@ -623,6 +704,10 @@
                 display: none;
             }
 
+            .theme-toggle {
+                display: none;
+            }
+
             .menu-button {
                 display: block;
             }
@@ -660,13 +745,21 @@
             </nav>
         </div>
         <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/>
+                </svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z"/>
+                </svg>
+            </button>
             <div class="header-search">
                 <div class="header-search-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
                     </svg>
                 </div>
-                <input type="text" class="header-search-input" placeholder="サイト内検索...">
+                <input type="text" class="header-search-input" id="site-search-input" placeholder="サイト内検索...">
             </div>
             <button class="menu-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -679,13 +772,24 @@
     <!-- モバイルメニュー -->
     <div class="mobile-menu">
         <div class="mobile-menu-search">
-            <input type="text" class="mobile-menu-search-input" placeholder="サイト内検索...">
+            <input type="text" class="mobile-menu-search-input" id="mobile-site-search-input" placeholder="サイト内検索...">
         </div>
         <nav class="mobile-menu-nav">
             <a href="#tools-section" class="mobile-menu-nav-item active">ツール</a>
             <a href="#install-section" class="mobile-menu-nav-item">インストール方法</a>
             <a href="#contact-section" class="mobile-menu-nav-item">お問い合わせ</a>
         </nav>
+        <div class="mobile-theme-toggle">
+            <button class="mobile-theme-toggle-button" id="mobileThemeToggle" aria-label="テーマ切替">
+                <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM11 1h2v3h-2V1zm0 19h2v3h-2v-3zM3.515 4.929l1.414-1.414L7.05 5.636 5.636 7.05 3.515 4.93zM16.95 18.364l1.414-1.414 2.121 2.121-1.414 1.414-2.121-2.121zm2.121-14.85l1.414 1.415-2.121 2.121-1.414-1.414 2.121-2.121zM5.636 16.95l1.414 1.414-2.121 2.121-1.414-1.414 2.121-2.121zM23 11v2h-3v-2h3zM4 11v2H1v-2h3z"/>
+                </svg>
+                <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M10 7a7 7 0 0 0 12 4.9v.1c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2h.1A6.979 6.979 0 0 0 10 7zm-6 5a8 8 0 0 0 15.062 3.762A9 9 0 0 1 8.238 4.938 7.999 7.999 0 0 0 4 12z"/>
+                </svg>
+            </button>
+            <span class="mobile-theme-toggle-label">ダーク/ライトモード切替</span>
+        </div>
     </div>
 
     <div class="container">
@@ -706,7 +810,7 @@
                     <div class="search-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                             <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
-                        </svg>
+                            </svg>
                     </div>
                     <input type="text" id="search-input" placeholder="ツールを検索...">
                 </div>
@@ -855,6 +959,29 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // テーマ切り替え機能
+            const themeToggle = document.getElementById('themeToggle');
+            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+            
+            // ローカルストレージからテーマ設定を読み込む
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+            
+            function toggleTheme() {
+                if (document.body.classList.contains('dark-theme')) {
+                    document.body.classList.remove('dark-theme');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    document.body.classList.add('dark-theme');
+                    localStorage.setItem('theme', 'dark');
+                }
+            }
+            
+            themeToggle.addEventListener('click', toggleTheme);
+            mobileThemeToggle.addEventListener('click', toggleTheme);
+            
             // ナビゲーション項目のアクティブ状態管理
             const navItems = document.querySelectorAll('.header-nav-item, .mobile-menu-nav-item');
             const sections = document.querySelectorAll('section[id]');
@@ -906,7 +1033,7 @@
                 mobileMenu.classList.toggle('active');
             });
             
-            // タブ切り替え機能（ぷるぷる動きを修正）
+            // タブ切り替え機能
             const tabs = document.querySelectorAll('.tab');
             
             tabs.forEach(tab => {
@@ -929,14 +1056,12 @@
                 });
             });
 
-            // 検索機能
+            // ツール検索機能
             const searchInput = document.getElementById('search-input');
-            const headerSearchInput = document.querySelector('.header-search-input');
-            const mobileSearchInput = document.querySelector('.mobile-menu-search-input');
             const toolCards = document.querySelectorAll('.tool-card');
             const noResultsMessage = document.getElementById('no-results-message');
             
-            function performSearch(searchTerm) {
+            function performToolSearch(searchTerm) {
                 let hasResults = false;
                 searchTerm = searchTerm.toLowerCase();
                 
@@ -956,42 +1081,42 @@
                 // 結果がない場合のメッセージ表示
                 if (!hasResults && searchTerm !== '') {
                     noResultsMessage.classList.remove('hidden');
-                    
-                    // ツールセクションにスクロール
-                    if (searchTerm !== '') {
-                        const toolsSection = document.getElementById('tools-section');
-                        window.scrollTo({
-                            top: toolsSection.offsetTop - 70,
-                            behavior: 'smooth'
-                        });
-                    }
                 } else {
                     noResultsMessage.classList.add('hidden');
                 }
             }
             
             searchInput.addEventListener('input', function() {
-                performSearch(this.value);
-                
-                // 他の検索フィールドも同期
-                headerSearchInput.value = this.value;
-                mobileSearchInput.value = this.value;
+                performToolSearch(this.value);
             });
             
-            headerSearchInput.addEventListener('input', function() {
-                performSearch(this.value);
+            // サイト内検索機能
+            const siteSearchInput = document.getElementById('site-search-input');
+            const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
+            
+            function performSiteSearch(searchTerm) {
+                if (searchTerm.trim() === '') return;
                 
-                // 他の検索フィールドも同期
-                searchInput.value = this.value;
-                mobileSearchInput.value = this.value;
+                // サイト内検索のロジックをここに実装
+                // 例: 検索クエリをURLパラメータとして特定のページに遷移
+                const searchUrl = 'https://i21i.github.io/search?q=' + encodeURIComponent(searchTerm);
+                window.location.href = searchUrl;
+                
+                // または、Google Custom Search などの検索プロバイダーを使用する場合:
+                // const searchUrl = 'https://www.google.com/search?q=site:i21i.github.io+' + encodeURIComponent(searchTerm);
+                // window.open(searchUrl, '_blank');
+            }
+            
+            siteSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSiteSearch(this.value);
+                }
             });
             
-            mobileSearchInput.addEventListener('input', function() {
-                performSearch(this.value);
-                
-                // 他の検索フィールドも同期
-                searchInput.value = this.value;
-                headerSearchInput.value = this.value;
+            mobileSiteSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSiteSearch(this.value);
+                }
             });
 
             // トップへスクロールするボタン
