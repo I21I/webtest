@@ -65,19 +65,6 @@ img, svg {
     }
 }
 
-.scroll-top-button.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
-.mobile-menu.active {
-    transform: translateY(0);
-}
-
-#search-results.active {
-    transform: translateY(0);
-}
-
 /* ボタン押下時のアクセシビリティ */
 .button:focus, 
 .tab:focus, 
@@ -234,4 +221,18 @@ footer {
     color: var(--text-secondary);
     font-size: 0.9rem;
     border-top: 1px solid var(--border-color);
+}
+
+/* 状態クラス */
+.scroll-top-button.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-menu.active {
+    transform: translateY(0);
+}
+
+#search-results.active {
+    transform: translateY(0);
 }
