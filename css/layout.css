@@ -1,0 +1,65 @@
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    padding-top: calc(var(--header-height) + 2rem);
+}
+
+header {
+    padding: 1rem 0 2rem;
+    text-align: center;
+}
+
+/* 固定ヘッダー */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--header-height);
+    background-color: var(--card-background);
+    box-shadow: 0 2px 8px var(--shadow-color);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.site-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.header-nav {
+    display: flex;
+    margin-left: 2rem;
+}
+
+.header-nav-item {
+    margin: 0 1rem;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: all 0.2s ease;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid transparent;
+}
+
+.header-nav-item:hover, .header-nav-item.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+}
