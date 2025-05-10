@@ -1,3 +1,4 @@
+// ui.js - UI関連の機能
 // モバイルメニュー切り替え
 function toggleMobileMenu() {
     // 画面サイズのチェック
@@ -18,9 +19,6 @@ function handleResize() {
         mobileMenu.classList.remove('active');
     }
 }
-
-// リサイズイベントリスナー追加
-window.addEventListener('resize', handleResize);
 
 // ツール検索処理
 function handleToolSearch() {
@@ -76,11 +74,152 @@ function handleNavClick(e) {
     const targetId = this.getAttribute('href');
     const targetElement = document.querySelector(targetId);
     
-    window.scrollTo({
-        top: targetElement.offsetTop - 70,
-        behavior: 'smooth'
-    });
+    if (targetElement) {
+        window.scrollTo({
+            top: targetElement.offsetTop - 70,
+            behavior: 'smooth'
+        });
+    }
     
     // モバイルメニューを閉じる
-    document.getElementById('mobile-menu').classList.remove('active');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu && mobileMenu.classList.contains('active')) {
+        mobileMenu.classList.remove('active');
+    }
+}
+
+// スクロールトップボタン
+function initScrollTopButton() {
+    const scrollTopButton = document.getElementById('scroll-top-button');
+    
+    if (scrollTopButton) {
+        scrollTopButton.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+}
+
+// スクロール時の処理
+function handleScroll() {
+    checkScrollTopButton();
+}
+
+// スクロールトップボタンの表示・非表示を切り替え
+function checkScrollTopButton() {
+    const scrollTopButton = document.getElementById('scroll-top-button');
+    
+    if (scrollTopButton) {
+        if (window.scrollY > 300) {
+            scrollTopButton.style.opacity = '1';
+            scrollTopButton.style.visibility = 'visible';
+        } else {
+            scrollTopButton.style.opacity = '0';
+            scrollTopButton.style.visibility = 'hidden';
+        }
+    }
+}
+
+// サイト内検索処理
+function handleSiteSearch(e) {
+    let searchTerm;
+    
+    if (typeof e === 'string') {
+        searchTerm = e;
+    } else if (e.key === 'Enter') {
+        searchTerm = this.value;
+    } else {
+        return;
+    }
+    
+    if (!searchTerm || searchTerm.trim() === '') return;
+    
+    searchTerm = searchTerm.toLowerCase();
+    const results = [];
+    
+    if (window.searchIndex) {
+        window.searchIndex.forEach(item => {
+            const titleMatch = item.title.toLowerCase().includes(searchTerm);
+            const contentMatch = item.content.toLowerCase().includes(searchTerm);
+            const tagsMatch = item.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+            
+            if (titleMatch || contentMatch || tagsMatch) {
+                results.push(item);
+            }
+        });
+    }
+    
+    // 検索結果を表示
+    displaySearchResults(searchTerm, results);
+}
+
+// 検索結果の表示
+function displaySearchResults(searchTerm, results) {
+    const searchResults = document.getElementById('search-results');
+    const searchResultsContent = document.getElementById('search-results-content');
+    const searchQuery = document.getElementById('search-query');
+    
+    if (searchResults && searchResultsContent && searchQuery) {
+        searchQuery.textContent = searchTerm;
+        searchResultsContent.innerHTML = '';
+        
+        if (results.length > 0) {
+            results.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'search-result-item';
+                
+                const title = document.createElement('h3');
+                title.className = 'search-result-title';
+                
+                const link = document.createElement('a');
+                link.href = result.url;
+                link.textContent = result.title;
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    searchResults.classList.remove('active');
+                    
+                    const targetElement = document.querySelector(result.url);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 70,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+                
+                title.appendChild(link);
+                
+                const path = document.createElement('div');
+                path.className = 'search-result-path';
+                path.textContent = result.path;
+                
+                const snippet = document.createElement('div');
+                snippet.className = 'search-result-snippet';
+                snippet.textContent = result.content;
+                
+                resultItem.appendChild(title);
+                resultItem.appendChild(path);
+                resultItem.appendChild(snippet);
+                
+                searchResultsContent.appendChild(resultItem);
+            });
+        } else {
+            const noResults = document.createElement('div');
+            noResults.className = 'no-results';
+            noResults.textContent = '検索結果が見つかりませんでした。';
+            searchResultsContent.appendChild(noResults);
+        }
+        
+        searchResults.classList.add('active');
+    }
+}
+
+// 検索結果を閉じる
+function closeSearchResults() {
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.classList.remove('active');
+    }
 }
