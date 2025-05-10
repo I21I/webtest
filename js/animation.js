@@ -1,53 +1,89 @@
-// animation.js - アニメーション関連の機能
-function initFadeAnime() {
-    // フェードイン要素を検出
-    const fadeElements = document.querySelectorAll('.fadeUp');
+// スクロール処理
+function handleScroll() {
+    // アクティブナビゲーション設定
+    setActiveNavItem();
     
-    // IntersectionObserverの設定
-    const options = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-    };
+    // スクロールトップボタン表示/非表示
+    checkScrollTopButton();
     
-    const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, options);
+    // フェードアニメーション
+    fadeAnime();
+}
+
+// アクティブナビゲーション設定
+function setActiveNavItem() {
+    const scrollY = window.pageYOffset;
     
-    // 各要素を監視
-    fadeElements.forEach(element => {
-        observer.observe(element);
+    document.querySelectorAll('section[id]').forEach(section => {
+        const sectionHeight = section.offsetHeight;
+        const sectionTop = section.offsetTop - 100;
+        const sectionId = section.getAttribute('id');
+        
+        if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+            document.querySelectorAll('.header-nav-item, .mobile-menu-nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + sectionId) {
+                    item.classList.add('active');
+                }
+            });
+        }
     });
 }
 
-// セクションのフェードイン
+// スクロールトップボタン表示チェック
+function checkScrollTopButton() {
+    const scrollTopButton = document.getElementById('scroll-top-button');
+    if (!scrollTopButton) return;
+    
+    if (window.pageYOffset > 300) {
+        scrollTopButton.classList.add('visible');
+    } else {
+        scrollTopButton.classList.remove('visible');
+    }
+}
+
+// トップにスクロール
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// スクロールトップボタンの初期化
+function initScrollTopButton() {
+    const scrollTopButton = document.getElementById('scroll-top-button');
+    if (scrollTopButton) {
+        scrollTopButton.addEventListener('click', scrollToTop);
+    }
+}
+
+// フェードアニメーション初期化
+function initFadeAnime() {
+    fadeAnime();
+}
+
+// フェードアニメーション
+function fadeAnime() {
+    document.querySelectorAll('section > *').forEach(function(element) {
+        const elemPos = element.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
+        
+        if (elemPos < windowHeight - 50) {
+            element.classList.add('fadeUp');
+        }
+    });
+}
+
+// MutationObserver のセットアップ
 function setupMutationObserver() {
-    // DOM変更を監視して動的に追加された要素にアニメーションを適用
-    const observer = new MutationObserver(mutations => {
-        mutations.forEach(mutation => {
-            if (mutation.addedNodes.length) {
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeType === 1) { // Element
-                        const fadeElements = node.querySelectorAll('.fadeUp');
-                        fadeElements.forEach(element => {
-                            // 少し遅延させてクラスを適用
-                            setTimeout(() => {
-                                element.classList.add('visible');
-                            }, 100);
-                        });
-                    }
-                });
-            }
-        });
+    const config = { childList: true, subtree: true };
+    const observer = new MutationObserver(function(mutations) {
+        fadeAnime();
     });
     
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
+    const container = document.querySelector('.container');
+    if (container) {
+        observer.observe(container, config);
+    }
 }
