@@ -94,12 +94,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const siteSearchInput = document.getElementById('site-search-input');
     if (siteSearchInput && typeof handleSiteSearch === 'function') {
-        siteSearchInput.addEventListener('keypress', handleSiteSearch);
+        siteSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSiteSearch(this.value);
+            }
+        });
     }
     
     const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
     if (mobileSiteSearchInput && typeof handleSiteSearch === 'function') {
-        mobileSiteSearchInput.addEventListener('keypress', handleSiteSearch);
+        mobileSiteSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSiteSearch(this.value);
+            }
+        });
     }
     
     const searchClose = document.getElementById('search-close');
