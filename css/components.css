@@ -99,7 +99,7 @@ button.button:hover {
     justify-content: flex-end;
 }
 
-/* ツール検索コンテナ */
+/* ツール検索コンテナ - 元の大きいデザインに戻す */
 .search-container {
     position: relative;
     max-width: 100%;
@@ -120,13 +120,6 @@ button.button:hover {
     color: var(--text-color);
     transition: all 0.3s ease;
     -webkit-appearance: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-#search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .search-icon {
@@ -149,97 +142,32 @@ button.button:hover {
     display: flex;
     border-bottom: 1px solid var(--border-color);
     margin-bottom: 0;
-    position: relative;
-    z-index: 1;
-    background-color: var(--background-color);
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
 }
 
 .tab {
     padding: 0.8rem 2rem;
     cursor: pointer;
     font-weight: 500;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: all 0.2s ease;
     text-align: center;
     flex: 1;
-    position: relative;
-    color: var(--text-secondary);
-    border: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .tab:hover {
-    background-color: rgba(71, 91, 245, 0.05);
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
 .tab.active {
+    border-bottom: 2px solid var(--primary-color);
     color: var(--primary-color);
     font-weight: 600;
-    border-bottom: 2px solid var(--primary-color);
 }
 
 .tab-content {
     display: none;
     padding: 1.5rem;
-    background-color: var(--card-background);
-    width: 100%;
-    box-sizing: border-box;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
 }
 
 .tab-content.active {
     display: block;
-}
-
-/* 情報ボックス */
-.info-box {
-    background-color: var(--card-background);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 2px 8px var(--shadow-color);
-}
-
-/* セクションタイトル */
-.section-title {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-    color: var(--primary-color);
-    border-left: 4px solid var(--primary-color);
-    padding-left: 1rem;
-    line-height: 1.4;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 900px) {
-    .search-container {
-        padding: 0.75rem;
-    }
-    
-    #search-input {
-        padding: 0.7rem 0.8rem 0.7rem 2.5rem;
-        font-size: 0.95rem;
-    }
-    
-    .search-icon {
-        left: 1.5rem;
-    }
-    
-    .tab {
-        padding: 0.7rem 1rem;
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 375px) {
-    .tab {
-        padding: 0.6rem 0.5rem;
-        font-size: 0.85rem;
-    }
 }
