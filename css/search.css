@@ -1,11 +1,9 @@
 /* search.css - 検索機能のスタイル */
-
 /* サイト内検索 - ヘッダー内のみ */
 .site-search {
     position: relative;
     margin-right: 1rem;
 }
-
 .site-search-input {
     padding: 0.5rem 0.5rem 0.5rem 2.2rem;
     border-radius: 20px;
@@ -16,14 +14,12 @@
     font-size: 0.9rem;
     transition: all 0.3s ease;
 }
-
 .site-search-input:focus {
     outline: none;
     border-color: var(--primary-color);
     width: 240px;
     box-shadow: 0 0 0 3px var(--primary-light);
 }
-
 .site-search-icon {
     position: absolute;
     left: 0.7rem;
@@ -31,18 +27,15 @@
     transform: translateY(-50%);
     pointer-events: none;
 }
-
 .site-search-icon svg {
     width: 1.2rem;
     height: 1.2rem;
     fill: var(--text-secondary);
     transition: fill 0.2s ease;
 }
-
 .site-search-input:focus + .site-search-icon svg {
     fill: var(--primary-color);
 }
-
 /* 検索結果表示 */
 #search-results {
     position: fixed;
@@ -58,14 +51,12 @@
     opacity: 0;
     visibility: hidden;
 }
-
 #search-results.active {
     max-height: 80vh;
     opacity: 1;
     visibility: visible;
     overflow-y: auto;
 }
-
 .search-results-header {
     display: flex;
     justify-content: space-between;
@@ -74,78 +65,64 @@
     background-color: var(--primary-light);
     border-bottom: 1px solid var(--border-color);
 }
-
 .search-results-title {
     margin: 0;
     font-size: 1.1rem;
     color: var(--primary-color);
 }
-
 .search-close {
     background: none;
     border: none;
     cursor: pointer;
     padding: 0.5rem;
 }
-
 .search-close svg {
     width: 1.2rem;
     height: 1.2rem;
     fill: var(--text-secondary);
     transition: fill 0.2s ease;
 }
-
 .search-close:hover svg {
     fill: var(--primary-color);
 }
-
 #search-results-content {
     padding: 1.5rem;
 }
-
 .search-result-item {
     border-bottom: 1px solid var(--border-color);
     padding: 1rem 0;
 }
-
 .search-result-item:last-child {
     border-bottom: none;
 }
-
 .search-result-title {
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
     font-weight: 600;
 }
-
 .search-result-title a {
     color: var(--primary-color);
     text-decoration: none;
 }
-
 .search-result-title a:hover {
     text-decoration: underline;
 }
-
 .search-result-path {
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin-bottom: 0.5rem;
 }
-
 .search-result-snippet {
     font-size: 0.9rem;
     line-height: 1.5;
     color: var(--text-color);
 }
-
 /* モバイルメニュー内の検索 */
 .mobile-menu-search {
     padding: 1rem;
     border-bottom: 1px solid var(--border-color);
     position: relative;
 }
-
 .mobile-menu-search-input {
     width: 100%;
     padding: 0.8rem 1rem 0.8rem 2.5rem;
@@ -156,13 +133,11 @@
     font-size: 0.95rem;
     transition: all 0.3s ease;
 }
-
 .mobile-menu-search-input:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-light);
 }
-
 .mobile-search-icon {
     position: absolute;
     left: 1.7rem;
@@ -170,13 +145,11 @@
     transform: translateY(-50%);
     pointer-events: none;
 }
-
 .mobile-search-icon svg {
     width: 1.2rem;
     height: 1.2rem;
     fill: var(--text-secondary);
 }
-
 /* レスポンシブ対応 */
 @media (max-width: 900px) {
     #search-results-content {
