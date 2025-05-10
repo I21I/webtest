@@ -1,10 +1,5 @@
 // モバイルメニュー切り替え
 function toggleMobileMenu() {
-    // 画面サイズのチェック
-    if (window.innerWidth > 900) {
-        return; // 大きい画面サイズでは何もしない
-    }
-    
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu) {
         mobileMenu.classList.toggle('active');
@@ -76,11 +71,16 @@ function handleNavClick(e) {
     const targetId = this.getAttribute('href');
     const targetElement = document.querySelector(targetId);
     
-    window.scrollTo({
-        top: targetElement.offsetTop - 70,
-        behavior: 'smooth'
-    });
+    if (targetElement) {
+        window.scrollTo({
+            top: targetElement.offsetTop - 70,
+            behavior: 'smooth'
+        });
+    }
     
     // モバイルメニューを閉じる
-    document.getElementById('mobile-menu').classList.remove('active');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu && mobileMenu.classList.contains('active')) {
+        mobileMenu.classList.remove('active');
+    }
 }
