@@ -1,11 +1,21 @@
 // main.js - メインのJavaScript
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM fully loaded');
+    
     // 各モジュールの初期化
     if (typeof initTheme === 'function') initTheme();
     if (typeof initToolSearch === 'function') initToolSearch();
     if (typeof initScrollTopButton === 'function') initScrollTopButton();
     if (typeof initFadeAnime === 'function') initFadeAnime();
     if (typeof setupMutationObserver === 'function') setupMutationObserver();
+    
+    // PCサイズでメニューボタンを強制的に非表示に
+    if (window.innerWidth > 900) {
+        const menuButton = document.getElementById('menu-button');
+        if (menuButton) {
+            menuButton.style.display = 'none';
+        }
+    }
     
     // 検索インデックスのロード
     fetch('data/search-index.json')
@@ -57,12 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // メニューボタンのイベントリスナー
     const menuButton = document.getElementById('menu-button');
     if (menuButton && typeof toggleMobileMenu === 'function') {
-        menuButton.addEventListener('click', function() {
-            // 画面幅チェックを追加
-            if (window.innerWidth <= 900) {
-                toggleMobileMenu();
-            }
-        });
+        menuButton.addEventListener('click', toggleMobileMenu);
     }
     
     // タブのイベントリスナー
@@ -144,14 +149,24 @@ document.addEventListener('DOMContentLoaded', function() {
         checkScrollTopButton();
     }
     
-    // リサイズイベント追加 - 画面サイズ変更時の処理
+    // リサイズイベント - メディアクエリの切り替わりを監視
     window.addEventListener('resize', function() {
-        // PC幅になったらモバイルメニューを非表示に
+        // PCサイズでメニューボタンを非表示に
         if (window.innerWidth > 900) {
-            const mobileMenu = document.getElementById('mobile-menu');
-            if (mobileMenu && mobileMenu.classList.contains('active')) {
-                mobileMenu.classList.remove('active');
+            const menuButton = document.getElementById('menu-button');
+            if (menuButton) {
+                menuButton.style.display = 'none';
             }
+        } else {
+            const menuButton = document.getElementById('menu-button');
+            if (menuButton) {
+                menuButton.style.display = 'block';
+            }
+        }
+        
+        // handleResizeが定義されている場合は実行
+        if (typeof handleResize === 'function') {
+            handleResize();
         }
     });
 });
