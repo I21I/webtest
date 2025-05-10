@@ -1,39 +1,6 @@
-// ui.js - UI関連の機能
 // モバイルメニュー切り替え
 function toggleMobileMenu() {
-    // 画面サイズのチェック - PCサイズでは何もしない
-    if (window.innerWidth > 900) {
-        return;
-    }
-    
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (mobileMenu) {
-        mobileMenu.classList.toggle('active');
-    }
-}
-
-// 画面リサイズ時にモバイルメニューを閉じる
-function handleResize() {
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (window.innerWidth > 900 && mobileMenu && mobileMenu.classList.contains('active')) {
-        mobileMenu.classList.remove('active');
-    }
-}
-
-// PCでのメニューボタン非表示を確認する
-function checkMenuButtonVisibility() {
-    const menuButton = document.getElementById('menu-button');
-    if (menuButton) {
-        if (window.innerWidth > 900) {
-            menuButton.style.display = 'none';
-            menuButton.setAttribute('aria-hidden', 'true');
-            menuButton.style.visibility = 'hidden';
-        } else {
-            menuButton.style.display = 'block';
-            menuButton.removeAttribute('aria-hidden');
-            menuButton.style.visibility = 'visible';
-        }
-    }
+    document.getElementById('mobile-menu').classList.toggle('active');
 }
 
 // ツール検索処理
@@ -54,13 +21,18 @@ function handleToolSearch() {
         }
     });
     
-    const noResultsMessage = document.getElementById('no-results-message');
-    if (noResultsMessage) {
-        if (!hasResults && searchTerm !== '') {
-            noResultsMessage.classList.remove('hidden');
-        } else {
-            noResultsMessage.classList.add('hidden');
-        }
+    if (!hasResults && searchTerm !== '') {
+        document.getElementById('no-results-message').classList.remove('hidden');
+    } else {
+        document.getElementById('no-results-message').classList.add('hidden');
+    }
+}
+
+// ツール検索の初期化
+function initToolSearch() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', handleToolSearch);
     }
 }
 
@@ -75,11 +47,7 @@ function handleTabClick() {
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
     });
-    
-    const targetTab = document.getElementById(tabId + '-tab');
-    if (targetTab) {
-        targetTab.classList.add('active');
-    }
+    document.getElementById(tabId + '-tab').classList.add('active');
 }
 
 // ナビクリック処理
@@ -89,16 +57,11 @@ function handleNavClick(e) {
     const targetId = this.getAttribute('href');
     const targetElement = document.querySelector(targetId);
     
-    if (targetElement) {
-        window.scrollTo({
-            top: targetElement.offsetTop - 70,
-            behavior: 'smooth'
-        });
-    }
+    window.scrollTo({
+        top: targetElement.offsetTop - 70,
+        behavior: 'smooth'
+    });
     
     // モバイルメニューを閉じる
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (mobileMenu && mobileMenu.classList.contains('active')) {
-        mobileMenu.classList.remove('active');
-    }
+    document.getElementById('mobile-menu').classList.remove('active');
 }
