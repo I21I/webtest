@@ -3,16 +3,16 @@
 /* ベース変数定義 */
 :root {
     /* カラーパレット */
-    --primary-color: #3f51b5; /* 青系統の色 */
-    --primary-light: rgba(63, 81, 181, 0.1);
-    --primary-hover: #303f9f;
+    --primary-color: #4756f5;
+    --primary-light: rgba(71, 86, 245, 0.1);
+    --primary-hover: #3a49e0;
     --background-color: #fafafa;
     --card-background: #ffffff;
     --text-color: #333333;
     --text-secondary: #757575;
     --border-color: #e0e0e0;
     --shadow-color: rgba(0, 0, 0, 0.08);
-    --info-background: rgba(63, 81, 181, 0.05);
+    --info-background: rgba(71, 86, 245, 0.05);
     --tab-inactive: #f5f5f5;
     --tab-active: #ffffff;
     --tab-border: #e0e0e0;
