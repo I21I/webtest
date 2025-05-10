@@ -1,3 +1,5 @@
+/* layout.css - レイアウト設定 */
+
 /* コンテナ設定 */
 .container {
     max-width: 1000px;
@@ -6,6 +8,10 @@
     padding-top: calc(var(--header-height) + 2rem);
     width: 100%;
     box-sizing: border-box;
+}
+
+.container section {
+    margin-bottom: 3rem;
 }
 
 header {
@@ -28,8 +34,8 @@ header {
     right: 30px;
     background-color: var(--primary-color);
     color: white;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     display: flex;
     justify-content: center;
@@ -68,7 +74,7 @@ header {
     align-items: center;
     padding: 0 1.5rem;
     transition: all 0.3s ease;
-    box-sizing: border-box; /* 追加: ボックスサイズを保証 */
+    box-sizing: border-box;
 }
 
 .header-left {
@@ -118,15 +124,16 @@ header {
     box-shadow: 0 4px 8px var(--shadow-color);
     z-index: 999;
     transform: translateY(-100%);
-    opacity: 0; /* 追加 */
-    visibility: hidden; /* 追加 */
+    opacity: 0;
+    visibility: hidden;
     transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .mobile-menu.active {
     transform: translateY(0);
-    opacity: 1; /* 追加 */
-    visibility: visible; /* 追加 */
+    opacity: 1;
+    visibility: visible;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .mobile-menu-search {
@@ -142,8 +149,8 @@ header {
     border: 1px solid var(--border-color);
     background-color: var(--background-color);
     color: var(--text-color);
-    font-size: 0.95rem; /* 追加 */
-    transition: all 0.3s ease; /* 追加 */
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
 }
 
 .mobile-menu-search-input:focus {
@@ -160,23 +167,50 @@ header {
     pointer-events: none;
 }
 
+.mobile-search-icon svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    fill: var(--text-secondary);
+}
+
 .mobile-menu-nav {
     padding: 1rem 0;
 }
 
 .mobile-menu-nav-item {
     display: block;
-    padding: 0.8rem 1rem;
+    padding: 1rem 1.5rem;
     color: var(--text-color);
     text-decoration: none;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
+    font-weight: 500;
 }
 
 .mobile-menu-nav-item:hover, .mobile-menu-nav-item.active {
     background-color: var(--primary-light);
     color: var(--primary-color);
     border-left-color: var(--primary-color);
+}
+
+.mobile-theme-toggle {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--border-color);
+}
+
+.mobile-theme-toggle-button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    margin-right: 0.5rem;
+}
+
+.mobile-theme-toggle-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
 /* メニューボタン（モバイル表示時） */
@@ -199,7 +233,6 @@ header {
 }
 
 /* レスポンシブ対応 */
-/* メディアクエリの修正 */
 @media (min-width: 901px) {
     /* PCサイズでは常にモバイルメニューを非表示に */
     .mobile-menu {
@@ -214,7 +247,15 @@ header {
 
 @media (max-width: 900px) {
     .header {
-        padding: 0 1rem; /* ヘッダーの横パディングを調整 */
+        padding: 0 1rem;
+    }
+    
+    .site-title {
+        font-size: 1.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 70%;
     }
     
     .header-nav {
@@ -231,19 +272,9 @@ header {
 
     .menu-button {
         display: block;
-        margin-left: auto; /* 右端に配置 */
+        margin-left: auto;
     }
     
-    /* モバイルメニューをアクティブでない限り非表示に */
-    .mobile-menu:not(.active) {
-        display: block;
-        transform: translateY(-100%);
-        opacity: 0;
-        visibility: hidden;
-    }
-}
-
-@media (max-width: 768px) {
     .container {
         padding: 1.5rem;
         padding-top: calc(var(--header-height) + 1.5rem);
@@ -262,15 +293,14 @@ header {
     }
 }
 
-/* スマホサイズ特有の調整 */
 @media (max-width: 480px) {
     .header {
-        padding: 0 0.75rem; /* さらに狭く */
+        padding: 0 0.75rem;
     }
     
     .site-title {
         font-size: 1rem;
-        max-width: 60%; /* タイトルが長すぎる場合に切り詰め */
+        max-width: 60%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -283,7 +313,7 @@ header {
     
     h1 {
         font-size: 1.75rem;
-        word-break: keep-all; /* 日本語タイトルの改行を調整 */
+        word-break: keep-all;
         line-height: 1.3;
     }
     
