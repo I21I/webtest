@@ -120,6 +120,13 @@ button.button:hover {
     color: var(--text-color);
     transition: all 0.3s ease;
     -webkit-appearance: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* 軽いシャドウを追加 */
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
 }
 
 .search-icon {
