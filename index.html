@@ -189,13 +189,12 @@
                     <strong>補足：</strong> 上部の「VCC/ALCOMに追加する」ボタンで簡単にリポジトリを追加できます。ブラウザによってはボタンが機能しない場合があります。その場合は以下の方法をお試しください。
                 </div>
                 
-                <div class="tabs">
+                <div class="tab-section">
+                    <div class="tabs">
                     <div class="tab active" data-tab="vcc">VCC</div>
-                    <div class="tab" data-tab="alcom">ALCOM</div>
-                </div>
-
-                <div class="tab-content active" id="vcc-tab">
-                    <div class="install-steps">
+                <div class="tab" data-tab="alcom">ALCOM</div>
+            </div>
+            <div id="vcc-tab" class="tab-content active">
                         <ol>
                             <li>VCCを開き、「Settings」タブを選択</li>
                             <li>「Packages」タブをクリック</li>
@@ -208,11 +207,8 @@
                             <li>「I Understand, Add Repository」をクリックして確認</li>
                             <li>プロジェクトを開き、「Manage Project」からツールをインストール</li>
                         </ol>
-                    </div>
-                </div>
-                
-                <div class="tab-content" id="alcom-tab">
-                    <div class="install-steps">
+             </div>
+             <div id="alcom-tab" class="tab-content">
                         <ol>
                             <li>ALCOMを開き、「パッケージ管理」タブを選択</li>
                             <li>「VPMリポジトリを追加」ボタンをクリック</li>
@@ -224,7 +220,7 @@
                             <li>再度「VPMリポジトリを追加」ボタンをクリック</li>
                             <li>「プロジェクト」タブを開き、「管理」からツールをインストール</li>
                         </ol>
-                    </div>
+              </div>
                 </div>
             </div>
         </section>
