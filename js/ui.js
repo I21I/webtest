@@ -1,7 +1,26 @@
 // モバイルメニュー切り替え
 function toggleMobileMenu() {
-    document.getElementById('mobile-menu').classList.toggle('active');
+    // 画面サイズのチェック
+    if (window.innerWidth > 900) {
+        return; // 大きい画面サイズでは何もしない
+    }
+    
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu) {
+        mobileMenu.classList.toggle('active');
+    }
 }
+
+// 画面リサイズ時にモバイルメニューを閉じる
+function handleResize() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (window.innerWidth > 900 && mobileMenu && mobileMenu.classList.contains('active')) {
+        mobileMenu.classList.remove('active');
+    }
+}
+
+// リサイズイベントリスナー追加
+window.addEventListener('resize', handleResize);
 
 // ツール検索処理
 function handleToolSearch() {
