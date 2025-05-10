@@ -53,6 +53,7 @@ h1, h2, h3, h4, h5, h6 {
 h1 {
     font-size: 2.5rem;
     letter-spacing: -0.02em;
+    color: var(--primary-color); /* タイトルの色を青に */
 }
 
 h2 {
@@ -103,7 +104,7 @@ a:hover {
     margin-bottom: 2rem;
 }
 
-/* セクションタイトル (ここを追加) */
+/* セクションタイトル */
 .section-title {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
@@ -114,13 +115,26 @@ a:hover {
     line-height: 1.4;
 }
 
+/* フェードインアニメーション用スタイル */
+.section-animated {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.section-animated.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 /* 情報ボックス */
 .info-box {
-    background-color: var(--info-background);
+    background-color: var(--card-background);
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 2rem;
     border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .info-content {
@@ -250,7 +264,7 @@ mark {
     border-radius: 2px;
 }
 
-/* PC表示で確実にメニューボタンを非表示にする (ここを追加) */
+/* PC表示で確実にメニューボタンを非表示にする */
 body.pc-view .menu-button {
     display: none !important;
     visibility: hidden !important;
