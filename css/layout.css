@@ -216,6 +216,10 @@ header {
     .menu-button {
         display: block;
     }
+    
+    .mobile-menu {
+        display: block;
+    }
 }
 
 @media (max-width: 768px) {
