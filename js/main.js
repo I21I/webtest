@@ -9,13 +9,31 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof initFadeAnime === 'function') initFadeAnime();
     if (typeof setupMutationObserver === 'function') setupMutationObserver();
     
-    // PCサイズでメニューボタンを強制的に非表示に
-    if (window.innerWidth > 900) {
+    // ここから新しく追加する関数 (PCでメニューボタンを確実に非表示にする処理)
+    function updateMenuButtonVisibility() {
         const menuButton = document.getElementById('menu-button');
         if (menuButton) {
-            menuButton.style.display = 'none';
+            if (window.innerWidth > 900) {
+                menuButton.style.display = 'none';
+                menuButton.setAttribute('aria-hidden', 'true'); // アクセシビリティのため
+            } else {
+                menuButton.style.display = 'block';
+                menuButton.removeAttribute('aria-hidden');
+            }
         }
     }
+    
+    // 初期化時に実行
+    updateMenuButtonVisibility();
+    // ここまでが新しく追加する部分
+    
+    // 元々あった部分は不要になるので削除または上の関数に置き換え
+    // if (window.innerWidth > 900) {
+    //     const menuButton = document.getElementById('menu-button');
+    //     if (menuButton) {
+    //         menuButton.style.display = 'none';
+    //     }
+    // }
     
     // 検索インデックスのロード
     fetch('data/search-index.json')
@@ -157,21 +175,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // リサイズイベント - メディアクエリの切り替わりを監視
+    // ここの部分を修正（元のコードは削除して新しい関数を使用）
     window.addEventListener('resize', function() {
-        // PCサイズでメニューボタンを非表示に
-        if (window.innerWidth > 900) {
-            const menuButton = document.getElementById('menu-button');
-            if (menuButton) {
-                menuButton.style.display = 'none';
-            }
-        } else {
-            const menuButton = document.getElementById('menu-button');
-            if (menuButton) {
-                menuButton.style.display = 'block';
-            }
-        }
+        // PCサイズでメニューボタンを非表示にする処理を更新
+        updateMenuButtonVisibility();
         
-        // handleResizeが定義されている場合は実行
+        // handleResizeが定義されている場合は実行（既存コードを維持）
         if (typeof handleResize === 'function') {
             handleResize();
         }
