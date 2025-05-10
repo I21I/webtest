@@ -128,6 +128,7 @@ header {
     transform: translateY(0);
     opacity: 1;
     visibility: visible;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* 陰影を強化して存在感を高める */
 }
 
 .mobile-menu-search {
@@ -205,9 +206,30 @@ header {
         display: none !important;
     }
     
-    /* PCサイズではメニューボタンも非表示 */
+    /* PCサイズではメニューボタンも絶対に非表示に */
     .menu-button {
         display: none !important;
+    }
+}
+
+/* モバイルでのレイアウト修正 - この部分を追加する */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+        padding-top: calc(var(--header-height) + 1rem);
+    }
+    
+    /* 検索ボックスのモバイル調整 */
+    .search-container {
+        padding: 0.8rem;
+    }
+    
+    #search-input {
+        padding: 0.7rem 0.8rem 0.7rem 2.5rem;
+    }
+    
+    .search-icon {
+        left: 1.5rem;
     }
 }
 
