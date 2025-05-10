@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (siteSearchInput && typeof handleSiteSearch === 'function') {
         siteSearchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                handleSiteSearch(this.value);
+                handleSiteSearch(e);
             }
         });
     }
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mobileSiteSearchInput && typeof handleSiteSearch === 'function') {
         mobileSiteSearchInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                handleSiteSearch(this.value);
+                handleSiteSearch(e);
             }
         });
     }
@@ -127,10 +127,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // ESC キーでの閉じる（検索結果とモバイルメニュー両方）
+    // ESC キーでの閉じる処理
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            // 検索結果を閉じる
             const searchResults = document.getElementById('search-results');
             if (searchResults && searchResults.classList.contains('active') &&
                 typeof closeSearchResults === 'function') {
