@@ -117,15 +117,15 @@ header {
     box-shadow: 0 4px 8px var(--shadow-color);
     z-index: 999;
     transform: translateY(-100%);
-    opacity: 0; /* 追加 */
-    visibility: hidden; /* 追加 */
+    opacity: 0;
+    visibility: hidden;
     transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .mobile-menu.active {
     transform: translateY(0);
-    opacity: 1; /* 追加 */
-    visibility: visible; /* 追加 */
+    opacity: 1;
+    visibility: visible;
 }
 
 .mobile-menu-search {
@@ -141,6 +141,7 @@ header {
     border: 1px solid var(--border-color);
     background-color: var(--background-color);
     color: var(--text-color);
+}
 
 .mobile-menu-search-input:focus {
     outline: none;
@@ -222,15 +223,22 @@ header {
     }
 
     .menu-button {
-        display: block;
+        display: block !important; /* !importantを追加して確実に表示 */
         margin-left: auto; /* 右端に配置 */
     }
     
-    .mobile-menu:not(.active) {
+    /* モバイルメニューの表示制御を修正 */
+    .mobile-menu {
         display: block;
         transform: translateY(-100%);
         opacity: 0;
         visibility: hidden;
+    }
+
+    .mobile-menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
     }
 }
 
