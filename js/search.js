@@ -189,15 +189,46 @@ function resetTabsState() {
 }
 
 /**
- * サイト内検索処理
+ * サイト内検索フィールドをクリックしたときの処理
+ */
+function handleSearchFieldClick(e) {
+    e.preventDefault();
+    
+    // 検索タブを表示
+    openSearchDialog();
+    
+    // 検索タブ内のフィールドにフォーカス
+    setTimeout(() => {
+        const searchQueryDisplay = document.getElementById('search-query-display');
+        if (searchQueryDisplay) {
+            searchQueryDisplay.focus();
+        }
+    }, 100);
+}
+
+/**
+ * サイト内検索処理（Enter押下時）
  */
 function handleSiteSearch(e) {
-    if (e.key === 'Enter') {
-        const searchTerm = this.value.trim();
-        if (searchTerm === '') return;
-        
-        performSiteSearch(searchTerm);
-        this.blur();
+    // 右上の検索フィールドは、クリックのみ反応して入力は無効化
+    e.preventDefault();
+}
+
+/**
+ * 検索ダイアログを開く
+ */
+function openSearchDialog() {
+    // 検索タブを表示
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.classList.add('active');
+        document.body.classList.add('search-open');
+    }
+    
+    // モバイルメニューを閉じる
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu && mobileMenu.classList.contains('active')) {
+        mobileMenu.classList.remove('active');
     }
 }
 
@@ -293,9 +324,9 @@ function performSiteSearch(query) {
                 highlightedContent = highlightText(highlightedContent);
                 highlightedTitle = highlightText(highlightedTitle);
                 
-                // 検索結果アイテムの生成 - アイテム全体をクリック可能に
+                // 検索結果アイテムの生成 - クリック可能だがテキスト選択も可能に
                 html += `
-                    <li class="search-result-item" onclick="handleResultClick('${result.url}')">
+                    <li class="search-result-item" data-url="${result.url}">
                         <h4 class="search-result-title">
                             ${highlightedTitle}
                             ${result.version ? `<span class="result-version">${result.version}</span>` : ''}
@@ -310,21 +341,29 @@ function performSiteSearch(query) {
         });
         
         searchResultsContent.innerHTML = html;
+        
+        // 検索結果アイテムにクリックイベントを設定（テキスト選択と分けるため）
+        document.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // テキスト選択中は無視
+                if (window.getSelection().toString()) return;
+                
+                const url = this.getAttribute('data-url');
+                if (url) {
+                    handleResultClick(url);
+                }
+            });
+        });
     } else {
         searchResultsContent.innerHTML = '<div class="search-no-results">検索条件に一致する結果が見つかりませんでした。別のキーワードをお試しください。</div>';
     }
     
-    // 表示モードの設定
+    // 表示モードの設定 - 初期状態はコンパクトモード
     const searchResults = document.getElementById('search-results');
     if (searchResults) {
         searchResults.classList.add('active');
+        searchResults.classList.remove('expanded'); // 拡大モードをリセット
         document.body.classList.add('search-open');
-    }
-    
-    // モバイルメニューを閉じる
-    const mobileMenu = document.getElementById('mobile-menu');
-    if (mobileMenu && mobileMenu.classList.contains('active')) {
-        mobileMenu.classList.remove('active');
     }
 }
 
@@ -346,8 +385,11 @@ function toggleSearchResultsView() {
     const searchResults = document.getElementById('search-results');
     if (!searchResults) return;
     
+    // 現在の状態を確認してトグル
+    const isExpanded = searchResults.classList.contains('expanded');
+    
     // クラスの追加/削除
-    if (searchResults.classList.contains('expanded')) {
+    if (isExpanded) {
         searchResults.classList.remove('expanded');
     } else {
         searchResults.classList.add('expanded');
@@ -356,10 +398,10 @@ function toggleSearchResultsView() {
     // 切り替えボタンのテキストを更新
     const toggleButton = document.getElementById('search-view-toggle');
     if (toggleButton) {
-        toggleButton.textContent = searchResults.classList.contains('expanded') 
-            ? '結果を縮小' 
-            : '結果を拡大';
+        toggleButton.textContent = isExpanded ? '結果を拡大' : '結果を縮小';
     }
+    
+    console.log('検索結果表示モード切替:', isExpanded ? 'コンパクト' : '拡大');
 }
 
 /**
@@ -404,48 +446,25 @@ function handleSearchQueryChange(e) {
 
 // ページ読み込み時に検索インデックスを生成
 document.addEventListener('DOMContentLoaded', function() {
-    // 検索入力欄にクリアボタンを追加
-    addClearButtonToSearch('site-search-input');
-    addClearButtonToSearch('mobile-site-search-input');
-    
-    // 検索ボタンのイベントリスナー
+    // 右上の検索入力欄はクリックで検索ダイアログを開くだけに変更
     const siteSearchInput = document.getElementById('site-search-input');
     if (siteSearchInput) {
-        siteSearchInput.addEventListener('keypress', handleSiteSearch);
+        siteSearchInput.addEventListener('click', handleSearchFieldClick);
+        siteSearchInput.addEventListener('focus', handleSearchFieldClick);
+        siteSearchInput.readOnly = true; // 入力を無効化
+        siteSearchInput.placeholder = 'サイト内検索...';
     }
     
     const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
     if (mobileSiteSearchInput) {
-        mobileSiteSearchInput.addEventListener('keypress', handleSiteSearch);
+        mobileSiteSearchInput.addEventListener('click', handleSearchFieldClick);
+        mobileSiteSearchInput.addEventListener('focus', handleSearchFieldClick);
+        mobileSiteSearchInput.readOnly = true; // 入力を無効化
+        mobileSiteSearchInput.placeholder = 'サイト内検索...';
     }
     
-    // 検索結果に検索クエリ表示欄を追加
-    const searchResultsHeader = document.querySelector('.search-results-header');
-    if (searchResultsHeader) {
-        // 既存の内容を削除
-        searchResultsHeader.innerHTML = '';
-        
-        // 検索フィールドを追加
-        const searchField = document.createElement('div');
-        searchField.className = 'search-field';
-        searchField.innerHTML = `
-            <input type="text" id="search-query-display" class="search-query-input" placeholder="検索...">
-            <button id="search-view-toggle" class="search-view-toggle">結果を拡大</button>
-        `;
-        searchResultsHeader.appendChild(searchField);
-        
-        // 検索フィールドのイベントリスナー
-        const searchQueryDisplay = document.getElementById('search-query-display');
-        if (searchQueryDisplay) {
-            searchQueryDisplay.addEventListener('keypress', handleSearchQueryChange);
-        }
-        
-        // 表示モード切り替えボタンのイベントリスナー
-        const viewToggleButton = document.getElementById('search-view-toggle');
-        if (viewToggleButton) {
-            viewToggleButton.addEventListener('click', toggleSearchResultsView);
-        }
-    }
+    // 検索ダイアログを作成（まだ存在しない場合）
+    createSearchDialog();
     
     // 外側クリックで閉じる機能のセットアップ
     setupOutsideClickHandler();
@@ -463,44 +482,82 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * 検索入力欄にクリアボタンを追加
+ * 検索ダイアログを作成
  */
-function addClearButtonToSearch(inputId) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
+function createSearchDialog() {
+    // すでに存在する場合は何もしない
+    if (document.getElementById('search-results')) return;
     
-    // 親要素（相対位置指定のためのコンテナ）
-    const parent = input.parentElement;
-    if (!parent) return;
+    const searchDialog = document.createElement('div');
+    searchDialog.id = 'search-results';
+    searchDialog.className = 'search-results';
     
-    // クリアボタンを作成
-    const clearButton = document.createElement('button');
-    clearButton.className = 'search-clear-button';
-    clearButton.setAttribute('type', 'button');
-    clearButton.setAttribute('aria-label', '検索をクリア');
-    clearButton.innerHTML = '×';
+    // 検索ヘッダー部分
+    const searchHeader = document.createElement('div');
+    searchHeader.className = 'search-results-header';
     
-    // クリアボタンのイベント
-    clearButton.addEventListener('click', function() {
-        input.value = '';
-        input.focus();
-        this.classList.remove('visible');
-    });
+    // 検索フィールド
+    const searchField = document.createElement('div');
+    searchField.className = 'search-field';
+    searchField.innerHTML = `
+        <div class="search-input-container">
+            <span class="search-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
+                </svg>
+            </span>
+            <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索...">
+            <button type="button" id="search-clear-button" class="search-clear-button" aria-label="検索をクリア">×</button>
+        </div>
+        <button id="search-view-toggle" class="search-view-toggle">結果を拡大</button>
+    `;
     
-    // 入力内容が変更されたらボタンの表示/非表示を切り替え
-    input.addEventListener('input', function() {
-        if (this.value.length > 0) {
-            clearButton.classList.add('visible');
-        } else {
-            clearButton.classList.remove('visible');
-        }
-    });
+    searchHeader.appendChild(searchField);
+    searchDialog.appendChild(searchHeader);
     
-    // 初期状態の設定
-    if (input.value.length > 0) {
-        clearButton.classList.add('visible');
+    // 検索結果コンテンツ
+    const searchContent = document.createElement('div');
+    searchContent.id = 'search-results-content';
+    searchContent.className = 'search-results-content';
+    searchDialog.appendChild(searchContent);
+    
+    // ボディに追加
+    document.body.appendChild(searchDialog);
+    
+    // 検索入力のイベントリスナー設定
+    const searchQueryDisplay = document.getElementById('search-query-display');
+    if (searchQueryDisplay) {
+        searchQueryDisplay.addEventListener('keypress', handleSearchQueryChange);
+        
+        // 入力変更時のクリアボタン表示制御
+        searchQueryDisplay.addEventListener('input', function() {
+            const clearButton = document.getElementById('search-clear-button');
+            if (clearButton) {
+                if (this.value.length > 0) {
+                    clearButton.classList.add('visible');
+                } else {
+                    clearButton.classList.remove('visible');
+                }
+            }
+        });
     }
     
-    // 親要素にボタンを追加
-    parent.appendChild(clearButton);
+    // クリアボタンのイベントリスナー
+    const clearButton = document.getElementById('search-clear-button');
+    if (clearButton) {
+        clearButton.addEventListener('click', function() {
+            const searchQueryDisplay = document.getElementById('search-query-display');
+            if (searchQueryDisplay) {
+                searchQueryDisplay.value = '';
+                searchQueryDisplay.focus();
+                this.classList.remove('visible');
+            }
+        });
+    }
+    
+    // 表示モード切り替えボタンのイベントリスナー
+    const viewToggleButton = document.getElementById('search-view-toggle');
+    if (viewToggleButton) {
+        viewToggleButton.addEventListener('click', toggleSearchResultsView);
+    }
 }
