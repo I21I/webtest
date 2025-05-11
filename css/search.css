@@ -1,218 +1,563 @@
-/* search.css - 検索機能のスタイル */
-/* サイト内検索 - ヘッダー内のみ */
-.site-search {
-    position: relative;
-    margin-right: 1rem;
-}
-.site-search-input {
-    padding: 0.5rem 0.5rem 0.5rem 2.2rem;
-    border-radius: 20px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color);
-    color: var(--text-color);
-    width: 200px;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-.site-search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    width: 240px;
-    box-shadow: 0 0 0 3px var(--primary-light);
+// search.js - 最終修正版検索機能
+
+/**
+ * 確実にタブコンテンツを含む検索インデックスを生成する関数
+ */
+function generateSearchIndex() {
+    console.log('検索インデックスを生成します...');
+    const searchIndex = [];
+
+    try {
+        // タブコンテンツを確実に取得するための特別な処理
+        forceActivateAllTabs();
+        
+        // ツールカードの処理
+        document.querySelectorAll('.tool-card').forEach(function(card) {
+            const title = card.querySelector('.tool-name')?.textContent?.trim() || '';
+            const version = card.querySelector('.tool-version')?.textContent?.trim() || '';
+            const description = card.querySelector('.tool-description')?.textContent?.trim() || '';
+            const tags = card.getAttribute('data-tags')?.split(',') || [];
+            
+            // 主な機能と動作環境も検索対象に含める
+            const features = [];
+            card.querySelectorAll('.tool-specs ul li').forEach(function(item) {
+                features.push(item.textContent?.trim() || '');
+            });
+            
+            searchIndex.push({
+                title: title,
+                url: "#tools-section",
+                content: description,
+                tags: tags,
+                path: "ツール",
+                version: version,
+                features: features.join(' ')
+            });
+        });
+        
+        // セクションタイトルの処理
+        document.querySelectorAll('.section-title').forEach(function(section) {
+            const title = section.textContent?.trim() || '';
+            const sectionId = section.closest('section')?.id || '';
+            
+            if (sectionId) {
+                searchIndex.push({
+                    title: title,
+                    url: "#" + sectionId,
+                    content: "セクション: " + title,
+                    path: "セクション"
+                });
+            }
+        });
+        
+        // タブコンテンツの処理
+        document.querySelectorAll('.tab-content').forEach(function(tabContent) {
+            const tabId = tabContent.id || '';
+            if (!tabId) return;
+            
+            // タブ名を取得（例: vcc-tab → VCC）
+            const tabName = tabId.replace('-tab', '').toUpperCase();
+            
+            // タブ内のすべてのテキストコンテンツを取得
+            const fullText = tabContent.textContent?.trim() || '';
+            
+            // タブ内の手順リスト
+            const steps = [];
+            tabContent.querySelectorAll('li').forEach(function(step) {
+                const stepText = step.textContent?.trim() || '';
+                if (stepText) steps.push(stepText);
+            });
+            
+            // コードブロック（URL等）
+            const codeBlock = tabContent.querySelector('pre')?.textContent?.trim() || '';
+            
+            // タブ内容をインデックスに追加
+            searchIndex.push({
+                title: tabName + " インストール方法",
+                url: "#install-section",
+                content: steps.join(' ') + ' ' + codeBlock,
+                fullContent: fullText,
+                path: "インストール方法",
+                tabId: tabId
+            });
+            
+            console.log('タブコンテンツを登録:', tabName, 'ステップ数:', steps.length);
+        });
+        
+        // インストールセクションの処理
+        const installNote = document.querySelector('#install-section .install-note')?.textContent?.trim() || '';
+        if (installNote) {
+            searchIndex.push({
+                title: "インストール方法の注意事項",
+                url: "#install-section",
+                content: installNote,
+                path: "インストール方法"
+            });
+        }
+        
+        // お問い合わせセクションの処理
+        const contactContent = document.querySelector('#contact-section .info-content p')?.textContent?.trim() || '';
+        const contactLinks = [];
+        document.querySelectorAll('#contact-section .social-links a').forEach(function(link) {
+            contactLinks.push(link.textContent?.trim() + ': ' + link.getAttribute('href'));
+        });
+        
+        searchIndex.push({
+            title: "お問い合わせ",
+            url: "#contact-section",
+            content: contactContent,
+            tags: ["お問い合わせ", "Twitter", "Booth"],
+            path: "お問い合わせ",
+            links: contactLinks.join(' ')
+        });
+        
+        // メインタイトルの処理
+        searchIndex.push({
+            title: "二十一世紀症候群 VRChatツール",
+            url: "#",
+            content: document.querySelector('h1')?.textContent + ' - ' + document.querySelector('.subtitle')?.textContent,
+            tags: ["VRChat", "ツール", "アバター改変", "最適化"],
+            path: "ホーム"
+        });
+        
+        // 検索インデックスをグローバル変数に設定
+        window.searchIndex = searchIndex;
+        console.log('検索インデックスが生成されました。項目数:', searchIndex.length);
+        
+        return searchIndex;
+    } catch (error) {
+        console.error('検索インデックス生成中にエラーが発生しました:', error);
+    } finally {
+        // 元のタブ状態を復元
+        resetTabsState();
+    }
 }
 
-/* サイト内検索アイコン修正 */
-.site-search-icon {
-    position: absolute;
-    left: 0.7rem;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    display: flex; /* Flexboxを使って配置 */
-    align-items: center; /* 垂直方向中央揃え */
-    height: 100%; /* 親要素の高さいっぱいに */
-}
-.site-search-icon svg {
-    width: 1rem; /* サイズを小さく */
-    height: 1rem; /* サイズを小さく */
-    fill: var(--text-secondary);
-    transition: fill 0.2s ease;
-}
-.site-search-input:focus + .site-search-icon svg {
-    fill: var(--primary-color);
-}
-
-/* 検索結果表示 */
-#search-results {
-    position: fixed;
-    top: var(--header-height);
-    left: 0;
-    width: 100%;
-    background-color: var(--card-background);
-    box-shadow: 0 4px 12px var(--shadow-color);
-    z-index: 998;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    opacity: 0;
-    visibility: hidden;
-}
-#search-results.active {
-    max-height: 80vh;
-    opacity: 1;
-    visibility: visible;
-    overflow-y: auto;
-}
-.search-results-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    background-color: var(--primary-light);
-    border-bottom: 1px solid var(--border-color);
-}
-.search-results-title {
-    margin: 0;
-    font-size: 1.1rem;
-    color: var(--primary-color);
-}
-.search-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-}
-.search-close svg {
-    width: 1.2rem;
-    height: 1.2rem;
-    fill: var(--text-secondary);
-    transition: fill 0.2s ease;
-}
-.search-close:hover svg {
-    fill: var(--primary-color);
-}
-#search-results-content {
-    padding: 1.5rem;
-}
-.search-result-item {
-    border-bottom: 1px solid var(--border-color);
-    padding: 1rem 0;
-}
-.search-result-item:last-child {
-    border-bottom: none;
-}
-.search-result-title {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
-.search-result-title a {
-    color: var(--primary-color);
-    text-decoration: none;
-}
-.search-result-title a:hover {
-    text-decoration: underline;
-}
-.search-result-path {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-}
-.search-result-snippet {
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: var(--text-color);
+/**
+ * すべてのタブを一時的にアクティブにしてコンテンツを読み込む
+ */
+function forceActivateAllTabs() {
+    console.log('すべてのタブを一時的にアクティブにします...');
+    
+    // 元のアクティブタブを記憶
+    window._originalActiveTabs = [];
+    document.querySelectorAll('.tab.active').forEach(tab => {
+        window._originalActiveTabs.push(tab);
+    });
+    
+    // すべてのタブを一時的にアクティブにする
+    document.querySelectorAll('.tab').forEach(tab => {
+        // クリックではなくdisplayプロパティで直接制御
+        const tabId = tab.getAttribute('data-tab');
+        if (tabId) {
+            const tabContent = document.getElementById(tabId + '-tab');
+            if (tabContent) {
+                // 一時的に表示して内容を確実に読み込む
+                tabContent.style.display = 'block';
+                console.log('タブ内容を読み込み:', tabId, tabContent.textContent.slice(0, 20) + '...');
+            }
+        }
+    });
 }
 
-/* モバイルメニュー内の検索 */
-.mobile-menu-search {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
-    position: relative;
-}
-.mobile-menu-search-input {
-    width: 100%;
-    padding: 0.8rem 1rem 0.8rem 2.5rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color);
-    color: var(--text-color);
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-.mobile-menu-search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-/* モバイルメニュー内検索アイコン修正 */
-.mobile-search-icon {
-    position: absolute;
-    left: 1.7rem;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    display: flex; /* Flexboxを使って配置 */
-    align-items: center; /* 垂直方向中央揃え */
-    height: 100%; /* 親要素の高さいっぱいに */
-}
-.mobile-search-icon svg {
-    width: 1rem; /* サイズを小さく */
-    height: 1rem; /* サイズを小さく */
-    fill: var(--text-secondary);
+/**
+ * タブの状態を元に戻す
+ */
+function resetTabsState() {
+    console.log('タブの状態を元に戻します...');
+    
+    // すべてのタブコンテンツを非表示に
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.style.display = 'none';
+    });
+    
+    // 元々アクティブだったタブだけを表示
+    if (window._originalActiveTabs) {
+        window._originalActiveTabs.forEach(tab => {
+            const tabId = tab.getAttribute('data-tab');
+            if (tabId) {
+                const tabContent = document.getElementById(tabId + '-tab');
+                if (tabContent) {
+                    tabContent.style.display = 'block';
+                }
+            }
+        });
+        
+        // 不要になった変数をクリア
+        delete window._originalActiveTabs;
+    }
 }
 
-/* ツール検索のスタイル修正 */
-.search-container {
-    position: relative;
-    max-width: 100%;
-    margin-bottom: 1.5rem;
+/**
+ * サイト内検索フィールドをクリックしたときの処理
+ */
+function handleSearchFieldClick(e) {
+    e.preventDefault();
+    
+    // 検索タブを表示
+    openSearchDialog();
+    
+    // 検索タブ内のフィールドにフォーカス
+    setTimeout(() => {
+        const searchQueryDisplay = document.getElementById('search-query-display');
+        if (searchQueryDisplay) {
+            searchQueryDisplay.focus();
+        }
+    }, 100);
 }
 
-#search-input {
-    width: 100%;
-    padding: 0.8rem 1rem 0.8rem 3rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    background-color: var(--card-background);
-    color: var(--text-color);
-    transition: all 0.3s ease;
-    -webkit-appearance: none;
+/**
+ * サイト内検索処理（Enter押下時）
+ */
+function handleSiteSearch(e) {
+    // 右上の検索フィールドは、クリックのみ反応して入力は無効化
+    e.preventDefault();
 }
 
-#search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-/* ツール検索アイコン修正 */
-.search-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    display: flex; /* Flexboxを使って配置 */
-    align-items: center; /* 垂直方向中央揃え */
-    height: 100%; /* 親要素の高さいっぱいに */
-}
-
-.search-icon svg {
-    width: 1rem; /* サイズを小さく */
-    height: 1rem; /* サイズを小さく */
-    fill: var(--text-secondary);
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 900px) {
-    #search-results-content {
-        padding: 1rem;
+/**
+ * 検索ダイアログを開く
+ */
+function openSearchDialog() {
+    // 検索タブを表示
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.classList.add('active');
+        document.body.classList.add('search-open');
     }
     
-    .search-results-header {
-        padding: 0.8rem 1rem;
+    // モバイルメニューを閉じる
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu && mobileMenu.classList.contains('active')) {
+        mobileMenu.classList.remove('active');
+    }
+}
+
+/**
+ * 検索入力をクリアする
+ */
+function clearSearchInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        input.value = '';
+        input.focus();
+    }
+}
+
+/**
+ * サイト内検索の実行
+ */
+function performSiteSearch(query) {
+    const searchResultsContent = document.getElementById('search-results-content');
+    const searchQueryDisplay = document.getElementById('search-query-display');
+    
+    if (!searchResultsContent) {
+        console.error('検索結果要素が見つかりません');
+        return;
+    }
+    
+    // まだ検索インデックスが生成されていない場合は生成
+    if (!window.searchIndex) {
+        window.searchIndex = generateSearchIndex();
+    }
+    
+    // 検索クエリを表示
+    if (searchQueryDisplay) {
+        searchQueryDisplay.value = query;
+    }
+    
+    const queryLower = query.toLowerCase();
+    
+    // 検索結果のフィルタリング
+    const results = window.searchIndex.filter(item => {
+        return (
+            // 基本検索
+            (item.title && item.title.toLowerCase().includes(queryLower)) || 
+            (item.content && item.content.toLowerCase().includes(queryLower)) || 
+            
+            // タグ検索
+            (item.tags && item.tags.some(tag => 
+                typeof tag === 'string' && tag.toLowerCase().includes(queryLower)
+            )) ||
+            
+            // 全テキスト検索
+            (item.fullContent && item.fullContent.toLowerCase().includes(queryLower)) ||
+            
+            // 機能リスト検索
+            (item.features && item.features.toLowerCase().includes(queryLower)) ||
+            
+            // リンク検索
+            (item.links && item.links.toLowerCase().includes(queryLower))
+        );
+    });
+    
+    // 検索結果をパスでグループ化
+    const groupedResults = {};
+    results.forEach(result => {
+        const path = result.path || 'その他';
+        if (!groupedResults[path]) {
+            groupedResults[path] = [];
+        }
+        groupedResults[path].push(result);
+    });
+    
+    if (results.length > 0) {
+        let html = '<div class="search-results-count">検索結果: ' + results.length + '件</div>';
+        
+        // パス別に結果を表示
+        Object.keys(groupedResults).forEach(path => {
+            html += `<div class="search-section"><h3 class="search-section-title">${path}</h3>`;
+            html += '<ul class="search-result-list">';
+            
+            groupedResults[path].forEach(result => {
+                // 検索語のハイライト
+                let highlightedContent = result.content || '';
+                let highlightedTitle = result.title || '';
+                
+                const highlightText = (text) => {
+                    if (!text || typeof text !== 'string') return '';
+                    return text.replace(
+                        new RegExp(queryLower, 'gi'), 
+                        match => `<mark>${match}</mark>`
+                    );
+                };
+                
+                highlightedContent = highlightText(highlightedContent);
+                highlightedTitle = highlightText(highlightedTitle);
+                
+                // 検索結果アイテムの生成 - クリック可能だがテキスト選択も可能に
+                html += `
+                    <li class="search-result-item" data-url="${result.url}">
+                        <h4 class="search-result-title">
+                            ${highlightedTitle}
+                            ${result.version ? `<span class="result-version">${result.version}</span>` : ''}
+                        </h4>
+                        <p class="search-result-snippet">${highlightedContent}</p>
+                        <p class="search-result-path">${result.path || ''}</p>
+                    </li>
+                `;
+            });
+            
+            html += '</ul></div>';
+        });
+        
+        searchResultsContent.innerHTML = html;
+        
+        // 検索結果アイテムにクリックイベントを設定（テキスト選択と分けるため）
+        document.querySelectorAll('.search-result-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                // テキスト選択中は無視
+                if (window.getSelection().toString()) return;
+                
+                const url = this.getAttribute('data-url');
+                if (url) {
+                    handleResultClick(url);
+                }
+            });
+        });
+    } else {
+        searchResultsContent.innerHTML = '<div class="search-no-results">検索条件に一致する結果が見つかりませんでした。別のキーワードをお試しください。</div>';
+    }
+    
+    // 表示モードの設定 - 初期状態はコンパクトモード
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.classList.add('active');
+        searchResults.classList.remove('expanded'); // 拡大モードをリセット
+        document.body.classList.add('search-open');
+    }
+}
+
+/**
+ * 検索結果アイテムクリック時の処理
+ */
+function handleResultClick(url) {
+    // 検索結果を閉じる
+    closeSearchResults();
+    
+    // リンク先に移動
+    window.location.href = url;
+}
+
+/**
+ * 検索結果の表示モードを切り替え（コンパクト/拡大）
+ */
+function toggleSearchResultsView() {
+    const searchResults = document.getElementById('search-results');
+    if (!searchResults) return;
+    
+    // 現在の状態を確認してトグル
+    const isExpanded = searchResults.classList.contains('expanded');
+    
+    // クラスの追加/削除
+    if (isExpanded) {
+        searchResults.classList.remove('expanded');
+    } else {
+        searchResults.classList.add('expanded');
+    }
+    
+    // 切り替えボタンのテキストを更新
+    const toggleButton = document.getElementById('search-view-toggle');
+    if (toggleButton) {
+        toggleButton.textContent = isExpanded ? '結果を拡大' : '結果を縮小';
+    }
+    
+    console.log('検索結果表示モード切替:', isExpanded ? 'コンパクト' : '拡大');
+}
+
+/**
+ * 検索結果を閉じる
+ */
+function closeSearchResults() {
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.classList.remove('active');
+        document.body.classList.remove('search-open');
+    }
+}
+
+/**
+ * 検索結果ポップアップの外側クリックで閉じる処理
+ */
+function setupOutsideClickHandler() {
+    document.addEventListener('click', function(e) {
+        const searchResults = document.getElementById('search-results');
+        // 検索結果が表示されている場合のみ処理
+        if (!searchResults || !searchResults.classList.contains('active')) return;
+        
+        // クリックされた要素が検索結果ポップアップの中にあるかチェック
+        if (!searchResults.contains(e.target) && e.target.id !== 'search-overlay') {
+            closeSearchResults();
+        }
+    });
+}
+
+/**
+ * 検索クエリ入力欄変更時の処理
+ */
+function handleSearchQueryChange(e) {
+    // Enter キーが押されたら検索実行
+    if (e.key === 'Enter') {
+        const query = this.value.trim();
+        if (query) {
+            performSiteSearch(query);
+        }
+    }
+}
+
+// ページ読み込み時に検索インデックスを生成
+document.addEventListener('DOMContentLoaded', function() {
+    // 右上の検索入力欄はクリックで検索ダイアログを開くだけに変更
+    const siteSearchInput = document.getElementById('site-search-input');
+    if (siteSearchInput) {
+        siteSearchInput.addEventListener('click', handleSearchFieldClick);
+        siteSearchInput.addEventListener('focus', handleSearchFieldClick);
+        siteSearchInput.readOnly = true; // 入力を無効化
+        siteSearchInput.placeholder = 'サイト内検索...';
+    }
+    
+    const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
+    if (mobileSiteSearchInput) {
+        mobileSiteSearchInput.addEventListener('click', handleSearchFieldClick);
+        mobileSiteSearchInput.addEventListener('focus', handleSearchFieldClick);
+        mobileSiteSearchInput.readOnly = true; // 入力を無効化
+        mobileSiteSearchInput.placeholder = 'サイト内検索...';
+    }
+    
+    // 検索ダイアログを作成（まだ存在しない場合）
+    createSearchDialog();
+    
+    // 外側クリックで閉じる機能のセットアップ
+    setupOutsideClickHandler();
+    
+    // オーバーレイ要素の追加
+    const overlay = document.createElement('div');
+    overlay.id = 'search-overlay';
+    overlay.className = 'search-overlay';
+    document.body.appendChild(overlay);
+    
+    // ページ読み込み完了後、少し遅延させて検索インデックスを生成
+    setTimeout(() => {
+        generateSearchIndex();
+    }, 500);
+});
+
+/**
+ * 検索ダイアログを作成
+ */
+function createSearchDialog() {
+    // すでに存在する場合は何もしない
+    if (document.getElementById('search-results')) return;
+    
+    const searchDialog = document.createElement('div');
+    searchDialog.id = 'search-results';
+    searchDialog.className = 'search-results';
+    
+    // 検索ヘッダー部分
+    const searchHeader = document.createElement('div');
+    searchHeader.className = 'search-results-header';
+    
+    // 検索フィールド
+    const searchField = document.createElement('div');
+    searchField.className = 'search-field';
+    searchField.innerHTML = `
+        <div class="search-input-container">
+            <span class="search-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
+                </svg>
+            </span>
+            <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索...">
+            <button type="button" id="search-clear-button" class="search-clear-button" aria-label="検索をクリア">×</button>
+        </div>
+        <button id="search-view-toggle" class="search-view-toggle">結果を拡大</button>
+    `;
+    
+    searchHeader.appendChild(searchField);
+    searchDialog.appendChild(searchHeader);
+    
+    // 検索結果コンテンツ
+    const searchContent = document.createElement('div');
+    searchContent.id = 'search-results-content';
+    searchContent.className = 'search-results-content';
+    searchDialog.appendChild(searchContent);
+    
+    // ボディに追加
+    document.body.appendChild(searchDialog);
+    
+    // 検索入力のイベントリスナー設定
+    const searchQueryDisplay = document.getElementById('search-query-display');
+    if (searchQueryDisplay) {
+        searchQueryDisplay.addEventListener('keypress', handleSearchQueryChange);
+        
+        // 入力変更時のクリアボタン表示制御
+        searchQueryDisplay.addEventListener('input', function() {
+            const clearButton = document.getElementById('search-clear-button');
+            if (clearButton) {
+                if (this.value.length > 0) {
+                    clearButton.classList.add('visible');
+                } else {
+                    clearButton.classList.remove('visible');
+                }
+            }
+        });
+    }
+    
+    // クリアボタンのイベントリスナー
+    const clearButton = document.getElementById('search-clear-button');
+    if (clearButton) {
+        clearButton.addEventListener('click', function() {
+            const searchQueryDisplay = document.getElementById('search-query-display');
+            if (searchQueryDisplay) {
+                searchQueryDisplay.value = '';
+                searchQueryDisplay.focus();
+                this.classList.remove('visible');
+            }
+        });
+    }
+    
+    // 表示モード切り替えボタンのイベントリスナー
+    const viewToggleButton = document.getElementById('search-view-toggle');
+    if (viewToggleButton) {
+        viewToggleButton.addEventListener('click', toggleSearchResultsView);
     }
 }
