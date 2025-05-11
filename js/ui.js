@@ -1,11 +1,7 @@
 // ui.js - UI関連の機能
 // モバイルメニュー切り替え
 function toggleMobileMenu() {
-    // 画面サイズのチェック
-    if (window.innerWidth > 900) {
-        return; // 大きい画面サイズでは何もしない
-    }
-    
+    // 画面サイズのチェックを削除 - レスポンシブCSSで対応
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu) {
         mobileMenu.classList.toggle('active');
@@ -15,8 +11,13 @@ function toggleMobileMenu() {
 // 画面リサイズ時にモバイルメニューを閉じる
 function handleResize() {
     const mobileMenu = document.getElementById('mobile-menu');
-    if (window.innerWidth > 900 && mobileMenu && mobileMenu.classList.contains('active')) {
-        mobileMenu.classList.remove('active');
+    const menuButton = document.getElementById('menu-button');
+    
+    if (window.innerWidth > 900) {
+        // PCサイズでメニューを閉じる
+        if (mobileMenu && mobileMenu.classList.contains('active')) {
+            mobileMenu.classList.remove('active');
+        }
     }
 }
 
@@ -105,6 +106,27 @@ function initScrollTopButton() {
 // スクロール時の処理
 function handleScroll() {
     checkScrollTopButton();
+    setActiveNavItem(); // ナビゲーション項目のアクティブ化を追加
+}
+
+// アクティブナビゲーション設定
+function setActiveNavItem() {
+    const scrollY = window.pageYOffset;
+    
+    document.querySelectorAll('section[id]').forEach(section => {
+        const sectionHeight = section.offsetHeight;
+        const sectionTop = section.offsetTop - 100;
+        const sectionId = section.getAttribute('id');
+        
+        if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+            document.querySelectorAll('.header-nav-item, .mobile-menu-nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('href') === '#' + sectionId) {
+                    item.classList.add('active');
+                }
+            });
+        }
+    });
 }
 
 // スクロールトップボタンの表示・非表示を切り替え
@@ -113,106 +135,84 @@ function checkScrollTopButton() {
     
     if (scrollTopButton) {
         if (window.scrollY > 300) {
-            scrollTopButton.style.opacity = '1';
-            scrollTopButton.style.visibility = 'visible';
+            scrollTopButton.classList.add('visible');
         } else {
-            scrollTopButton.style.opacity = '0';
-            scrollTopButton.style.visibility = 'hidden';
+            scrollTopButton.classList.remove('visible');
         }
     }
 }
 
-// サイト内検索処理
+// サイト内検索処理 - 修正版
 function handleSiteSearch(e) {
-    let searchTerm;
-    
     if (typeof e === 'string') {
-        searchTerm = e;
+        performSiteSearch(e);
     } else if (e.key === 'Enter') {
-        searchTerm = this.value;
-    } else {
-        return;
+        const searchTerm = this.value.trim();
+        if (searchTerm === '') return;
+        
+        performSiteSearch(searchTerm);
+        this.blur();
     }
-    
-    if (!searchTerm || searchTerm.trim() === '') return;
-    
-    searchTerm = searchTerm.toLowerCase();
-    const results = [];
-    
-    if (window.searchIndex) {
-        window.searchIndex.forEach(item => {
-            const titleMatch = item.title.toLowerCase().includes(searchTerm);
-            const contentMatch = item.content.toLowerCase().includes(searchTerm);
-            const tagsMatch = item.tags.some(tag => tag.toLowerCase().includes(searchTerm));
-            
-            if (titleMatch || contentMatch || tagsMatch) {
-                results.push(item);
-            }
-        });
-    }
-    
-    // 検索結果を表示
-    displaySearchResults(searchTerm, results);
 }
 
-// 検索結果の表示
-function displaySearchResults(searchTerm, results) {
-    const searchResults = document.getElementById('search-results');
+// サイト内検索の実行 - 修正版
+function performSiteSearch(query) {
     const searchResultsContent = document.getElementById('search-results-content');
     const searchQuery = document.getElementById('search-query');
     
-    if (searchResults && searchResultsContent && searchQuery) {
-        searchQuery.textContent = searchTerm;
-        searchResultsContent.innerHTML = '';
+    if (!searchResultsContent || !searchQuery || !window.searchIndex) return;
+    
+    searchQuery.textContent = query;
+    query = query.toLowerCase();
+    
+    // 検索結果のフィルタリング - 検索対象を拡大
+    const results = window.searchIndex.filter(item => {
+        return item.title.toLowerCase().includes(query) || 
+               item.content.toLowerCase().includes(query) || 
+               (item.tags && item.tags.some(tag => tag.toLowerCase().includes(query)));
+    });
+    
+    if (results.length > 0) {
+        let html = '<ul class="search-result-list">';
         
-        if (results.length > 0) {
-            results.forEach(result => {
-                const resultItem = document.createElement('div');
-                resultItem.className = 'search-result-item';
-                
-                const title = document.createElement('h3');
-                title.className = 'search-result-title';
-                
-                const link = document.createElement('a');
-                link.href = result.url;
-                link.textContent = result.title;
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    searchResults.classList.remove('active');
-                    
-                    const targetElement = document.querySelector(result.url);
-                    if (targetElement) {
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 70,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-                
-                title.appendChild(link);
-                
-                const path = document.createElement('div');
-                path.className = 'search-result-path';
-                path.textContent = result.path;
-                
-                const snippet = document.createElement('div');
-                snippet.className = 'search-result-snippet';
-                snippet.textContent = result.content;
-                
-                resultItem.appendChild(title);
-                resultItem.appendChild(path);
-                resultItem.appendChild(snippet);
-                
-                searchResultsContent.appendChild(resultItem);
-            });
-        } else {
-            const noResults = document.createElement('div');
-            noResults.className = 'no-results';
-            noResults.textContent = '検索結果が見つかりませんでした。';
-            searchResultsContent.appendChild(noResults);
-        }
+        results.forEach(result => {
+            // 検索語のハイライト
+            let highlightedContent = result.content;
+            let highlightedTitle = result.title;
+            
+            // 簡易的なハイライト処理
+            highlightedContent = highlightedContent.replace(
+                new RegExp(query, 'gi'), 
+                match => `<mark>${match}</mark>`
+            );
+            
+            highlightedTitle = highlightedTitle.replace(
+                new RegExp(query, 'gi'), 
+                match => `<mark>${match}</mark>`
+            );
+            
+            html += `
+                <li class="search-result-item">
+                    <h4 class="search-result-title"><a href="${result.url}">${highlightedTitle}</a></h4>
+                    <p class="search-result-snippet">${highlightedContent}</p>
+                    <p class="search-result-path">${result.path}</p>
+                </li>
+            `;
+        });
         
-        searchResults.classList.add('active');
+        html += '</ul>';
+        searchResultsContent.innerHTML = html;
+    } else {
+        searchResultsContent.innerHTML = '<div class="search-no-results">検索条件に一致する結果が見つかりませんでした。別のキーワードをお試しください。</div>';
+    }
+    
+    // 検索結果を表示
+    document.getElementById('search-results').classList.add('active');
+    
+    // モバイルメニューを閉じる
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu) {
+        mobileMenu.classList.remove('active');
     }
 }
 
