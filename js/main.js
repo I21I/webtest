@@ -9,19 +9,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof initFadeAnime === 'function') initFadeAnime();
     if (typeof setupMutationObserver === 'function') setupMutationObserver();
     
-    // PCサイズでメニューボタンを強制的に非表示に
-    if (window.innerWidth > 900) {
-        const menuButton = document.getElementById('menu-button');
-        if (menuButton) {
-            menuButton.style.display = 'none';
-        }
-    }
-    
     // 検索インデックスのロード
     fetch('data/search-index.json')
         .then(response => response.json())
         .then(data => {
             window.searchIndex = data;
+            console.log('検索インデックスを読み込みました', data);
         })
         .catch(error => {
             console.error('検索インデックスの読み込みに失敗しました:', error);
@@ -151,22 +144,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // リサイズイベント - メディアクエリの切り替わりを監視
     window.addEventListener('resize', function() {
-        // PCサイズでメニューボタンを非表示に
-        if (window.innerWidth > 900) {
-            const menuButton = document.getElementById('menu-button');
-            if (menuButton) {
-                menuButton.style.display = 'none';
-            }
-        } else {
-            const menuButton = document.getElementById('menu-button');
-            if (menuButton) {
-                menuButton.style.display = 'block';
-            }
-        }
-        
         // handleResizeが定義されている場合は実行
         if (typeof handleResize === 'function') {
             handleResize();
         }
     });
+    
+    // 初期状態でアクティブなナビゲーションアイテムを設定
+    if (typeof setActiveNavItem === 'function') {
+        setActiveNavItem();
+    }
 });
