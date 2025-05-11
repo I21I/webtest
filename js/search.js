@@ -212,8 +212,13 @@ function handleSearchFieldClick(e) {
  * サイト内検索処理（Enter押下時）
  */
 function handleSiteSearch(e) {
-    // 右上の検索フィールドは、クリックのみ反応して入力は無効化
-    e.preventDefault();
+    if (e.key === 'Enter') {
+        const searchTerm = this.value.trim();
+        if (searchTerm === '') return;
+        
+        performSiteSearch(searchTerm);
+        this.blur();
+    }
 }
 
 /**
@@ -470,43 +475,6 @@ function handleSearchQueryChange(e) {
     }
 }
 
-// ページ読み込み時に検索インデックスを生成
-document.addEventListener('DOMContentLoaded', function() {
-    // 右上の検索入力欄はクリックで検索ダイアログを開くだけに変更
-    const siteSearchInput = document.getElementById('site-search-input');
-    if (siteSearchInput) {
-        siteSearchInput.addEventListener('click', handleSearchFieldClick);
-        siteSearchInput.addEventListener('focus', handleSearchFieldClick);
-        siteSearchInput.readOnly = true; // 入力を無効化
-        siteSearchInput.placeholder = 'サイト内検索...';
-    }
-    
-    const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
-    if (mobileSiteSearchInput) {
-        mobileSiteSearchInput.addEventListener('click', handleSearchFieldClick);
-        mobileSiteSearchInput.addEventListener('focus', handleSearchFieldClick);
-        mobileSiteSearchInput.readOnly = true; // 入力を無効化
-        mobileSiteSearchInput.placeholder = 'サイト内検索...';
-    }
-    
-    // 検索ダイアログを作成（まだ存在しない場合）
-    createSearchDialog();
-    
-    // 外側クリックで閉じる機能のセットアップ
-    setupOutsideClickHandler();
-    
-    // オーバーレイ要素の追加
-    const overlay = document.createElement('div');
-    overlay.id = 'search-overlay';
-    overlay.className = 'search-overlay';
-    document.body.appendChild(overlay);
-    
-    // ページ読み込み完了後、少し遅延させて検索インデックスを生成
-    setTimeout(() => {
-        generateSearchIndex();
-    }, 500);
-});
-
 /**
  * 検索ダイアログを作成
  */
@@ -587,3 +555,86 @@ function createSearchDialog() {
         viewToggleButton.addEventListener('click', toggleSearchResultsView);
     }
 }
+
+/**
+ * 検索入力欄にクリアボタンを追加
+ */
+function addClearButtonToSearch(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    
+    // 親要素（相対位置指定のためのコンテナ）
+    const parent = input.parentElement;
+    if (!parent) return;
+    
+    // クリアボタンを作成
+    const clearButton = document.createElement('button');
+    clearButton.className = 'search-clear-button';
+    clearButton.setAttribute('type', 'button');
+    clearButton.setAttribute('aria-label', '検索をクリア');
+    clearButton.innerHTML = '×';
+    
+    // クリアボタンのイベント
+    clearButton.addEventListener('click', function() {
+        input.value = '';
+        input.focus();
+        this.classList.remove('visible');
+    });
+    
+    // 入力内容が変更されたらボタンの表示/非表示を切り替え
+    input.addEventListener('input', function() {
+        if (this.value.length > 0) {
+            clearButton.classList.add('visible');
+        } else {
+            clearButton.classList.remove('visible');
+        }
+    });
+    
+    // 初期状態の設定
+    if (input.value.length > 0) {
+        clearButton.classList.add('visible');
+    }
+    
+    // 親要素にボタンを追加
+    parent.appendChild(clearButton);
+}
+
+// ページ読み込み時の初期化処理
+document.addEventListener('DOMContentLoaded', function() {
+    // 右上の検索入力欄はクリックで検索ダイアログを開く
+    const siteSearchInput = document.getElementById('site-search-input');
+    if (siteSearchInput) {
+        siteSearchInput.addEventListener('click', handleSearchFieldClick);
+        siteSearchInput.addEventListener('focus', handleSearchFieldClick);
+        siteSearchInput.addEventListener('keypress', handleSiteSearch);
+    }
+    
+    const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
+    if (mobileSiteSearchInput) {
+        mobileSiteSearchInput.addEventListener('click', handleSearchFieldClick);
+        mobileSiteSearchInput.addEventListener('focus', handleSearchFieldClick);
+        mobileSiteSearchInput.addEventListener('keypress', handleSiteSearch);
+    }
+    
+    // クリアボタンの追加
+    addClearButtonToSearch('site-search-input');
+    addClearButtonToSearch('mobile-site-search-input');
+    
+    // 検索ダイアログを作成（まだ存在しない場合）
+    createSearchDialog();
+    
+    // 外側クリックで閉じる機能のセットアップ
+    setupOutsideClickHandler();
+    
+    // オーバーレイ要素の追加
+    const overlay = document.createElement('div');
+    overlay.id = 'search-overlay';
+    overlay.className = 'search-overlay';
+    overlay.addEventListener('click', closeSearchResults); // オーバーレイクリックでも閉じる
+    document.body.appendChild(overlay);
+    
+    // ページ読み込み完了後、少し遅延させて検索インデックスを生成
+    setTimeout(() => {
+        generateSearchIndex();
+    }, 500);
+});
