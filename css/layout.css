@@ -207,11 +207,21 @@ header {
     .menu-button {
         display: none !important;
     }
+    
+    /* PCサイズではヘッダーナビゲーションを表示 */
+    .header-nav {
+        display: flex;
+    }
 }
 
 @media (max-width: 900px) {
     .header {
         padding: 0 1rem; /* ヘッダーの横パディングを調整 */
+    }
+
+    /* ヘッダーナビゲーションを非表示に（重要） */
+    .header-nav {
+        display: none !important;
     }
 
     .site-search {
