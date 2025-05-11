@@ -85,6 +85,7 @@ header {
     font-weight: 600;
     color: var(--primary-color);
     text-decoration: none;
+    white-space: nowrap; /* 改行しない */
 }
 
 .header-nav {
@@ -277,11 +278,12 @@ header {
     }
     
     .site-title {
-        font-size: 1rem;
-        max-width: 60%; /* タイトルが長すぎる場合に切り詰め */
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        font-size: 1.1rem; /* ちょっと小さく */
+        max-width: none; /* 幅制限を解除 */
+        overflow: visible; /* オーバーフロー制限解除 */
+        text-overflow: clip; /* 省略しない */
+        white-space: nowrap; /* 改行しない */
+    }
     }
     
     .container {
