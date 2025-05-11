@@ -54,18 +54,46 @@ function initToolSearch() {
     }
 }
 
-// タブクリック処理
+// タブクリック処理 - 修正版
 function handleTabClick() {
     if (this.classList.contains('active')) return;
     
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    // 同じタブコンテナ内のタブのみ非アクティブにする
+    const tabContainer = this.closest('.tabs');
+    tabContainer.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     this.classList.add('active');
     
+    // タブIDを取得
     const tabId = this.getAttribute('data-tab');
-    document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-    });
-    document.getElementById(tabId + '-tab').classList.add('active');
+    
+    // 親要素（インフォボックスなど）を取得
+    const parentSection = this.closest('.info-box') || this.closest('section');
+    
+    if (parentSection) {
+        // 親要素内のタブコンテンツを検索
+        parentSection.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        const targetContent = parentSection.querySelector('#' + tabId + '-tab');
+        if (targetContent) {
+            targetContent.classList.add('active');
+        }
+    } else {
+        // 親要素が特定できない場合はドキュメント全体から探す
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        const targetContent = document.getElementById(tabId + '-tab');
+        if (targetContent) {
+            targetContent.classList.add('active');
+        }
+    }
+    
+    // デバッグログ
+    console.log('Tab clicked:', tabId);
+    console.log('Target content:', document.getElementById(tabId + '-tab'));
 }
 
 // ナビクリック処理
@@ -169,7 +197,7 @@ function performSiteSearch(query) {
     const results = window.searchIndex.filter(item => {
         return item.title.toLowerCase().includes(query) || 
                item.content.toLowerCase().includes(query) || 
-               (item.tags && item.tags.some(tag => tag.toLowerCase().includes(query)));
+               (item.tags && item.tags.some(tag => typeof tag === 'string' && tag.toLowerCase().includes(query)));
     });
     
     if (results.length > 0) {
