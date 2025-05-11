@@ -17,7 +17,8 @@
     <header class="header">
         <div class="header-left">
             <a href="#" class="site-title">二十一世紀症候群</a>
-            <nav class="header-nav">
+            <!-- header-navに媒体による条件付き表示を追加 -->
+            <nav class="header-nav" id="header-nav">
                 <a href="#tools-section" class="header-nav-item active">ツール</a>
                 <a href="#install-section" class="header-nav-item">インストール方法</a>
                 <a href="#contact-section" class="header-nav-item">お問い合わせ</a>
@@ -261,4 +262,33 @@
     <script src="js/animation.js"></script>
     <script src="js/main.js"></script>
 </body>
+
+<script>
+// ヘッダーメニューの表示を画面サイズに応じて制御
+function handleHeaderResponsive() {
+    const headerNav = document.getElementById('header-nav');
+    const menuButton = document.getElementById('menu-button');
+    
+    if (window.innerWidth <= 900) {
+        // モバイルサイズなら非表示
+        if (headerNav) headerNav.style.display = 'none';
+        if (menuButton) menuButton.style.display = 'block';
+        document.body.classList.add('mobile-view');
+    } else {
+        // PCサイズなら表示
+        if (headerNav) headerNav.style.display = 'flex';
+        if (menuButton) menuButton.style.display = 'none';
+        document.body.classList.remove('mobile-view');
+    }
+}
+
+// ページ読み込み時とリサイズ時に実行
+document.addEventListener('DOMContentLoaded', handleHeaderResponsive);
+window.addEventListener('resize', handleHeaderResponsive);
+window.addEventListener('load', handleHeaderResponsive);
+
+// 即時実行
+handleHeaderResponsive();
+</script>
+    
 </html>
