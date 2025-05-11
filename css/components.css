@@ -147,16 +147,19 @@ section {
 }
 
 /* タブのスタイル */
+
+/* タブのスタイル - 角を四角に修正 */
 .tabs {
     display: flex;
     background-color: var(--tab-inactive);
     margin-bottom: -1px;
     position: relative;
     z-index: 1;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    /* 角の丸みを削除 */
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
     overflow: hidden;
-    width: 100%; /* 幅を100%に設定 */
+    width: 100%;
 }
 
 .tab {
@@ -170,7 +173,9 @@ section {
     position: relative;
     color: var(--text-secondary);
     border: none;
-    white-space: nowrap; /* テキスト改行しない */
+    /* 角の丸みを削除 */
+    border-radius: 0;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -201,8 +206,9 @@ section {
     border: 1px solid var(--border-color);
     border-top: none;
     background-color: var(--tab-active);
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    /* 角の丸みを削除 */
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
     width: 100%;
     box-sizing: border-box;
 }
