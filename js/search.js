@@ -192,7 +192,9 @@ function resetTabsState() {
  * サイト内検索フィールドをクリックしたときの処理
  */
 function handleSearchFieldClick(e) {
+    // クリックイベントの伝播を止める - 重要！
     e.preventDefault();
+    e.stopPropagation();
     
     // 検索タブを表示
     openSearchDialog();
@@ -223,6 +225,13 @@ function openSearchDialog() {
     if (searchResults) {
         searchResults.classList.add('active');
         document.body.classList.add('search-open');
+        
+        // 開いた直後は外側クリック判定を一時的に無効化
+        // これにより、検索フィールドのクリックが外側クリックと判定されることを防ぐ
+        window._ignoreOutsideClick = true;
+        setTimeout(() => {
+            window._ignoreOutsideClick = false;
+        }, 300); // 300ms後に外側クリック判定を有効化
     }
     
     // モバイルメニューを閉じる
@@ -420,9 +429,26 @@ function closeSearchResults() {
  */
 function setupOutsideClickHandler() {
     document.addEventListener('click', function(e) {
+        // 直後のクリックは無視するフラグがある場合は処理をスキップ
+        if (window._ignoreOutsideClick) {
+            return;
+        }
+        
         const searchResults = document.getElementById('search-results');
         // 検索結果が表示されている場合のみ処理
         if (!searchResults || !searchResults.classList.contains('active')) return;
+        
+        // サイト内検索フィールドがクリックされた場合は閉じない
+        const siteSearchInput = document.getElementById('site-search-input');
+        const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
+        
+        if (siteSearchInput && (siteSearchInput === e.target || siteSearchInput.contains(e.target))) {
+            return;
+        }
+        
+        if (mobileSiteSearchInput && (mobileSiteSearchInput === e.target || mobileSiteSearchInput.contains(e.target))) {
+            return;
+        }
         
         // クリックされた要素が検索結果ポップアップの中にあるかチェック
         if (!searchResults.contains(e.target) && e.target.id !== 'search-overlay') {
