@@ -1,8 +1,7 @@
-// search.js - 改良版検索機能
+// search.js - 最終修正版検索機能
 
 /**
  * 確実にタブコンテンツを含む検索インデックスを生成する関数
- * すべてのコンテンツを詳細に取得して検索対象化
  */
 function generateSearchIndex() {
     console.log('検索インデックスを生成します...');
@@ -12,7 +11,7 @@ function generateSearchIndex() {
         // タブコンテンツを確実に取得するための特別な処理
         forceActivateAllTabs();
         
-        // --------- ツールカードの処理 ---------
+        // ツールカードの処理
         document.querySelectorAll('.tool-card').forEach(function(card) {
             const title = card.querySelector('.tool-name')?.textContent?.trim() || '';
             const version = card.querySelector('.tool-version')?.textContent?.trim() || '';
@@ -36,7 +35,7 @@ function generateSearchIndex() {
             });
         });
         
-        // --------- セクションタイトルの処理 ---------
+        // セクションタイトルの処理
         document.querySelectorAll('.section-title').forEach(function(section) {
             const title = section.textContent?.trim() || '';
             const sectionId = section.closest('section')?.id || '';
@@ -51,7 +50,7 @@ function generateSearchIndex() {
             }
         });
         
-        // --------- タブコンテンツの処理 ---------
+        // タブコンテンツの処理
         document.querySelectorAll('.tab-content').forEach(function(tabContent) {
             const tabId = tabContent.id || '';
             if (!tabId) return;
@@ -85,7 +84,7 @@ function generateSearchIndex() {
             console.log('タブコンテンツを登録:', tabName, 'ステップ数:', steps.length);
         });
         
-        // --------- インストールセクションの処理 ---------
+        // インストールセクションの処理
         const installNote = document.querySelector('#install-section .install-note')?.textContent?.trim() || '';
         if (installNote) {
             searchIndex.push({
@@ -96,7 +95,7 @@ function generateSearchIndex() {
             });
         }
         
-        // --------- お問い合わせセクションの処理 ---------
+        // お問い合わせセクションの処理
         const contactContent = document.querySelector('#contact-section .info-content p')?.textContent?.trim() || '';
         const contactLinks = [];
         document.querySelectorAll('#contact-section .social-links a').forEach(function(link) {
@@ -112,7 +111,7 @@ function generateSearchIndex() {
             links: contactLinks.join(' ')
         });
         
-        // --------- メインタイトルの処理 ---------
+        // メインタイトルの処理
         searchIndex.push({
             title: "二十一世紀症候群 VRChatツール",
             url: "#",
@@ -218,9 +217,9 @@ function clearSearchInput(inputId) {
  */
 function performSiteSearch(query) {
     const searchResultsContent = document.getElementById('search-results-content');
-    const searchQuery = document.getElementById('search-query');
+    const searchQueryDisplay = document.getElementById('search-query-display');
     
-    if (!searchResultsContent || !searchQuery) {
+    if (!searchResultsContent) {
         console.error('検索結果要素が見つかりません');
         return;
     }
@@ -230,29 +229,33 @@ function performSiteSearch(query) {
         window.searchIndex = generateSearchIndex();
     }
     
-    searchQuery.textContent = query;
-    query = query.toLowerCase();
+    // 検索クエリを表示
+    if (searchQueryDisplay) {
+        searchQueryDisplay.value = query;
+    }
     
-    // 検索結果のフィルタリング - 検索範囲を拡大
+    const queryLower = query.toLowerCase();
+    
+    // 検索結果のフィルタリング
     const results = window.searchIndex.filter(item => {
         return (
             // 基本検索
-            (item.title && item.title.toLowerCase().includes(query)) || 
-            (item.content && item.content.toLowerCase().includes(query)) || 
+            (item.title && item.title.toLowerCase().includes(queryLower)) || 
+            (item.content && item.content.toLowerCase().includes(queryLower)) || 
             
             // タグ検索
             (item.tags && item.tags.some(tag => 
-                typeof tag === 'string' && tag.toLowerCase().includes(query)
+                typeof tag === 'string' && tag.toLowerCase().includes(queryLower)
             )) ||
             
             // 全テキスト検索
-            (item.fullContent && item.fullContent.toLowerCase().includes(query)) ||
+            (item.fullContent && item.fullContent.toLowerCase().includes(queryLower)) ||
             
             // 機能リスト検索
-            (item.features && item.features.toLowerCase().includes(query)) ||
+            (item.features && item.features.toLowerCase().includes(queryLower)) ||
             
             // リンク検索
-            (item.links && item.links.toLowerCase().includes(query))
+            (item.links && item.links.toLowerCase().includes(queryLower))
         );
     });
     
@@ -282,7 +285,7 @@ function performSiteSearch(query) {
                 const highlightText = (text) => {
                     if (!text || typeof text !== 'string') return '';
                     return text.replace(
-                        new RegExp(query, 'gi'), 
+                        new RegExp(queryLower, 'gi'), 
                         match => `<mark>${match}</mark>`
                     );
                 };
@@ -290,11 +293,11 @@ function performSiteSearch(query) {
                 highlightedContent = highlightText(highlightedContent);
                 highlightedTitle = highlightText(highlightedTitle);
                 
-                // 検索結果アイテムの生成
+                // 検索結果アイテムの生成 - アイテム全体をクリック可能に
                 html += `
-                    <li class="search-result-item">
+                    <li class="search-result-item" onclick="handleResultClick('${result.url}')">
                         <h4 class="search-result-title">
-                            <a href="${result.url}">${highlightedTitle}</a>
+                            ${highlightedTitle}
                             ${result.version ? `<span class="result-version">${result.version}</span>` : ''}
                         </h4>
                         <p class="search-result-snippet">${highlightedContent}</p>
@@ -311,10 +314,12 @@ function performSiteSearch(query) {
         searchResultsContent.innerHTML = '<div class="search-no-results">検索条件に一致する結果が見つかりませんでした。別のキーワードをお試しください。</div>';
     }
     
-    // コンパクトモードに設定（デフォルト）
-    document.getElementById('search-results').classList.add('active');
-    document.getElementById('search-results').classList.remove('expanded');
-    document.body.classList.add('search-open');
+    // 表示モードの設定
+    const searchResults = document.getElementById('search-results');
+    if (searchResults) {
+        searchResults.classList.add('active');
+        document.body.classList.add('search-open');
+    }
     
     // モバイルメニューを閉じる
     const mobileMenu = document.getElementById('mobile-menu');
@@ -324,11 +329,29 @@ function performSiteSearch(query) {
 }
 
 /**
+ * 検索結果アイテムクリック時の処理
+ */
+function handleResultClick(url) {
+    // 検索結果を閉じる
+    closeSearchResults();
+    
+    // リンク先に移動
+    window.location.href = url;
+}
+
+/**
  * 検索結果の表示モードを切り替え（コンパクト/拡大）
  */
 function toggleSearchResultsView() {
     const searchResults = document.getElementById('search-results');
-    searchResults.classList.toggle('expanded');
+    if (!searchResults) return;
+    
+    // クラスの追加/削除
+    if (searchResults.classList.contains('expanded')) {
+        searchResults.classList.remove('expanded');
+    } else {
+        searchResults.classList.add('expanded');
+    }
     
     // 切り替えボタンのテキストを更新
     const toggleButton = document.getElementById('search-view-toggle');
@@ -350,6 +373,35 @@ function closeSearchResults() {
     }
 }
 
+/**
+ * 検索結果ポップアップの外側クリックで閉じる処理
+ */
+function setupOutsideClickHandler() {
+    document.addEventListener('click', function(e) {
+        const searchResults = document.getElementById('search-results');
+        // 検索結果が表示されている場合のみ処理
+        if (!searchResults || !searchResults.classList.contains('active')) return;
+        
+        // クリックされた要素が検索結果ポップアップの中にあるかチェック
+        if (!searchResults.contains(e.target) && e.target.id !== 'search-overlay') {
+            closeSearchResults();
+        }
+    });
+}
+
+/**
+ * 検索クエリ入力欄変更時の処理
+ */
+function handleSearchQueryChange(e) {
+    // Enter キーが押されたら検索実行
+    if (e.key === 'Enter') {
+        const query = this.value.trim();
+        if (query) {
+            performSiteSearch(query);
+        }
+    }
+}
+
 // ページ読み込み時に検索インデックスを生成
 document.addEventListener('DOMContentLoaded', function() {
     // 検索入力欄にクリアボタンを追加
@@ -367,23 +419,42 @@ document.addEventListener('DOMContentLoaded', function() {
         mobileSiteSearchInput.addEventListener('keypress', handleSiteSearch);
     }
     
-    // 検索結果表示モード切り替えボタンの追加
+    // 検索結果に検索クエリ表示欄を追加
     const searchResultsHeader = document.querySelector('.search-results-header');
     if (searchResultsHeader) {
-        const viewToggleButton = document.createElement('button');
-        viewToggleButton.id = 'search-view-toggle';
-        viewToggleButton.className = 'search-view-toggle';
-        viewToggleButton.textContent = '結果を拡大';
-        viewToggleButton.addEventListener('click', toggleSearchResultsView);
+        // 既存の内容を削除
+        searchResultsHeader.innerHTML = '';
         
-        // 閉じるボタンの前に挿入
-        const closeButton = searchResultsHeader.querySelector('.search-close');
-        if (closeButton) {
-            searchResultsHeader.insertBefore(viewToggleButton, closeButton);
-        } else {
-            searchResultsHeader.appendChild(viewToggleButton);
+        // 検索フィールドを追加
+        const searchField = document.createElement('div');
+        searchField.className = 'search-field';
+        searchField.innerHTML = `
+            <input type="text" id="search-query-display" class="search-query-input" placeholder="検索...">
+            <button id="search-view-toggle" class="search-view-toggle">結果を拡大</button>
+        `;
+        searchResultsHeader.appendChild(searchField);
+        
+        // 検索フィールドのイベントリスナー
+        const searchQueryDisplay = document.getElementById('search-query-display');
+        if (searchQueryDisplay) {
+            searchQueryDisplay.addEventListener('keypress', handleSearchQueryChange);
+        }
+        
+        // 表示モード切り替えボタンのイベントリスナー
+        const viewToggleButton = document.getElementById('search-view-toggle');
+        if (viewToggleButton) {
+            viewToggleButton.addEventListener('click', toggleSearchResultsView);
         }
     }
+    
+    // 外側クリックで閉じる機能のセットアップ
+    setupOutsideClickHandler();
+    
+    // オーバーレイ要素の追加
+    const overlay = document.createElement('div');
+    overlay.id = 'search-overlay';
+    overlay.className = 'search-overlay';
+    document.body.appendChild(overlay);
     
     // ページ読み込み完了後、少し遅延させて検索インデックスを生成
     setTimeout(() => {
