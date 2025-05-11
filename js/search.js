@@ -196,6 +196,9 @@ function handleSearchFieldClick(e) {
     e.preventDefault();
     e.stopPropagation();
     
+    // 検索ダイアログを作成してから表示
+    createSearchDialog();
+    
     // 検索タブを表示
     openSearchDialog();
     
@@ -479,12 +482,14 @@ function handleSearchQueryChange(e) {
  * 検索ダイアログを作成
  */
 function createSearchDialog() {
-    // すでに存在する場合は何もしない
-    if (document.getElementById('search-results')) return;
+    // すでに存在する場合は削除して再作成
+    const existingResults = document.getElementById('search-results');
+    if (existingResults) {
+        existingResults.parentNode.removeChild(existingResults);
+    }
     
     const searchDialog = document.createElement('div');
     searchDialog.id = 'search-results';
-    searchDialog.className = 'search-results';
     
     // 検索ヘッダー部分
     const searchHeader = document.createElement('div');
@@ -513,6 +518,7 @@ function createSearchDialog() {
     const searchContent = document.createElement('div');
     searchContent.id = 'search-results-content';
     searchContent.className = 'search-results-content';
+    searchContent.innerHTML = '<div class="search-no-results">キーワードを入力して検索してください</div>';
     searchDialog.appendChild(searchContent);
     
     // ボディに追加
@@ -554,6 +560,8 @@ function createSearchDialog() {
     if (viewToggleButton) {
         viewToggleButton.addEventListener('click', toggleSearchResultsView);
     }
+    
+    console.log('検索ダイアログを作成しました');
 }
 
 /**
@@ -606,22 +614,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (siteSearchInput) {
         siteSearchInput.addEventListener('click', handleSearchFieldClick);
         siteSearchInput.addEventListener('focus', handleSearchFieldClick);
-        siteSearchInput.addEventListener('keypress', handleSiteSearch);
+        siteSearchInput.readOnly = true; // 入力を無効化
+        siteSearchInput.placeholder = 'サイト内検索...';
     }
     
     const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
     if (mobileSiteSearchInput) {
         mobileSiteSearchInput.addEventListener('click', handleSearchFieldClick);
         mobileSiteSearchInput.addEventListener('focus', handleSearchFieldClick);
-        mobileSiteSearchInput.addEventListener('keypress', handleSiteSearch);
+        mobileSiteSearchInput.readOnly = true; // 入力を無効化
+        mobileSiteSearchInput.placeholder = 'サイト内検索...';
     }
     
     // クリアボタンの追加
     addClearButtonToSearch('site-search-input');
     addClearButtonToSearch('mobile-site-search-input');
     
-    // 検索ダイアログを作成（まだ存在しない場合）
-    createSearchDialog();
+    // 検索ダイアログは初期化時点では作成しない（クリック時に作成）
     
     // 外側クリックで閉じる機能のセットアップ
     setupOutsideClickHandler();
