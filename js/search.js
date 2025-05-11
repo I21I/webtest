@@ -19,11 +19,21 @@ function performSiteSearch(query) {
     searchQuery.textContent = query;
     query = query.toLowerCase();
     
-    // 検索結果のフィルタリング
+    // 検索結果のフィルタリング - 検索範囲を拡大
     const results = window.searchIndex.filter(item => {
-        return item.title.toLowerCase().includes(query) || 
-               item.content.toLowerCase().includes(query) || 
-               item.tags.some(tag => tag.toLowerCase().includes(query));
+        // タイトル、コンテンツ、タグに加えて、オブジェクトが持つすべてのテキストプロパティを検索
+        return (
+            item.title.toLowerCase().includes(query) || 
+            item.content.toLowerCase().includes(query) || 
+            (item.tags && item.tags.some(tag => 
+                typeof tag === 'string' && tag.toLowerCase().includes(query)
+            )) ||
+            // 他の可能性のあるフィールドも検索
+            (item.description && typeof item.description === 'string' && 
+                item.description.toLowerCase().includes(query)) ||
+            (item.path && typeof item.path === 'string' && 
+                item.path.toLowerCase().includes(query))
+        );
     });
     
     if (results.length > 0) {
@@ -35,15 +45,16 @@ function performSiteSearch(query) {
             let highlightedTitle = result.title;
             
             // 簡易的なハイライト処理
-            highlightedContent = highlightedContent.replace(
-                new RegExp(query, 'gi'), 
-                match => `<mark>${match}</mark>`
-            );
+            const highlightText = (text) => {
+                if (!text || typeof text !== 'string') return '';
+                return text.replace(
+                    new RegExp(query, 'gi'), 
+                    match => `<mark>${match}</mark>`
+                );
+            };
             
-            highlightedTitle = highlightedTitle.replace(
-                new RegExp(query, 'gi'), 
-                match => `<mark>${match}</mark>`
-            );
+            highlightedContent = highlightText(highlightedContent);
+            highlightedTitle = highlightText(highlightedTitle);
             
             html += `
                 <li class="search-result-item">
