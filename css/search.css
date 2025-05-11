@@ -20,22 +20,28 @@
     width: 240px;
     box-shadow: 0 0 0 3px var(--primary-light);
 }
+
+/* サイト内検索アイコン修正 */
 .site-search-icon {
     position: absolute;
     left: 0.7rem;
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
+    display: flex; /* Flexboxを使って配置 */
+    align-items: center; /* 垂直方向中央揃え */
+    height: 100%; /* 親要素の高さいっぱいに */
 }
 .site-search-icon svg {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 1rem; /* サイズを小さく */
+    height: 1rem; /* サイズを小さく */
     fill: var(--text-secondary);
     transition: fill 0.2s ease;
 }
 .site-search-input:focus + .site-search-icon svg {
     fill: var(--primary-color);
 }
+
 /* 検索結果表示 */
 #search-results {
     position: fixed;
@@ -117,6 +123,7 @@
     line-height: 1.5;
     color: var(--text-color);
 }
+
 /* モバイルメニュー内の検索 */
 .mobile-menu-search {
     padding: 1rem;
@@ -138,16 +145,21 @@
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-light);
 }
+
+/* モバイルメニュー内検索アイコン修正 */
 .mobile-search-icon {
     position: absolute;
     left: 1.7rem;
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
+    display: flex; /* Flexboxを使って配置 */
+    align-items: center; /* 垂直方向中央揃え */
+    height: 100%; /* 親要素の高さいっぱいに */
 }
 .mobile-search-icon svg {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 1rem; /* サイズを小さく */
+    height: 1rem; /* サイズを小さく */
     fill: var(--text-secondary);
 }
 
@@ -176,18 +188,21 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* 検索アイコン修正 */
+/* ツール検索アイコン修正 */
 .search-icon {
     position: absolute;
     left: 1rem;
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
+    display: flex; /* Flexboxを使って配置 */
+    align-items: center; /* 垂直方向中央揃え */
+    height: 100%; /* 親要素の高さいっぱいに */
 }
 
 .search-icon svg {
-    width: 1.2rem;
-    height: 1.2rem;
+    width: 1rem; /* サイズを小さく */
+    height: 1rem; /* サイズを小さく */
     fill: var(--text-secondary);
 }
 
