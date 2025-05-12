@@ -201,8 +201,6 @@ window.addEventListener('popstate', function(event) {
 
 // グローバル変数 - 検索ダイアログが開いているかどうか
 window.isSearchDialogOpen = false;
-// グローバル変数 - 検索ダイアログが折りたたまれているかどうか
-window.isSearchCollapsed = true;
 
 /**
  * サイト内検索フィールドをクリックしたときの処理
@@ -258,15 +256,6 @@ function openSearchDialog() {
     
     // アクティブクラスを追加してアニメーション開始
     searchResults.classList.add('active');
-    
-    // 初期状態は折りたたみモード
-    if (window.isSearchCollapsed) {
-        searchResults.classList.add('collapsed');
-        searchResults.classList.remove('expanded');
-    } else {
-        searchResults.classList.add('expanded');
-        searchResults.classList.remove('collapsed');
-    }
     
     // 検索ダイアログが開いていることをフラグに記録
     window.isSearchDialogOpen = true;
@@ -441,39 +430,6 @@ function handleResultClick(url) {
 }
 
 /**
- * 検索結果の表示モードを切り替え（折りたたみ/展開）
- */
-function toggleSearchResultsView() {
-    const searchResults = document.getElementById('search-results');
-    if (!searchResults) return;
-    
-    // 現在の折りたたみ状態を確認してトグル
-    const isCollapsed = window.isSearchCollapsed;
-    
-    // 新しい状態をグローバル変数に保存
-    window.isSearchCollapsed = !isCollapsed;
-    
-    // クラスの追加/削除
-    if (isCollapsed) {
-        // 折りたたみ → 展開
-        searchResults.classList.remove('collapsed');
-        searchResults.classList.add('expanded');
-    } else {
-        // 展開 → 折りたたみ
-        searchResults.classList.add('collapsed');
-        searchResults.classList.remove('expanded');
-    }
-    
-    // 切り替えボタンのテキストを更新
-    const toggleButton = document.getElementById('search-view-toggle');
-    if (toggleButton) {
-        toggleButton.textContent = isCollapsed ? '結果を縮小' : '結果を拡大';
-    }
-    
-    console.log('検索結果表示モード切替:', isCollapsed ? '拡大モード' : '折りたたみモード');
-}
-
-/**
  * 検索結果を閉じる
  */
 function closeSearchResults() {
@@ -602,9 +558,12 @@ function createSearchDialog() {
                 </svg>
             </span>
             <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索...">
-            <button type="button" id="search-clear-button" class="search-clear-button" aria-label="検索をクリア"></button>
+            <button type="button" id="search-clear-button" class="search-clear-button" aria-label="検索をクリア">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+            </button>
         </div>
-        <button id="search-view-toggle" class="search-view-toggle">結果を拡大</button>
     `;
     
     // 閉じるボタン追加
@@ -675,19 +634,6 @@ function createSearchDialog() {
         });
     }
     
-    // 表示モード切り替えボタンのイベントリスナー
-    const viewToggleButton = document.getElementById('search-view-toggle');
-    if (viewToggleButton) {
-        // 初期状態のテキスト設定
-        viewToggleButton.textContent = window.isSearchCollapsed ? '結果を拡大' : '結果を縮小';
-        
-        viewToggleButton.addEventListener('click', function(e) {
-            // イベント伝播を止める
-            e.stopPropagation();
-            toggleSearchResultsView();
-        });
-    }
-    
     console.log('検索ダイアログを作成しました');
 }
 
@@ -724,6 +670,11 @@ function setupToolSearch() {
         clearButton.className = 'search-clear-button';
         clearButton.type = 'button';
         clearButton.setAttribute('aria-label', '検索をクリア');
+        clearButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+        `;
         
         searchContainer.appendChild(clearButton);
         
@@ -813,6 +764,20 @@ function setupMobileSearch() {
                     </svg>
                 `;
                 mobileSearchContainer.appendChild(iconElement);
+            }
+            
+            // クリアボタンがない場合は追加
+            if (!mobileSearchContainer.querySelector('.search-clear-button')) {
+                const clearButton = document.createElement('button');
+                clearButton.className = 'search-clear-button';
+                clearButton.type = 'button';
+                clearButton.setAttribute('aria-label', '検索をクリア');
+                clearButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                `;
+                mobileSearchContainer.appendChild(clearButton);
             }
         }
         
@@ -961,6 +926,20 @@ function setupSiteSearch() {
                     </svg>
                 `;
                 searchWrapper.appendChild(iconElement);
+            }
+            
+            // クリアボタンがない場合は追加
+            if (!searchWrapper.querySelector('.search-clear-button')) {
+                const clearButton = document.createElement('button');
+                clearButton.className = 'search-clear-button';
+                clearButton.type = 'button';
+                clearButton.setAttribute('aria-label', '検索をクリア');
+                clearButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                `;
+                searchWrapper.appendChild(clearButton);
             }
         }
         
