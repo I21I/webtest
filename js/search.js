@@ -705,8 +705,11 @@ function setupToolSearch() {
     // 検索コンテナが絶対位置指定でないと子要素の絶対位置がずれる
     searchContainer.style.position = 'relative';
     
-    // 虫眼鏡アイコンがない場合は追加
-    if (!searchContainer.querySelector('.search-icon')) {
+    // 既存のアイコンを確認
+    const existingIcon = searchContainer.querySelector('.search-icon');
+    
+    // 虫眼鏡アイコンがない場合のみ追加
+    if (!existingIcon) {
         const iconElement = document.createElement('span');
         iconElement.className = 'search-icon';
         iconElement.innerHTML = `
@@ -807,8 +810,12 @@ function setupMobileSearch() {
         if (mobileSearchContainer) {
             mobileSearchContainer.style.position = 'relative';
             
-            // 虫眼鏡アイコンがない場合は追加
-            if (!mobileSearchContainer.querySelector('.search-icon')) {
+            // 既存のアイコンを確認
+            const existingIcon = mobileSearchContainer.querySelector('.mobile-search-icon') || 
+                              mobileSearchContainer.querySelector('.search-icon');
+            
+            // 虫眼鏡アイコンがない場合のみ追加
+            if (!existingIcon) {
                 const iconElement = document.createElement('span');
                 iconElement.className = 'search-icon';
                 iconElement.innerHTML = `
@@ -1003,8 +1010,12 @@ function setupSiteSearch() {
             // 位置を相対に設定
             searchWrapper.style.position = 'relative';
             
-            // 虫眼鏡アイコンがない場合は追加
-            if (!searchWrapper.querySelector('.search-icon')) {
+            // 既存の虫眼鏡アイコンを確認
+            const existingIcon = searchWrapper.querySelector('.site-search-icon') || 
+                               searchWrapper.querySelector('.search-icon');
+            
+            // 虫眼鏡アイコンがない場合だけ追加する
+            if (!existingIcon) {
                 const iconElement = document.createElement('span');
                 iconElement.className = 'search-icon';
                 iconElement.innerHTML = `
