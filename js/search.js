@@ -239,7 +239,7 @@ function openSearchDialog() {
         window._ignoreOutsideClick = true;
         setTimeout(() => {
             window._ignoreOutsideClick = false;
-        }, 300); // 300ms後に外側クリック判定を有効化
+        }, 500); // 500ms後に外側クリック判定を有効化（時間を延長）
     }
     
     // モバイルメニューを閉じる
@@ -466,16 +466,39 @@ function setupOutsideClickHandler() {
 }
 
 /**
- * 検索クエリ入力欄変更時の処理
+ * デバウンス関数 - 連続した呼び出しを遅延させる
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+/**
+ * 検索クエリ入力欄変更時の処理 - リアルタイム検索
  */
 function handleSearchQueryChange(e) {
-    // Enter キーが押されたら検索実行
-    if (e.key === 'Enter') {
-        const query = this.value.trim();
-        if (query) {
-            performSiteSearch(query);
-        }
+    // Enterキー押下時もしくは入力値が変わった時
+    const query = this.value.trim();
+    
+    // クリアボタンの表示/非表示を切り替え
+    const clearButton = document.getElementById('search-clear-button');
+    if (clearButton) {
+        clearButton.classList.toggle('visible', query.length > 0);
     }
+    
+    // 検索クエリが空の場合は検索しない
+    if (query.length === 0) {
+        document.getElementById('search-results-content').innerHTML = 
+            '<div class="search-no-results">キーワードを入力して検索してください</div>';
+        return;
+    }
+    
+    // デバウンスされた検索実行（300ms後に実行）
+    window.debouncedSearch(query);
 }
 
 /**
@@ -511,7 +534,18 @@ function createSearchDialog() {
         <button id="search-view-toggle" class="search-view-toggle">結果を拡大</button>
     `;
     
+    // 閉じるボタン追加
+    const closeButton = document.createElement('button');
+    closeButton.id = 'search-close-button';
+    closeButton.className = 'search-close-button';
+    closeButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+    `;
+    
     searchHeader.appendChild(searchField);
+    searchHeader.appendChild(closeButton);
     searchDialog.appendChild(searchHeader);
     
     // 検索結果コンテンツ
@@ -527,16 +561,13 @@ function createSearchDialog() {
     // 検索入力のイベントリスナー設定
     const searchQueryDisplay = document.getElementById('search-query-display');
     if (searchQueryDisplay) {
-        searchQueryDisplay.addEventListener('keypress', handleSearchQueryChange);
-        
-        // 入力変更時のクリアボタン表示制御
-        searchQueryDisplay.addEventListener('input', function() {
-            const clearButton = document.getElementById('search-clear-button');
-            if (clearButton) {
-                if (this.value.length > 0) {
-                    clearButton.classList.add('visible');
-                } else {
-                    clearButton.classList.remove('visible');
+        // リアルタイム検索のためにinputイベントを監視
+        searchQueryDisplay.addEventListener('input', handleSearchQueryChange);
+        searchQueryDisplay.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    performSiteSearch(query);
                 }
             }
         });
@@ -551,8 +582,16 @@ function createSearchDialog() {
                 searchQueryDisplay.value = '';
                 searchQueryDisplay.focus();
                 this.classList.remove('visible');
+                document.getElementById('search-results-content').innerHTML = 
+                    '<div class="search-no-results">キーワードを入力して検索してください</div>';
             }
         });
+    }
+    
+    // 閉じるボタンのイベントリスナー
+    const searchCloseButton = document.getElementById('search-close-button');
+    if (searchCloseButton) {
+        searchCloseButton.addEventListener('click', closeSearchResults);
     }
     
     // 表示モード切り替えボタンのイベントリスナー
@@ -609,6 +648,9 @@ function addClearButtonToSearch(inputId) {
 
 // ページ読み込み時の初期化処理
 document.addEventListener('DOMContentLoaded', function() {
+    // リアルタイム検索のためのデバウンス関数を設定
+    window.debouncedSearch = debounce(performSiteSearch, 300);
+    
     // 右上の検索入力欄はクリックで検索ダイアログを開く
     const siteSearchInput = document.getElementById('site-search-input');
     if (siteSearchInput) {
