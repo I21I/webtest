@@ -20,7 +20,7 @@ body.search-open .search-overlay {
     opacity: 1;
 }
 
-/* 検索結果コンテナ - 拡大/縮小機能を削除、単一サイズに */
+/* 検索結果コンテナ - 固定サイズに統一 */
 #search-results {
     position: fixed;
     top: 50%;
