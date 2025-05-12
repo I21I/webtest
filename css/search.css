@@ -1,12 +1,9 @@
-/* search.css - 検索機能のスタイル - 修正版 */
-
-/* サイト内検索 - ヘッダー内のみ */
 .site-search {
     position: relative;
     margin-right: 1rem;
 }
 .site-search-input {
-    padding: 0.5rem 2.2rem 0.5rem 2.2rem; /* 両側にパディング */
+    padding: 0.5rem 2.2rem 0.5rem 2.2rem;
     border-radius: 20px;
     border: 1px solid var(--border-color);
     background-color: var(--background-color);
@@ -22,7 +19,6 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* サイト内検索アイコン修正 */
 .site-search-icon {
     position: absolute;
     left: 0.7rem;
@@ -46,7 +42,6 @@
     fill: var(--primary-color);
 }
 
-/* サイト内検索のクリアボタン */
 .site-search .search-clear-button {
     position: absolute;
     right: 0.7rem;
@@ -84,7 +79,6 @@
     background-color: var(--primary-color);
 }
 
-/* 検索結果表示 */
 #search-results {
     position: fixed;
     top: var(--header-height);
@@ -166,7 +160,6 @@
     color: var(--text-color);
 }
 
-/* モバイルメニュー内の検索 */
 .mobile-menu-search {
     padding: 1rem;
     border-bottom: 1px solid var(--border-color);
@@ -174,7 +167,7 @@
 }
 .mobile-menu-search-input {
     width: 100%;
-    padding: 0.8rem 2.5rem 0.8rem 2.5rem; /* 両側にパディング */
+    padding: 0.8rem 2.5rem 0.8rem 2.5rem;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background-color: var(--background-color);
@@ -188,7 +181,6 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* モバイルメニュー内検索アイコン修正 */
 .mobile-search-icon {
     position: absolute;
     left: 1.7rem;
@@ -208,7 +200,6 @@
     fill: var(--text-secondary);
 }
 
-/* モバイルメニュー内のクリアボタン */
 .mobile-menu-search .search-clear-button {
     position: absolute;
     right: 1.7rem;
@@ -246,7 +237,6 @@
     background-color: var(--primary-color);
 }
 
-/* ツール検索のスタイル修正 */
 .search-container {
     position: relative;
     max-width: 100%;
@@ -255,7 +245,7 @@
 
 #search-input {
     width: 100%;
-    padding: 0.8rem 2.5rem 0.8rem 2.5rem; /* 両側にパディング */
+    padding: 0.8rem 2.5rem 0.8rem 2.5rem;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 1rem;
@@ -271,7 +261,6 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-/* ツール検索アイコン修正 */
 .search-container .search-icon {
     position: absolute;
     left: 0.8rem;
@@ -292,7 +281,6 @@
     fill: var(--text-secondary);
 }
 
-/* ツール検索のクリアボタン */
 .search-container .search-clear-button {
     position: absolute;
     right: 0.8rem;
@@ -330,7 +318,6 @@
     background-color: var(--primary-color);
 }
 
-/* 検索結果情報表示 */
 #search-results-info {
     margin-top: 0.5rem;
     font-size: 0.85rem;
@@ -339,7 +326,6 @@
     padding: 0 1rem;
 }
 
-/* レスポンシブ対応 */
 @media (max-width: 900px) {
     #search-results-content {
         padding: 1rem;
@@ -349,7 +335,6 @@
         padding: 0.8rem 1rem;
     }
     
-    /* モバイルでボタンをより大きく */
     .search-container .search-clear-button {
         width: 24px;
         height: 24px;
