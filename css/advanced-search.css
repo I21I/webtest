@@ -20,7 +20,7 @@ body.search-open .search-overlay {
     opacity: 1;
 }
 
-/* 検索結果コンテナ */
+/* 検索結果コンテナ - 拡大/縮小機能を削除、単一サイズに */
 #search-results {
     position: fixed;
     top: 50%;
@@ -29,7 +29,7 @@ body.search-open .search-overlay {
     width: 90%;
     max-width: 800px;
     height: auto;
-    max-height: 60vh; /* 標準サイズ */
+    max-height: 70vh; /* 固定サイズに統一 */
     background-color: var(--card-background, #fff);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -39,24 +39,14 @@ body.search-open .search-overlay {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s, max-height 0.4s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s;
 }
 
 #search-results.active {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
     visibility: visible;
-    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s, max-height 0.4s ease;
-}
-
-/* 拡大モード */
-#search-results.expanded {
-    max-height: 80vh;
-}
-
-/* 折りたたみモード */
-#search-results.collapsed {
-    max-height: 40vh;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s;
 }
 
 /* モバイル固定表示 */
@@ -137,7 +127,7 @@ body.search-open .search-overlay {
     fill: var(--text-secondary, #666);
 }
 
-/* クリアボタン */
+/* クリアボタン - SVGアイコン使用 */
 .search-clear-button {
     position: absolute;
     right: 0.75rem;
@@ -159,15 +149,11 @@ body.search-open .search-overlay {
     justify-content: center;
 }
 
-.search-clear-button::before {
-    content: "×";
-    color: white;
-    font-size: 14px;
-    line-height: 1;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.search-clear-button svg {
+    width: 12px;
+    height: 12px;
+    fill: white;
+    display: block;
 }
 
 .search-clear-button.visible {
@@ -208,26 +194,6 @@ body.search-open .search-overlay {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-
-/* 表示モード切り替えボタン */
-.search-view-toggle {
-    background: none;
-    border: 1px solid var(--border-color, #ddd);
-    border-radius: 4px;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-    color: var(--text-secondary, #666);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-.search-view-toggle:hover {
-    background-color: var(--primary-light, #f0f4ff);
-    color: var(--primary-color, #4a6cf7);
-    border-color: var(--primary-color, #4a6cf7);
 }
 
 /* 検索結果コンテンツ */
@@ -367,7 +333,7 @@ mark {
     #search-results {
         width: 95%;
         max-width: 95%;
-        max-height: 70vh;
+        max-height: 75vh;
     }
     
     .search-results-header {
@@ -380,12 +346,6 @@ mark {
     
     .search-result-item {
         padding: 0.8rem;
-    }
-    
-    /* モバイルでもボタンを見やすく */
-    .search-view-toggle {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.9rem;
     }
     
     /* 閉じるボタンをより大きく */
@@ -422,8 +382,9 @@ mark {
         height: 24px;
     }
     
-    .search-clear-button::before {
-        font-size: 16px;
+    .search-clear-button svg {
+        width: 16px;
+        height: 16px;
     }
     
     /* 検索結果のフォントサイズ拡大 */
