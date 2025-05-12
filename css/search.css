@@ -29,9 +29,9 @@
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
-    display: flex; /* Flexboxを使って配置 */
-    align-items: center; /* 垂直方向中央揃え */
-    justify-content: center; /* 水平方向中央揃え */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 16px;
     height: 16px;
     z-index: 2;
@@ -68,15 +68,11 @@
     justify-content: center;
 }
 
-.site-search .search-clear-button::before {
-    content: "×";
-    color: white;
-    font-size: 12px;
-    line-height: 1;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.site-search .search-clear-button svg {
+    width: 10px;
+    height: 10px;
+    fill: white;
+    display: block;
 }
 
 .site-search .search-clear-button.visible {
@@ -234,15 +230,11 @@
     justify-content: center;
 }
 
-.mobile-menu-search .search-clear-button::before {
-    content: "×";
-    color: white;
-    font-size: 14px;
-    line-height: 1;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.mobile-menu-search .search-clear-button svg {
+    width: 12px;
+    height: 12px;
+    fill: white;
+    display: block;
 }
 
 .mobile-menu-search .search-clear-button.visible {
@@ -322,15 +314,11 @@
     justify-content: center;
 }
 
-.search-container .search-clear-button::before {
-    content: "×";
-    color: white;
-    font-size: 14px;
-    line-height: 1;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.search-container .search-clear-button svg {
+    width: 12px;
+    height: 12px;
+    fill: white;
+    display: block;
 }
 
 .search-container .search-clear-button.visible {
@@ -367,8 +355,9 @@
         height: 24px;
     }
     
-    .search-container .search-clear-button::before {
-        font-size: 16px;
+    .search-container .search-clear-button svg {
+        width: 14px;
+        height: 14px;
     }
     
     .search-container .search-icon {
