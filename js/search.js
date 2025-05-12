@@ -231,6 +231,12 @@ function openSearchDialog() {
     // 検索タブを表示
     const searchResults = document.getElementById('search-results');
     if (searchResults) {
+        // アニメーションのための遅延表示
+        searchResults.style.display = 'flex';
+        
+        // レイアウトリフローを強制して、表示状態からアニメーション開始
+        searchResults.offsetHeight;
+        
         searchResults.classList.add('active');
         document.body.classList.add('search-open');
         
@@ -239,7 +245,7 @@ function openSearchDialog() {
         window._ignoreOutsideClick = true;
         setTimeout(() => {
             window._ignoreOutsideClick = false;
-        }, 500); // 500ms後に外側クリック判定を有効化（時間を延長）
+        }, 500); // 500ms後に外側クリック判定を有効化
     }
     
     // モバイルメニューを閉じる
@@ -379,7 +385,10 @@ function performSiteSearch(query) {
     const searchResults = document.getElementById('search-results');
     if (searchResults) {
         searchResults.classList.add('active');
-        searchResults.classList.remove('expanded'); // 拡大モードをリセット
+        
+        // 前回の表示状態を維持するため、拡大モードは切り替えない
+        // searchResults.classList.remove('expanded'); // これは削除
+        
         document.body.classList.add('search-open');
     }
 }
@@ -427,8 +436,16 @@ function toggleSearchResultsView() {
 function closeSearchResults() {
     const searchResults = document.getElementById('search-results');
     if (searchResults) {
+        // アニメーションのためにまずクラスだけ外す
         searchResults.classList.remove('active');
         document.body.classList.remove('search-open');
+        
+        // トランジション完了後に非表示にする
+        setTimeout(() => {
+            if (!searchResults.classList.contains('active')) {
+                searchResults.style.display = 'none';
+            }
+        }, 300); // CSSのトランジション時間に合わせる
     }
 }
 
@@ -513,6 +530,7 @@ function createSearchDialog() {
     
     const searchDialog = document.createElement('div');
     searchDialog.id = 'search-results';
+    searchDialog.style.display = 'none'; // 初期状態は非表示
     
     // 検索ヘッダー部分
     const searchHeader = document.createElement('div');
@@ -646,6 +664,135 @@ function addClearButtonToSearch(inputId) {
     parent.appendChild(clearButton);
 }
 
+/**
+ * ツール検索にもクリアボタンを適用
+ */
+function setupToolSearch() {
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return;
+    
+    addClearButtonToSearch('search-input');
+    
+    // リアルタイム検索の設定
+    const debouncedFilterTools = debounce(filterTools, 300);
+    searchInput.addEventListener('input', function() {
+        debouncedFilterTools(this.value);
+    });
+}
+
+/**
+ * ツールのフィルタリング
+ */
+function filterTools(query) {
+    const toolCards = document.querySelectorAll('.tool-card');
+    const queryLower = query.toLowerCase();
+    let visibleCount = 0;
+    
+    toolCards.forEach(card => {
+        const title = card.querySelector('.tool-name')?.textContent?.toLowerCase() || '';
+        const description = card.querySelector('.tool-description')?.textContent?.toLowerCase() || '';
+        const tags = card.getAttribute('data-tags')?.toLowerCase() || '';
+        
+        if (title.includes(queryLower) || description.includes(queryLower) || tags.includes(queryLower)) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // 検索結果の表示
+    const searchResults = document.getElementById('search-results-info');
+    if (searchResults) {
+        if (query.trim() === '') {
+            searchResults.innerHTML = '';
+        } else {
+            searchResults.innerHTML = `検索結果: ${visibleCount}件のツールが見つかりました`;
+        }
+    }
+}
+
+/**
+ * モバイルメニューからの検索を処理
+ */
+function setupMobileSearch() {
+    // モバイルメニュー内の検索フィールド
+    const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
+    if (mobileSiteSearchInput) {
+        // モバイルメニューからの検索クリック時に特別な処理
+        mobileSiteSearchInput.addEventListener('click', function(e) {
+            // まずモバイルメニューを閉じる
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu) {
+                mobileMenu.classList.remove('active');
+            }
+            
+            // 少し遅延させて検索ダイアログを表示
+            setTimeout(() => {
+                handleSearchFieldClick(e);
+            }, 100);
+        });
+    }
+    
+    // 画面サイズ変更時の処理
+    window.addEventListener('resize', debounce(function() {
+        // 小さい画面サイズでダイアログが表示されている場合の対応
+        const searchResults = document.getElementById('search-results');
+        if (window.innerWidth <= 768 && searchResults && searchResults.classList.contains('active')) {
+            // モバイル表示では必ず中央に表示
+            searchResults.style.position = 'fixed';
+            searchResults.style.top = '50%';
+            searchResults.style.left = '50%';
+            searchResults.style.transform = 'translate(-50%, -50%)';
+        }
+    }, 200));
+}
+
+/**
+ * VCC/ALCOMタブの修正
+ */
+function fixTabSwitching() {
+    // タブクリックのイベントハンドラを再設定
+    document.querySelectorAll('.tab').forEach(tab => {
+        // 既存のクリックイベントを削除
+        const clone = tab.cloneNode(true);
+        tab.parentNode.replaceChild(clone, tab);
+        
+        // 新しいイベントを設定
+        clone.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            if (!tabId) return;
+            
+            // 同じグループ内のタブを非アクティブ化
+            const tabGroup = this.closest('.tabs');
+            if (tabGroup) {
+                tabGroup.querySelectorAll('.tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // 全てのタブコンテンツを非表示
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+            }
+            
+            // クリックされたタブをアクティブ化
+            this.classList.add('active');
+            
+            // 対応するコンテンツを表示
+            const tabContent = document.getElementById(tabId + '-tab');
+            if (tabContent) {
+                tabContent.style.display = 'block';
+            }
+            
+            // URLハッシュを更新（オプション）
+            if (tabId) {
+                history.replaceState(null, null, '#' + tabId);
+            }
+        });
+    });
+}
+
 // ページ読み込み時の初期化処理
 document.addEventListener('DOMContentLoaded', function() {
     // リアルタイム検索のためのデバウンス関数を設定
@@ -671,6 +818,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // クリアボタンの追加
     addClearButtonToSearch('site-search-input');
     addClearButtonToSearch('mobile-site-search-input');
+    
+    // ツール検索にもクリアボタンを追加
+    setupToolSearch();
+    
+    // モバイル検索の特別な処理
+    setupMobileSearch();
+    
+    // タブ切り替え機能の修正
+    fixTabSwitching();
     
     // 検索ダイアログは初期化時点では作成しない（クリック時に作成）
     
