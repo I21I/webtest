@@ -1,11 +1,12 @@
-/* search.css - 検索機能のスタイル */
+/* search.css - 検索機能のスタイル - 修正版 */
+
 /* サイト内検索 - ヘッダー内のみ */
 .site-search {
     position: relative;
     margin-right: 1rem;
 }
 .site-search-input {
-    padding: 0.5rem 0.5rem 0.5rem 2.2rem;
+    padding: 0.5rem 2.2rem 0.5rem 2.2rem; /* 両側にパディング */
     border-radius: 20px;
     border: 1px solid var(--border-color);
     background-color: var(--background-color);
@@ -30,16 +31,61 @@
     pointer-events: none;
     display: flex; /* Flexboxを使って配置 */
     align-items: center; /* 垂直方向中央揃え */
-    height: 100%; /* 親要素の高さいっぱいに */
+    justify-content: center; /* 水平方向中央揃え */
+    width: 16px;
+    height: 16px;
+    z-index: 2;
 }
 .site-search-icon svg {
-    width: 1rem; /* サイズを小さく */
-    height: 1rem; /* サイズを小さく */
+    width: 16px; 
+    height: 16px; 
     fill: var(--text-secondary);
     transition: fill 0.2s ease;
 }
 .site-search-input:focus + .site-search-icon svg {
     fill: var(--primary-color);
+}
+
+/* サイト内検索のクリアボタン */
+.site-search .search-clear-button {
+    position: absolute;
+    right: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #aaa;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    z-index: 2;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.site-search .search-clear-button::before {
+    content: "×";
+    color: white;
+    font-size: 12px;
+    line-height: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.site-search .search-clear-button.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.site-search .search-clear-button:hover {
+    background-color: var(--primary-color);
 }
 
 /* 検索結果表示 */
@@ -132,7 +178,7 @@
 }
 .mobile-menu-search-input {
     width: 100%;
-    padding: 0.8rem 1rem 0.8rem 2.5rem;
+    padding: 0.8rem 2.5rem 0.8rem 2.5rem; /* 両側にパディング */
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background-color: var(--background-color);
@@ -153,14 +199,59 @@
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
-    display: flex; /* Flexboxを使って配置 */
-    align-items: center; /* 垂直方向中央揃え */
-    height: 100%; /* 親要素の高さいっぱいに */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    z-index: 2;
 }
 .mobile-search-icon svg {
-    width: 1rem; /* サイズを小さく */
-    height: 1rem; /* サイズを小さく */
+    width: 18px;
+    height: 18px;
     fill: var(--text-secondary);
+}
+
+/* モバイルメニュー内のクリアボタン */
+.mobile-menu-search .search-clear-button {
+    position: absolute;
+    right: 1.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #aaa;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    z-index: 2;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-menu-search .search-clear-button::before {
+    content: "×";
+    color: white;
+    font-size: 14px;
+    line-height: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.mobile-menu-search .search-clear-button.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-menu-search .search-clear-button:hover {
+    background-color: var(--primary-color);
 }
 
 /* ツール検索のスタイル修正 */
@@ -172,7 +263,7 @@
 
 #search-input {
     width: 100%;
-    padding: 0.8rem 1rem 0.8rem 3rem;
+    padding: 0.8rem 2.5rem 0.8rem 2.5rem; /* 両側にパディング */
     border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 1rem;
@@ -189,21 +280,75 @@
 }
 
 /* ツール検索アイコン修正 */
-.search-icon {
+.search-container .search-icon {
     position: absolute;
-    left: 1rem;
+    left: 0.8rem;
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
-    display: flex; /* Flexboxを使って配置 */
-    align-items: center; /* 垂直方向中央揃え */
-    height: 100%; /* 親要素の高さいっぱいに */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    z-index: 2;
 }
 
-.search-icon svg {
-    width: 1rem; /* サイズを小さく */
-    height: 1rem; /* サイズを小さく */
+.search-container .search-icon svg {
+    width: 20px;
+    height: 20px;
     fill: var(--text-secondary);
+}
+
+/* ツール検索のクリアボタン */
+.search-container .search-clear-button {
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #aaa;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+    z-index: 2;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-container .search-clear-button::before {
+    content: "×";
+    color: white;
+    font-size: 14px;
+    line-height: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.search-container .search-clear-button.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.search-container .search-clear-button:hover {
+    background-color: var(--primary-color);
+}
+
+/* 検索結果情報表示 */
+#search-results-info {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: right;
+    padding: 0 1rem;
 }
 
 /* レスポンシブ対応 */
@@ -214,5 +359,25 @@
     
     .search-results-header {
         padding: 0.8rem 1rem;
+    }
+    
+    /* モバイルでボタンをより大きく */
+    .search-container .search-clear-button {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .search-container .search-clear-button::before {
+        font-size: 16px;
+    }
+    
+    .search-container .search-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .search-container .search-icon svg {
+        width: 24px;
+        height: 24px;
     }
 }
