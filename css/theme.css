@@ -1,4 +1,3 @@
-/* ダークテーマ変数 */
 body.dark-theme {
     --primary-color: #5c6efd;
     --primary-light: rgba(92, 110, 253, 0.1);
@@ -15,7 +14,6 @@ body.dark-theme {
     --tab-border: #333333;
 }
 
-/* テーマ切替ボタン */
 .theme-toggle {
     width: 36px;
     height: 36px;
@@ -31,7 +29,6 @@ body.dark-theme {
     transition: background-color 0.3s;
 }
 
-/* テーマトグルのアイコンアニメーション */
 .theme-toggle:hover {
     background-color: var(--primary-light);
 }
@@ -65,7 +62,6 @@ body.dark-theme .theme-toggle svg.moon {
     transform: rotate(0) scale(1);
 }
 
-/* モバイルテーマトグル */
 .mobile-theme-toggle {
     padding: 0.8rem 1rem;
     display: flex;
