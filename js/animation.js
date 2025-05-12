@@ -1,16 +1,9 @@
-// スクロール処理
 function handleScroll() {
-    // アクティブナビゲーション設定
     setActiveNavItem();
-    
-    // スクロールトップボタン表示/非表示
     checkScrollTopButton();
-    
-    // フェードアニメーション
     fadeAnime();
 }
 
-// アクティブナビゲーション設定
 function setActiveNavItem() {
     const scrollY = window.pageYOffset;
     
@@ -30,7 +23,6 @@ function setActiveNavItem() {
     });
 }
 
-// スクロールトップボタン表示チェック
 function checkScrollTopButton() {
     const scrollTopButton = document.getElementById('scroll-top-button');
     if (!scrollTopButton) return;
@@ -42,7 +34,6 @@ function checkScrollTopButton() {
     }
 }
 
-// トップにスクロール
 function scrollToTop() {
     window.scrollTo({
         top: 0,
@@ -50,7 +41,6 @@ function scrollToTop() {
     });
 }
 
-// スクロールトップボタンの初期化
 function initScrollTopButton() {
     const scrollTopButton = document.getElementById('scroll-top-button');
     if (scrollTopButton) {
@@ -58,12 +48,10 @@ function initScrollTopButton() {
     }
 }
 
-// フェードアニメーション初期化
 function initFadeAnime() {
     fadeAnime();
 }
 
-// フェードアニメーション
 function fadeAnime() {
     document.querySelectorAll('section > *').forEach(function(element) {
         const elemPos = element.getBoundingClientRect().top;
@@ -75,7 +63,6 @@ function fadeAnime() {
     });
 }
 
-// MutationObserver のセットアップ
 function setupMutationObserver() {
     const config = { childList: true, subtree: true };
     const observer = new MutationObserver(function(mutations) {
