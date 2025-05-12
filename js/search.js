@@ -1,7 +1,7 @@
-// search.js - 最終修正版検索機能
+// search.js - 最終完全修正版検索機能
 
 /**
- * 確実にタブコンテンツを含む検索インデックスを生成する関数
+ * 検索インデックスを生成する関数
  */
 function generateSearchIndex() {
     console.log('検索インデックスを生成します...');
@@ -199,10 +199,10 @@ window.addEventListener('popstate', function(event) {
     }
 });
 
-// グローバル変数 - 検索ダイアログが作成済みかどうか
-window.searchDialogCreated = false;
 // グローバル変数 - 検索ダイアログが開いているかどうか
 window.isSearchDialogOpen = false;
+// グローバル変数 - 検索ダイアログが折りたたまれているかどうか
+window.isSearchCollapsed = true;
 
 /**
  * サイト内検索フィールドをクリックしたときの処理
@@ -219,11 +219,8 @@ function handleSearchFieldClick(e) {
         return;
     }
     
-    // まだ検索ダイアログが作成されていない場合は作成
-    if (!window.searchDialogCreated) {
-        createSearchDialog();
-        window.searchDialogCreated = true;
-    }
+    // 検索ダイアログを作成
+    createSearchDialog();
     
     // 検索ダイアログを表示
     openSearchDialog();
@@ -235,19 +232,6 @@ function handleSearchFieldClick(e) {
             searchQueryDisplay.focus();
         }
     }, 50);
-}
-
-/**
- * サイト内検索処理（Enter押下時）
- */
-function handleSiteSearch(e) {
-    if (e.key === 'Enter') {
-        const searchTerm = this.value.trim();
-        if (searchTerm === '') return;
-        
-        performSiteSearch(searchTerm);
-        this.blur();
-    }
 }
 
 /**
@@ -275,6 +259,15 @@ function openSearchDialog() {
     // アクティブクラスを追加してアニメーション開始
     searchResults.classList.add('active');
     
+    // 初期状態は折りたたみモード
+    if (window.isSearchCollapsed) {
+        searchResults.classList.add('collapsed');
+        searchResults.classList.remove('expanded');
+    } else {
+        searchResults.classList.add('expanded');
+        searchResults.classList.remove('collapsed');
+    }
+    
     // 検索ダイアログが開いていることをフラグに記録
     window.isSearchDialogOpen = true;
     
@@ -290,8 +283,8 @@ function openSearchDialog() {
         mobileMenu.classList.remove('active');
     }
     
-    // URLハッシュを追加して、ブラウザバックでダイアログを閉じられるようにする（オプション）
-    // history.pushState({}, '', `${location.pathname}?search`);
+    // デバイスサイズに合わせた表示
+    handleWindowResize();
 }
 
 /**
@@ -448,29 +441,36 @@ function handleResultClick(url) {
 }
 
 /**
- * 検索結果の表示モードを切り替え（コンパクト/拡大）
+ * 検索結果の表示モードを切り替え（折りたたみ/展開）
  */
 function toggleSearchResultsView() {
     const searchResults = document.getElementById('search-results');
     if (!searchResults) return;
     
-    // 現在の状態を確認してトグル
-    const isExpanded = searchResults.classList.contains('expanded');
+    // 現在の折りたたみ状態を確認してトグル
+    const isCollapsed = window.isSearchCollapsed;
+    
+    // 新しい状態をグローバル変数に保存
+    window.isSearchCollapsed = !isCollapsed;
     
     // クラスの追加/削除
-    if (isExpanded) {
-        searchResults.classList.remove('expanded');
-    } else {
+    if (isCollapsed) {
+        // 折りたたみ → 展開
+        searchResults.classList.remove('collapsed');
         searchResults.classList.add('expanded');
+    } else {
+        // 展開 → 折りたたみ
+        searchResults.classList.add('collapsed');
+        searchResults.classList.remove('expanded');
     }
     
     // 切り替えボタンのテキストを更新
     const toggleButton = document.getElementById('search-view-toggle');
     if (toggleButton) {
-        toggleButton.textContent = isExpanded ? '結果を拡大' : '結果を縮小';
+        toggleButton.textContent = isCollapsed ? '結果を縮小' : '結果を拡大';
     }
     
-    console.log('検索結果表示モード切替:', isExpanded ? 'コンパクトモード' : '拡大モード');
+    console.log('検索結果表示モード切替:', isCollapsed ? '拡大モード' : '折りたたみモード');
 }
 
 /**
@@ -497,9 +497,6 @@ function closeSearchResults() {
             window.isSearchDialogOpen = false;
         }
     }, 300); // CSSのトランジション時間に合わせる
-    
-    // URLハッシュを戻す（オプション）
-    // history.pushState({}, '', location.pathname);
 }
 
 /**
@@ -605,7 +602,7 @@ function createSearchDialog() {
                 </svg>
             </span>
             <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索...">
-            <button type="button" id="search-clear-button" class="search-clear-button" aria-label="検索をクリア">×</button>
+            <button type="button" id="search-clear-button" class="search-clear-button" aria-label="検索をクリア"></button>
         </div>
         <button id="search-view-toggle" class="search-view-toggle">結果を拡大</button>
     `;
@@ -681,6 +678,9 @@ function createSearchDialog() {
     // 表示モード切り替えボタンのイベントリスナー
     const viewToggleButton = document.getElementById('search-view-toggle');
     if (viewToggleButton) {
+        // 初期状態のテキスト設定
+        viewToggleButton.textContent = window.isSearchCollapsed ? '結果を拡大' : '結果を縮小';
+        
         viewToggleButton.addEventListener('click', function(e) {
             // イベント伝播を止める
             e.stopPropagation();
@@ -695,47 +695,62 @@ function createSearchDialog() {
  * ツール検索のセットアップ
  */
 function setupToolSearch() {
+    // ツール検索フィールド
     const searchInput = document.getElementById('search-input');
     if (!searchInput) return;
     
+    // 検索コンテナを取得
     const searchContainer = searchInput.closest('.search-container');
     if (!searchContainer) return;
     
-    // 既存の虫眼鏡アイコンがあれば保持（削除しない）
-    const existingIcon = searchContainer.querySelector('.search-icon');
-    
-    // クリアボタンを追加（既存の検索アイコンは維持）
-    const clearButton = document.createElement('button');
-    clearButton.type = 'button';
-    clearButton.className = 'search-clear-button';
-    clearButton.setAttribute('aria-label', '検索をクリア');
-    clearButton.innerHTML = '×';
-    
-    // 検索入力のコンテナ位置を相対位置に設定
+    // 検索コンテナが絶対位置指定でないと子要素の絶対位置がずれる
     searchContainer.style.position = 'relative';
     
-    // クリアボタンを追加
-    searchContainer.appendChild(clearButton);
+    // 虫眼鏡アイコンがない場合は追加
+    if (!searchContainer.querySelector('.search-icon')) {
+        const iconElement = document.createElement('span');
+        iconElement.className = 'search-icon';
+        iconElement.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
+            </svg>
+        `;
+        searchContainer.appendChild(iconElement);
+    }
+    
+    // クリアボタンがない場合は追加
+    if (!searchContainer.querySelector('.search-clear-button')) {
+        const clearButton = document.createElement('button');
+        clearButton.className = 'search-clear-button';
+        clearButton.type = 'button';
+        clearButton.setAttribute('aria-label', '検索をクリア');
+        
+        searchContainer.appendChild(clearButton);
+        
+        // クリアボタンのイベント
+        clearButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            searchInput.value = '';
+            searchInput.focus();
+            this.classList.remove('visible');
+            
+            // ツール検索をクリア
+            filterTools('');
+        });
+    }
     
     // 入力監視イベント
     searchInput.addEventListener('input', function() {
         const query = this.value.trim();
         
         // クリアボタンの表示切替
-        clearButton.classList.toggle('visible', query.length > 0);
+        const clearButton = searchContainer.querySelector('.search-clear-button');
+        if (clearButton) {
+            clearButton.classList.toggle('visible', query.length > 0);
+        }
         
         // リアルタイム検索を実行（デバウンス）
         window.debouncedFilterTools(query);
-    });
-    
-    // クリアボタンのクリックイベント
-    clearButton.addEventListener('click', function() {
-        searchInput.value = '';
-        searchInput.focus();
-        this.classList.remove('visible');
-        
-        // 全ツールを表示
-        filterTools('');
     });
     
     // リアルタイム検索のデバウンス関数
@@ -783,6 +798,24 @@ function setupMobileSearch() {
     // モバイルメニュー内の検索フィールド
     const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
     if (mobileSiteSearchInput) {
+        // モバイル検索フィールドの位置とスタイルを調整
+        const mobileSearchContainer = mobileSiteSearchInput.parentElement;
+        if (mobileSearchContainer) {
+            mobileSearchContainer.style.position = 'relative';
+            
+            // 虫眼鏡アイコンがない場合は追加
+            if (!mobileSearchContainer.querySelector('.search-icon')) {
+                const iconElement = document.createElement('span');
+                iconElement.className = 'search-icon';
+                iconElement.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
+                    </svg>
+                `;
+                mobileSearchContainer.appendChild(iconElement);
+            }
+        }
+        
         // すべてのイベントハンドラを削除（クローン作成で）
         const clonedInput = mobileSiteSearchInput.cloneNode(true);
         mobileSiteSearchInput.parentNode.replaceChild(clonedInput, mobileSiteSearchInput);
@@ -906,69 +939,31 @@ function setupInitialTabs() {
 }
 
 /**
- * 検索入力欄にクリアボタンを追加
+ * サイト内検索の初期化
  */
-function addClearButtonToSearch(inputId) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-    
-    // 親要素（相対位置指定のためのコンテナ）
-    const parent = input.parentElement;
-    if (!parent) return;
-    
-    // 既存のクリアボタンがあれば削除
-    const existingButton = parent.querySelector('.search-clear-button');
-    if (existingButton) {
-        existingButton.parentNode.removeChild(existingButton);
-    }
-    
-    // クリアボタンを作成
-    const clearButton = document.createElement('button');
-    clearButton.className = 'search-clear-button';
-    clearButton.setAttribute('type', 'button');
-    clearButton.setAttribute('aria-label', '検索をクリア');
-    clearButton.textContent = '×';
-    
-    // スタイル調整
-    parent.style.position = 'relative';
-    
-    // クリアボタンのイベント
-    clearButton.addEventListener('click', function(e) {
-        e.stopPropagation(); // イベント伝播を止める
-        
-        input.value = '';
-        input.focus();
-        this.classList.remove('visible');
-    });
-    
-    // 入力内容が変更されたらボタンの表示/非表示を切り替え
-    input.addEventListener('input', function() {
-        if (this.value.length > 0) {
-            clearButton.classList.add('visible');
-        } else {
-            clearButton.classList.remove('visible');
-        }
-    });
-    
-    // 初期状態の設定
-    if (input.value.length > 0) {
-        clearButton.classList.add('visible');
-    }
-    
-    // 親要素にボタンを追加
-    parent.appendChild(clearButton);
-    
-    console.log(`検索入力 ${inputId} にクリアボタンを追加しました`);
-}
-
-// ページ読み込み時の初期化処理
-document.addEventListener('DOMContentLoaded', function() {
-    // リアルタイム検索のためのデバウンス関数を設定
-    window.debouncedSearch = debounce(performSiteSearch, 300);
-    
-    // 右上の検索入力欄はクリックで検索ダイアログを開く
+function setupSiteSearch() {
+    // 右上の検索入力欄のセットアップ
     const siteSearchInput = document.getElementById('site-search-input');
     if (siteSearchInput) {
+        // 検索コンテナの取得
+        const searchWrapper = siteSearchInput.closest('.site-search-wrapper');
+        if (searchWrapper) {
+            // 位置を相対に設定
+            searchWrapper.style.position = 'relative';
+            
+            // 虫眼鏡アイコンがない場合は追加
+            if (!searchWrapper.querySelector('.search-icon')) {
+                const iconElement = document.createElement('span');
+                iconElement.className = 'search-icon';
+                iconElement.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
+                    </svg>
+                `;
+                searchWrapper.appendChild(iconElement);
+            }
+        }
+        
         // サイト内検索のクリックイベントを登録
         siteSearchInput.addEventListener('click', handleSearchFieldClick);
         siteSearchInput.addEventListener('focus', function(e) {
@@ -980,8 +975,15 @@ document.addEventListener('DOMContentLoaded', function() {
         siteSearchInput.readOnly = true; // 入力を無効化
         siteSearchInput.placeholder = 'サイト内検索...';
     }
+}
+
+// ページ読み込み時の初期化処理
+document.addEventListener('DOMContentLoaded', function() {
+    // リアルタイム検索のためのデバウンス関数を設定
+    window.debouncedSearch = debounce(performSiteSearch, 300);
     
-    // 検索ダイアログはまだ作成しない（クリック時に作成）
+    // 検索関連の処理を初期化
+    setupSiteSearch();
     
     // 外側クリックで閉じる機能のセットアップ
     setupOutsideClickHandler();
