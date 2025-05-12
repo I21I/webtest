@@ -1,24 +1,16 @@
-// main.js - メインのJavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM fully loaded');
-    
-    // 各モジュールの初期化
     if (typeof initTheme === 'function') initTheme();
     if (typeof initToolSearch === 'function') initToolSearch();
     if (typeof initScrollTopButton === 'function') initScrollTopButton();
     if (typeof initFadeAnime === 'function') initFadeAnime();
     if (typeof setupMutationObserver === 'function') setupMutationObserver();
     
-    // 検索インデックスのロード
     fetch('data/search-index.json')
         .then(response => response.json())
         .then(data => {
             window.searchIndex = data;
-            console.log('検索インデックスを読み込みました', data);
         })
         .catch(error => {
-            console.error('検索インデックスの読み込みに失敗しました:', error);
-            // フォールバック：ハードコードされたデータを使用
             window.searchIndex = [
                 {
                     title: "AAO Merge Helper",
@@ -44,8 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ];
         });
     
-    // イベントリスナーの設定
-    // テーマトグルボタンのイベントリスナー
     const themeToggle = document.getElementById('theme-toggle');
     const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
     
@@ -57,13 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
         mobileThemeToggle.addEventListener('click', toggleTheme);
     }
     
-    // メニューボタンのイベントリスナー
     const menuButton = document.getElementById('menu-button');
     if (menuButton && typeof toggleMobileMenu === 'function') {
         menuButton.addEventListener('click', toggleMobileMenu);
     }
     
-    // タブのイベントリスナー
     const tabs = document.querySelectorAll('.tab');
     tabs.forEach(tab => {
         if (typeof handleTabClick === 'function') {
@@ -71,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // ナビゲーションのイベントリスナー
     const navItems = document.querySelectorAll('.header-nav-item, .mobile-menu-nav-item');
     navItems.forEach(item => {
         if (typeof handleNavClick === 'function') {
@@ -79,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // 検索関連のイベントリスナー
     const searchInput = document.getElementById('search-input');
     if (searchInput && typeof handleToolSearch === 'function') {
         searchInput.addEventListener('input', handleToolSearch);
@@ -100,7 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
         searchClose.addEventListener('click', closeSearchResults);
     }
     
-    // 検索結果外クリックでの閉じる
     document.addEventListener('click', function(e) {
         const searchResults = document.getElementById('search-results');
         if (searchResults && searchResults.classList.contains('active') && 
@@ -112,17 +97,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // ESC キーでの閉じる（検索結果とモバイルメニュー両方）
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            // 検索結果を閉じる
             const searchResults = document.getElementById('search-results');
             if (searchResults && searchResults.classList.contains('active') &&
                 typeof closeSearchResults === 'function') {
                 closeSearchResults();
             }
             
-            // モバイルメニューを閉じる
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileMenu && mobileMenu.classList.contains('active')) {
                 mobileMenu.classList.remove('active');
@@ -130,27 +112,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // スクロールイベント
     window.addEventListener('scroll', function() {
         if (typeof handleScroll === 'function') {
             handleScroll();
         }
     });
     
-    // スクロールトップボタンの初期チェック
     if (typeof checkScrollTopButton === 'function') {
         checkScrollTopButton();
     }
     
-    // リサイズイベント - メディアクエリの切り替わりを監視
     window.addEventListener('resize', function() {
-        // handleResizeが定義されている場合は実行
         if (typeof handleResize === 'function') {
             handleResize();
         }
     });
     
-    // 初期状態でアクティブなナビゲーションアイテムを設定
     if (typeof setActiveNavItem === 'function') {
         setActiveNavItem();
     }
