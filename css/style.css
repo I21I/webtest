@@ -1,5 +1,4 @@
 :root {
-    /* 変数定義 */
     --primary-color: #475bf5;
     --primary-light: rgba(71, 91, 245, 0.1);
     --primary-hover: #3649ca;
@@ -36,7 +35,6 @@ body {
     scroll-padding-top: var(--header-height);
 }
 
-/* 一般的な調整 */
 img, svg {
     max-width: 100%;
     height: auto;
@@ -46,7 +44,6 @@ img, svg {
     display: none !important;
 }
 
-/* アニメーション */
 .fadeUp {
     animation-name: fadeUpAnime;
     animation-duration: 0.6s;
@@ -65,7 +62,6 @@ img, svg {
     }
 }
 
-/* ボタン押下時のアクセシビリティ */
 .button:focus, 
 .tab:focus, 
 .search-close:focus {
@@ -73,7 +69,6 @@ img, svg {
     outline-offset: 2px;
 }
 
-/* インフォボックス */
 .info-box {
     background-color: var(--card-background);
     border-radius: 16px;
@@ -95,7 +90,6 @@ img, svg {
     font-size: 0.95rem;
 }
 
-/* ツール内容 */
 .tools-content {
     background-color: var(--card-background);
     border-radius: 16px;
@@ -104,7 +98,6 @@ img, svg {
     margin-bottom: 2rem;
 }
 
-/* 検索コンテナ */
 .search-container {
     position: relative;
     max-width: 100%;
@@ -223,7 +216,6 @@ footer {
     border-top: 1px solid var(--border-color);
 }
 
-/* 状態クラス */
 .scroll-top-button.visible {
     opacity: 1;
     visibility: visible;
