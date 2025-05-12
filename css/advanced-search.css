@@ -11,10 +11,13 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 998;
     backdrop-filter: blur(2px);
+    transition: opacity 0.3s ease;
+    opacity: 0;
 }
 
 body.search-open .search-overlay {
     display: block;
+    opacity: 1;
 }
 
 /* 検索結果コンテナ */
@@ -36,13 +39,14 @@ body.search-open .search-overlay {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease, max-height 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s, max-height 0.3s ease;
 }
 
 #search-results.active {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
     visibility: visible;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s, max-height 0.3s ease;
 }
 
 /* 拡大モード */
@@ -106,6 +110,7 @@ body.search-open .search-overlay {
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s ease;
+    flex-shrink: 0;
 }
 
 .search-close-button:hover {
@@ -172,6 +177,17 @@ body.search-open .search-overlay {
 
 .search-clear-button:hover {
     background-color: var(--primary-color);
+}
+
+/* クリアボタンの × を中央に配置 */
+.search-clear-button::after {
+    content: "×";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    line-height: 1;
 }
 
 /* 表示モード切り替えボタン */
@@ -320,6 +336,21 @@ mark {
 /* ツール検索フィールド */
 #search-input {
     padding-left: 3rem;
+    padding-right: 2.5rem; /* クリアボタン用の余白 */
+    position: relative;
+}
+
+/* 検索結果の情報表示 */
+#search-results-info {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: right;
+}
+
+/* モバイルメニュー検索フィールド特別対応 */
+#mobile-site-search-input {
+    cursor: pointer;
 }
 
 /* レスポンシブ対応 - モバイル表示を改善 */
@@ -328,6 +359,14 @@ mark {
         width: 95%;
         max-width: 95%;
         max-height: 75vh; /* モバイルでより多くの領域を確保 */
+        position: fixed !important; /* 絶対固定 */
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) scale(0.95) !important;
+    }
+    
+    #search-results.active {
+        transform: translate(-50%, -50%) scale(1) !important;
     }
     
     .search-results-header {
@@ -383,5 +422,15 @@ mark {
     
     .search-result-snippet {
         font-size: 0.9rem;
+    }
+    
+    /* クリアボタンを大きく */
+    .search-clear-button {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .search-clear-button::after {
+        font-size: 14px;
     }
 }
