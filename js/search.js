@@ -383,9 +383,12 @@ function performSiteSearch(query) {
                 highlightedContent = highlightText(highlightedContent);
                 highlightedTitle = highlightText(highlightedTitle);
                 
+                // タブIDを持つ項目の場合はデータ属性に追加
+                const tabIdAttr = result.tabId ? ` data-tab-id="${result.tabId}"` : '';
+                
                 // 検索結果アイテムの生成 - クリック可能だがテキスト選択も可能に
                 html += `
-                    <li class="search-result-item" data-url="${result.url}">
+                    <li class="search-result-item" data-url="${result.url}"${tabIdAttr}>
                         <h4 class="search-result-title">
                             ${highlightedTitle}
                             ${result.version ? `<span class="result-version">${result.version}</span>` : ''}
@@ -409,7 +412,8 @@ function performSiteSearch(query) {
                 
                 const url = this.getAttribute('data-url');
                 if (url) {
-                    handleResultClick(url);
+                    e.preventDefault(); // デフォルトの挙動を防止
+                    handleResultClick(url, this);
                 }
             });
         });
@@ -421,12 +425,61 @@ function performSiteSearch(query) {
 /**
  * 検索結果アイテムクリック時の処理
  */
-function handleResultClick(url) {
-    // 検索結果を閉じる
-    closeSearchResults();
+function handleResultClick(url, resultItem) {
+    // tabIdを持つ結果かどうか確認
+    const tabId = resultItem ? resultItem.getAttribute('data-tab-id') : null;
     
-    // リンク先に移動
-    window.location.href = url;
+    if (tabId && url === '#install-section') {
+        // タブIDをもとにタブ名を取得（例: vcc-tab → vcc）
+        const tabName = tabId.replace('-tab', '');
+        
+        // 検索結果を閉じる
+        closeSearchResults();
+        
+        // リンク先へ遷移するときにタブ切り替えを実行
+        setTimeout(() => {
+            // リンク先に移動
+            window.location.href = url;
+            
+            // タブ切り替え
+            setTimeout(() => {
+                activateTabByName(tabName);
+            }, 100);
+        }, 100);
+    } else {
+        // 通常の処理（tabIdがない場合）
+        closeSearchResults();
+        window.location.href = url;
+    }
+}
+
+/**
+ * タブ名を指定してタブをアクティブ化する
+ */
+function activateTabByName(tabName) {
+    if (!tabName) return false;
+    
+    const tab = document.querySelector(`.tab[data-tab="${tabName}"]`);
+    if (tab) {
+        // タブをクリックして切り替える
+        tab.click();
+        return true;
+    }
+    return false;
+}
+
+/**
+ * URLハッシュとクエリパラメータを解析してタブを自動選択
+ */
+function handleUrlTabParam() {
+    // URLからタブパラメータを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    
+    // #install-sectionへのアクセスでタブパラメータがある場合
+    if (window.location.hash === '#install-section' && tabParam) {
+        activateTabByName(tabParam);
+    }
 }
 
 /**
@@ -881,6 +934,19 @@ function fixTabSwitching() {
  * 初期表示タブの設定 - ページロード時
  */
 function setupInitialTabs() {
+    // まずURLパラメータによるタブ指定を確認
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    
+    if (window.location.hash === '#install-section' && tabParam) {
+        // URLパラメータでタブが指定されている場合はそのタブを表示
+        const tabActivated = activateTabByName(tabParam);
+        
+        if (tabActivated) {
+            return; // タブが有効化されたら処理終了
+        }
+    }
+    
     // URLハッシュに基づいてタブを表示
     const hash = window.location.hash;
     if (hash && hash.length > 1) {
@@ -904,6 +970,27 @@ function setupInitialTabs() {
 }
 
 /**
+ * 自動タブ切り替えのためのハッシュ変更イベント監視
+ */
+function setupHashChangeHandler() {
+    window.addEventListener('hashchange', function() {
+        // #install-sectionへのハッシュ変更時
+        if (window.location.hash === '#install-section') {
+            // URLからtabパラメータを取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            
+            if (tabParam) {
+                // tabパラメータがある場合はそのタブをアクティブ化
+                setTimeout(() => {
+                    activateTabByName(tabParam);
+                }, 100);
+            }
+        }
+    });
+}
+
+/**
  * サイト内検索の初期化
  */
 function setupSiteSearch() {
@@ -911,7 +998,7 @@ function setupSiteSearch() {
     const siteSearchInput = document.getElementById('site-search-input');
     if (siteSearchInput) {
         // 検索コンテナの取得
-        const searchWrapper = siteSearchInput.closest('.site-search-wrapper');
+        const searchWrapper = siteSearchInput.closest('.site-search');
         if (searchWrapper) {
             // 位置を相対に設定
             searchWrapper.style.position = 'relative';
@@ -987,8 +1074,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // タブ切り替え機能の修正
     fixTabSwitching();
     
+    // 自動タブ切り替えのためのハッシュ変更イベント監視
+    setupHashChangeHandler();
+    
     // 初期表示タブの設定
     setupInitialTabs();
+    
+    // URLからのタブパラメータによる自動タブ切り替え
+    handleUrlTabParam();
     
     // 検索インデックスの生成（遅延実行）
     setTimeout(() => {
