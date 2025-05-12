@@ -1,27 +1,21 @@
-// ui.js - UI関連の機能
-// モバイルメニュー切り替え
 function toggleMobileMenu() {
-    // 画面サイズのチェックを削除 - レスポンシブCSSで対応
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu) {
         mobileMenu.classList.toggle('active');
     }
 }
 
-// 画面リサイズ時にモバイルメニューを閉じる
 function handleResize() {
     const mobileMenu = document.getElementById('mobile-menu');
     const menuButton = document.getElementById('menu-button');
     
     if (window.innerWidth > 900) {
-        // PCサイズでメニューを閉じる
         if (mobileMenu && mobileMenu.classList.contains('active')) {
             mobileMenu.classList.remove('active');
         }
     }
 }
 
-// ツール検索処理
 function handleToolSearch() {
     const searchTerm = this.value.toLowerCase();
     let hasResults = false;
@@ -46,7 +40,6 @@ function handleToolSearch() {
     }
 }
 
-// ツール検索の初期化
 function initToolSearch() {
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
@@ -54,23 +47,18 @@ function initToolSearch() {
     }
 }
 
-// タブクリック処理 - 修正版
 function handleTabClick() {
     if (this.classList.contains('active')) return;
     
-    // 同じタブコンテナ内のタブのみ非アクティブにする
     const tabContainer = this.closest('.tabs');
     tabContainer.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
     this.classList.add('active');
     
-    // タブIDを取得
     const tabId = this.getAttribute('data-tab');
     
-    // 親要素（インフォボックスなど）を取得
     const parentSection = this.closest('.info-box') || this.closest('section');
     
     if (parentSection) {
-        // 親要素内のタブコンテンツを検索
         parentSection.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
@@ -80,7 +68,6 @@ function handleTabClick() {
             targetContent.classList.add('active');
         }
     } else {
-        // 親要素が特定できない場合はドキュメント全体から探す
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
@@ -90,13 +77,8 @@ function handleTabClick() {
             targetContent.classList.add('active');
         }
     }
-    
-    // デバッグログ
-    console.log('Tab clicked:', tabId);
-    console.log('Target content:', document.getElementById(tabId + '-tab'));
 }
 
-// ナビクリック処理
 function handleNavClick(e) {
     e.preventDefault();
     
@@ -110,14 +92,12 @@ function handleNavClick(e) {
         });
     }
     
-    // モバイルメニューを閉じる
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu && mobileMenu.classList.contains('active')) {
         mobileMenu.classList.remove('active');
     }
 }
 
-// スクロールトップボタン
 function initScrollTopButton() {
     const scrollTopButton = document.getElementById('scroll-top-button');
     
@@ -131,13 +111,11 @@ function initScrollTopButton() {
     }
 }
 
-// スクロール時の処理
 function handleScroll() {
     checkScrollTopButton();
-    setActiveNavItem(); // ナビゲーション項目のアクティブ化を追加
+    setActiveNavItem();
 }
 
-// アクティブナビゲーション設定
 function setActiveNavItem() {
     const scrollY = window.pageYOffset;
     
@@ -157,7 +135,6 @@ function setActiveNavItem() {
     });
 }
 
-// スクロールトップボタンの表示・非表示を切り替え
 function checkScrollTopButton() {
     const scrollTopButton = document.getElementById('scroll-top-button');
     
@@ -170,7 +147,6 @@ function checkScrollTopButton() {
     }
 }
 
-// サイト内検索処理 - 修正版
 function handleSiteSearch(e) {
     if (typeof e === 'string') {
         performSiteSearch(e);
@@ -183,7 +159,6 @@ function handleSiteSearch(e) {
     }
 }
 
-// サイト内検索の実行 - 修正版
 function performSiteSearch(query) {
     const searchResultsContent = document.getElementById('search-results-content');
     const searchQuery = document.getElementById('search-query');
@@ -193,7 +168,6 @@ function performSiteSearch(query) {
     searchQuery.textContent = query;
     query = query.toLowerCase();
     
-    // 検索結果のフィルタリング - 検索対象を拡大
     const results = window.searchIndex.filter(item => {
         return item.title.toLowerCase().includes(query) || 
                item.content.toLowerCase().includes(query) || 
@@ -204,11 +178,9 @@ function performSiteSearch(query) {
         let html = '<ul class="search-result-list">';
         
         results.forEach(result => {
-            // 検索語のハイライト
             let highlightedContent = result.content;
             let highlightedTitle = result.title;
             
-            // 簡易的なハイライト処理
             highlightedContent = highlightedContent.replace(
                 new RegExp(query, 'gi'), 
                 match => `<mark>${match}</mark>`
@@ -234,17 +206,14 @@ function performSiteSearch(query) {
         searchResultsContent.innerHTML = '<div class="search-no-results">検索条件に一致する結果が見つかりませんでした。別のキーワードをお試しください。</div>';
     }
     
-    // 検索結果を表示
     document.getElementById('search-results').classList.add('active');
     
-    // モバイルメニューを閉じる
     const mobileMenu = document.getElementById('mobile-menu');
     if (mobileMenu) {
         mobileMenu.classList.remove('active');
     }
 }
 
-// 検索結果を閉じる
 function closeSearchResults() {
     const searchResults = document.getElementById('search-results');
     if (searchResults) {
