@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>二十一世紀症候群 VRChatツールリポジトリ</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
-    <!-- CSSファイルの読み込み - 順序が重要 -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/theme.css">
     <link rel="stylesheet" href="css/layout.css">
@@ -13,11 +12,9 @@
     <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-    <!-- 固定ヘッダー -->
     <header class="header">
         <div class="header-left">
             <a href="#" class="site-title">二十一世紀症候群</a>
-            <!-- header-navに媒体による条件付き表示を追加 -->
             <nav class="header-nav" id="header-nav">
                 <a href="#tools-section" class="header-nav-item active">ツール</a>
                 <a href="#install-section" class="header-nav-item">インストール方法</a>
@@ -49,7 +46,6 @@
         </div>
     </header>
 
-    <!-- 検索結果 -->
     <div id="search-results">
         <div class="search-results-header">
             <h3 class="search-results-title">「<span id="search-query"></span>」の検索結果</h3>
@@ -62,7 +58,6 @@
         <div id="search-results-content"></div>
     </div>
 
-    <!-- モバイルメニュー -->
     <div class="mobile-menu" id="mobile-menu">
         <div class="mobile-menu-search">
             <input type="text" class="mobile-menu-search-input" id="mobile-site-search-input" placeholder="サイト内検索...">
@@ -93,7 +88,7 @@
     <div class="container">
         <header>
             <h1>二十一世紀症候群 VRChatツール</h1>
-            <p class="subtitle">アバター改変を効率化する洗練されたツールコレクション</p>
+            <p class="subtitle">VRChatアバター改変ツールのコレクション</p>
             
             <div class="button-container">
                 <a href="vcc://vpm/addRepo?url=https://i21i.github.io/vpm-repos/vpm.json" class="button add-vcc-button">VCC/ALCOMに追加する</a>
@@ -114,7 +109,6 @@
                 </div>
                 
                 <div class="tool-cards" id="tools-container">
-                    <!-- AAO Merge Helper -->
                     <div class="tool-card" data-name="AAO Merge Helper" data-tags="AAO,Avatar Optimizer,MergeSkinnedMesh,MergePhysBone,最適化">
                         <div class="tool-header">
                             <h3 class="tool-name">AAO Merge Helper</h3>
@@ -143,38 +137,6 @@
                             <a href="https://i21i.github.io/AAOMergeHelper/" class="button">詳細を見る</a>
                         </div>
                     </div>
-
-                    <!-- 将来的なツール追加用テンプレート -->
-                    <!--
-                    <div class="tool-card" data-name="ツール名" data-tags="タグ1,タグ2,タグ3">
-                        <div class="tool-header">
-                            <h3 class="tool-name">ツール名</h3>
-                            <div class="tool-version">vx.x.x</div>
-                        </div>
-                        <div class="tool-body">
-                            <p class="tool-description">ツールの説明文をここに記載します。</p>
-                            
-                            <div class="tool-specs">
-                                <h4>主な機能</h4>
-                                <ul>
-                                    <li>機能1</li>
-                                    <li>機能2</li>
-                                    <li>機能3</li>
-                                </ul>
-                                
-                                <h4>動作環境</h4>
-                                <ul>
-                                    <li>Unity 2022.3.x</li>
-                                    <li>VRCSDK3 x.x.x</li>
-                                    <li>その他の依存パッケージ</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="tool-footer">
-                            <a href="#" class="button">詳細を見る</a>
-                        </div>
-                    </div>
-                    -->
                 </div>
                 
                 <div id="no-results-message" class="no-results hidden">
@@ -248,14 +210,12 @@
         </footer>
     </div>
 
-    <!-- トップへスクロールするボタン -->
     <div class="scroll-top-button" id="scroll-top-button">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M12 10.828l-4.95 4.95-1.414-1.414L12 8l6.364 6.364-1.414 1.414z"/>
         </svg>
     </div>
 
-    <!-- JavaScript ファイル -->
     <link rel="stylesheet" href="css/advanced-search.css">
     <script src="js/theme.js"></script>
     <script src="js/ui.js"></script>
@@ -265,30 +225,24 @@
 </body>
 
 <script>
-// ヘッダーメニューの表示を画面サイズに応じて制御
 function handleHeaderResponsive() {
     const headerNav = document.getElementById('header-nav');
     const menuButton = document.getElementById('menu-button');
     
     if (window.innerWidth <= 900) {
-        // モバイルサイズなら非表示
         if (headerNav) headerNav.style.display = 'none';
         if (menuButton) menuButton.style.display = 'block';
         document.body.classList.add('mobile-view');
     } else {
-        // PCサイズなら表示
         if (headerNav) headerNav.style.display = 'flex';
         if (menuButton) menuButton.style.display = 'none';
         document.body.classList.remove('mobile-view');
     }
 }
 
-// ページ読み込み時とリサイズ時に実行
 document.addEventListener('DOMContentLoaded', handleHeaderResponsive);
 window.addEventListener('resize', handleHeaderResponsive);
 window.addEventListener('load', handleHeaderResponsive);
-
-// 即時実行
 handleHeaderResponsive();
 </script>
     
