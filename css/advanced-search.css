@@ -1,4 +1,4 @@
-/* 検索ダイアログのスタイル - 完全修正版 */
+/* lilスタイルの検索機能CSS - 最終版 */
 
 /* オーバーレイ */
 .search-overlay {
@@ -8,9 +8,9 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 998;
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(2px);
     transition: opacity 0.3s ease;
     opacity: 0;
 }
@@ -30,7 +30,7 @@ body.search-open .search-overlay {
     max-width: 800px;
     height: auto;
     max-height: 60vh; /* 初期値はコンパクト */
-    background-color: var(--card-background, #fff);
+    background-color: var(--card-background);
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     z-index: 999;
@@ -39,24 +39,19 @@ body.search-open .search-overlay {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s, max-height 0.4s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s 0.3s, max-height 0.3s ease;
 }
 
 #search-results.active {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
     visibility: visible;
-    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s, max-height 0.4s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0s, max-height 0.3s ease;
 }
 
 /* 拡大モード */
 #search-results.expanded {
     max-height: 80vh;
-}
-
-/* 折りたたみモード */
-#search-results.collapsed {
-    max-height: 40vh;
 }
 
 /* モバイル固定表示 */
@@ -65,8 +60,6 @@ body.search-open .search-overlay {
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) scale(0.95) !important;
-    width: 95% !important;
-    max-width: 95% !important;
 }
 
 #search-results.mobile-view.active {
@@ -78,8 +71,8 @@ body.search-open .search-overlay {
     position: sticky;
     top: 0;
     padding: 0.75rem;
-    background-color: var(--card-background, #fff);
-    border-bottom: 1px solid var(--border-color, #ddd);
+    background-color: var(--card-background);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -102,87 +95,24 @@ body.search-open .search-overlay {
 
 .search-query-input {
     width: 100%;
-    padding: 0.5rem 2.5rem 0.5rem 2.5rem; /* 左右両方にアイコン用のパディング */
-    border: 1px solid var(--border-color, #ddd);
+    padding: 0.5rem 0.75rem 0.5rem 2rem; /* 左側に虫眼鏡アイコン用スペース */
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     font-size: 0.9rem;
-    color: var(--text-color, #333);
-    background-color: var(--background-color, #f5f5f5);
+    color: var(--text-color);
+    background-color: var(--background-color);
 }
 
 .search-query-input:focus {
     outline: none;
-    border-color: var(--primary-color, #4a6cf7);
-    box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.15);
-}
-
-/* 虫眼鏡アイコン */
-.search-icon {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-    z-index: 2;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.search-icon svg {
-    width: 16px;
-    height: 16px;
-    fill: var(--text-secondary, #666);
-}
-
-/* クリアボタン */
-.search-clear-button {
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background-color: #aaa;
-    border: none;
-    cursor: pointer;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, background-color 0.2s ease;
-    z-index: 2;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.search-clear-button::before {
-    content: "×";
-    color: white;
-    font-size: 14px;
-    line-height: 1;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.search-clear-button.visible {
-    opacity: 1;
-    visibility: visible;
-}
-
-.search-clear-button:hover {
-    background-color: var(--primary-color, #4a6cf7);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--primary-light);
 }
 
 /* 閉じるボタン */
 .search-close-button {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     background: none;
     border: none;
     cursor: pointer;
@@ -197,27 +127,94 @@ body.search-open .search-overlay {
 }
 
 .search-close-button:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--primary-light);
 }
 
 .search-close-button svg {
     width: 20px;
     height: 20px;
-    fill: var(--text-secondary, #666);
+    fill: var(--text-secondary);
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
+.search-close-button:hover svg {
+    fill: var(--primary-color);
+}
+
+/* 虫眼鏡アイコン */
+.search-icon {
+    position: absolute;
+    left: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-icon svg {
+    width: 0.9rem;
+    height: 0.9rem;
+    fill: var(--text-secondary);
+}
+
+/* クリアボタン */
+.search-clear-button {
+    position: absolute;
+    right: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--text-secondary);
+    color: white;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 0;
+    position: relative;
+}
+
+.search-clear-button.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.search-clear-button:hover {
+    background-color: var(--primary-color);
+}
+
+/* クリアボタンの × を中央に配置 */
+.search-clear-button::before {
+    content: "×";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    line-height: 1;
+    color: white;
+}
+
 /* 表示モード切り替えボタン */
 .search-view-toggle {
     background: none;
-    border: 1px solid var(--border-color, #ddd);
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     padding: 0.4rem 0.8rem;
     font-size: 0.85rem;
-    color: var(--text-secondary, #666);
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
@@ -225,9 +222,9 @@ body.search-open .search-overlay {
 }
 
 .search-view-toggle:hover {
-    background-color: var(--primary-light, #f0f4ff);
-    color: var(--primary-color, #4a6cf7);
-    border-color: var(--primary-color, #4a6cf7);
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 /* 検索結果コンテンツ */
@@ -242,8 +239,8 @@ body.search-open .search-overlay {
     padding: 0.5rem 0;
     margin-bottom: 0.5rem;
     font-size: 0.85rem;
-    color: var(--text-secondary, #666);
-    border-bottom: 1px solid var(--border-color, #ddd);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
 }
 
 /* セクション */
@@ -255,9 +252,9 @@ body.search-open .search-overlay {
 .search-section-title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: var(--primary-color, #4a6cf7);
+    color: var(--primary-color);
     margin: 1rem 0 0.5rem;
-    border-left: 3px solid var(--primary-color, #4a6cf7);
+    border-left: 3px solid var(--primary-color);
     padding-left: 0.5rem;
 }
 
@@ -273,7 +270,7 @@ body.search-open .search-overlay {
     margin-bottom: 0.5rem;
     border-radius: 8px;
     transition: background-color 0.2s ease;
-    border-bottom: 1px solid var(--border-color, #ddd);
+    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     user-select: text; /* テキスト選択を許可 */
 }
@@ -283,7 +280,7 @@ body.search-open .search-overlay {
 }
 
 .search-result-item:hover {
-    background-color: var(--primary-light, #f0f4ff);
+    background-color: var(--primary-light);
 }
 
 /* 検索結果タイトル */
@@ -299,9 +296,9 @@ body.search-open .search-overlay {
 /* バージョン表示 */
 .result-version {
     font-size: 0.75rem;
-    color: var(--text-secondary, #666);
+    color: var(--text-secondary);
     font-weight: normal;
-    background-color: var(--primary-light, #f0f4ff);
+    background-color: var(--primary-light);
     padding: 0.1rem 0.4rem;
     border-radius: 4px;
     margin-left: 0.5rem;
@@ -312,7 +309,7 @@ body.search-open .search-overlay {
     font-size: 0.85rem;
     line-height: 1.4;
     margin-bottom: 0.25rem;
-    color: var(--text-color, #333);
+    color: var(--text-color);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -322,7 +319,7 @@ body.search-open .search-overlay {
 /* パス表示 */
 .search-result-path {
     font-size: 0.75rem;
-    color: var(--text-secondary, #666);
+    color: var(--text-secondary);
     margin: 0;
 }
 
@@ -341,13 +338,61 @@ mark {
 .search-no-results {
     text-align: center;
     padding: 2rem 0;
-    color: var(--text-secondary, #666);
+    color: var(--text-secondary);
     font-style: italic;
     font-size: 0.9rem;
 }
 
-/* レスポンシブ対応 */
+/* サイト内検索の見た目を変更 */
+.site-search-input, 
+.mobile-menu-search-input {
+    cursor: pointer;
+    background-color: var(--background-color);
+}
+
+/* ツール検索フィールド */
+.search-container {
+    position: relative;
+}
+
+#search-input {
+    padding-left: 3rem;
+    padding-right: 2.5rem; /* クリアボタン用の余白 */
+}
+
+/* ツール検索用のクリアボタン - 専用スタイル */
+.search-container .search-clear-button {
+    right: 12px;
+}
+
+/* ツール検索用の検索アイコン - 既存スタイルを保持 */
+.search-container .search-icon {
+    left: 1rem;
+    pointer-events: none;
+}
+
+/* 検索結果の情報表示 */
+#search-results-info {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: right;
+    padding: 0 0.5rem;
+}
+
+/* モバイルメニュー検索フィールド特別対応 */
+#mobile-site-search-input {
+    cursor: pointer;
+}
+
+/* レスポンシブ対応 - モバイル表示を改善 */
 @media (max-width: 768px) {
+    #search-results {
+        width: 95%;
+        max-width: 95%;
+        max-height: 75vh; /* モバイルでより多くの領域を確保 */
+    }
+    
     .search-results-header {
         padding: 0.8rem;
     }
@@ -364,6 +409,7 @@ mark {
     .search-view-toggle {
         padding: 0.5rem 0.8rem;
         font-size: 0.9rem;
+        margin-right: 0.5rem;
     }
     
     /* 閉じるボタンをより大きく */
@@ -379,29 +425,17 @@ mark {
     
     /* 検索入力フィールドをより大きく */
     .search-query-input {
-        padding: 0.7rem 2.8rem 0.7rem 2.8rem;
+        padding: 0.7rem 1rem 0.7rem 2.2rem;
         font-size: 1rem;
     }
     
     .search-icon {
-        left: 1rem;
-        width: 18px;
-        height: 18px;
+        left: 0.8rem;
     }
     
     .search-icon svg {
-        width: 18px;
-        height: 18px;
-    }
-    
-    .search-clear-button {
-        right: 1rem;
-        width: 24px;
-        height: 24px;
-    }
-    
-    .search-clear-button::before {
-        font-size: 16px;
+        width: 1rem;
+        height: 1rem;
     }
     
     /* 検索結果のフォントサイズ拡大 */
@@ -411,5 +445,15 @@ mark {
     
     .search-result-snippet {
         font-size: 0.9rem;
+    }
+    
+    /* クリアボタンを大きく */
+    .search-clear-button {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .search-clear-button::before {
+        font-size: 16px;
     }
 }
