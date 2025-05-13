@@ -11,6 +11,8 @@
     width: 200px;
     font-size: 0.9rem;
     transition: all 0.3s ease;
+    line-height: normal;
+    vertical-align: middle;
 }
 .site-search-input:focus {
     outline: none;
@@ -174,6 +176,8 @@
     color: var(--text-color);
     font-size: 0.95rem;
     transition: all 0.3s ease;
+    line-height: normal;
+    vertical-align: middle;
 }
 .mobile-menu-search-input:focus {
     outline: none;
@@ -253,6 +257,8 @@
     color: var(--text-color);
     transition: all 0.3s ease;
     -webkit-appearance: none;
+    line-height: normal;
+    vertical-align: middle;
 }
 
 #search-input:focus {
@@ -324,6 +330,18 @@
     color: var(--text-secondary);
     text-align: right;
     padding: 0 1rem;
+}
+
+.search-query-input {
+    width: 100%;
+    padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--text-color, #333);
+    background-color: var(--background-color, #f5f5f5);
+    line-height: normal;
+    vertical-align: middle;
 }
 
 @media (max-width: 900px) {
