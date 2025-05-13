@@ -260,10 +260,12 @@ body.dark-theme .theme-icon-container svg.moon {
 
     .mobile-search-toggle {
         display: block;
+        order: 1
     }
 
     .menu-button {
         display: block;
+        order: 2;
     }
     
     .mobile-menu {
@@ -277,6 +279,11 @@ body.dark-theme .theme-icon-container svg.moon {
         transform: translateY(0);
         opacity: 1;
         visibility: visible;
+    }
+
+        .header-right {
+        display: flex;
+        align-items: center;
     }
 }
 
