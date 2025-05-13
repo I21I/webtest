@@ -294,6 +294,7 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+/* ツール検索のアイコンサイズを固定（画面サイズに関わらず一定） */
 .search-container .search-icon {
     position: absolute;
     left: 0.8rem;
@@ -303,14 +304,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     z-index: 2;
 }
 
 .search-container .search-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     fill: var(--text-secondary);
 }
 
@@ -380,6 +381,13 @@
     vertical-align: middle;
 }
 
+/* モバイル検索トグルボタンをクリック可能にする */
+.mobile-search-toggle {
+    z-index: 10;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
 @media (max-width: 900px) {
     #search-results-content {
         padding: 1rem;
@@ -390,26 +398,25 @@
     }
     
     .search-container .search-clear-button {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
     }
     
     .search-container .search-clear-button svg {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
     }
     
-    .search-container .search-icon,
+    /* サイト内検索アイコンのサイズを調整 */
     .site-search-icon,
     .mobile-search-icon {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
     }
     
-    .search-container .search-icon svg,
     .site-search-icon svg,
     .mobile-search-icon svg {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
     }
 }
