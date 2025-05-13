@@ -190,10 +190,84 @@ header {
     fill: var(--primary-color);
 }
 
-.mobile-visible-theme-toggle {
-    margin: 0 0.5rem;
-    width: 32px;
-    height: 32px;
+.mobile-search-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.mobile-search-toggle svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: var(--text-secondary);
+}
+
+.mobile-search-toggle:hover svg {
+    fill: var(--primary-color);
+}
+
+.theme-toggle-menu-item {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    display: flex;
+    align-items: center;
+}
+
+.theme-icon-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+}
+
+.theme-icon-container svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--text-color);
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle-menu-item:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+}
+
+.theme-toggle-menu-item:hover svg {
+    fill: var(--primary-color);
+}
+
+body.dark-theme .theme-icon-container svg.sun {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+}
+
+body.dark-theme .theme-icon-container svg.moon {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+.theme-icon-container svg.sun {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+.theme-icon-container svg.moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
 }
 
 @media (min-width: 901px) {
@@ -201,7 +275,7 @@ header {
         display: none !important;
     }
     
-    .menu-button {
+    .menu-button, .mobile-search-toggle {
         display: none !important;
     }
     
@@ -224,17 +298,16 @@ header {
     }
 
     .theme-toggle {
-        display: block !important;
-        margin-right: 0.5rem;
+        display: none !important;
     }
-    
-    .mobile-theme-toggle {
-        display: none;
+
+    .mobile-search-toggle {
+        display: block;
     }
 
     .menu-button {
         display: block !important;
-        margin-left: auto;
+        margin-left: 0.5rem;
     }
     
     .mobile-menu {
@@ -283,15 +356,10 @@ header {
         white-space: nowrap;
     }
 
-    .mobile-visible-theme-toggle {
-        width: 28px;
-        height: 28px;
-        margin: 0 0.3rem;
-    }
-    
-    .mobile-visible-theme-toggle svg {
-        width: 18px;
-        height: 18px;
+    .mobile-search-toggle svg,
+    .menu-button svg {
+        width: 1.3rem;
+        height: 1.3rem;
     }
     
     .container {
