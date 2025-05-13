@@ -91,6 +91,17 @@ body.search-open .search-overlay {
     font-size: 0.9rem;
     color: var(--text-color, #333);
     background-color: var(--background-color, #f5f5f5);
+    line-height: 1.5;
+    vertical-align: middle;
+    height: 2.5rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+.search-query-input::placeholder {
+    line-height: 1.5;
+    vertical-align: middle;
 }
 
 .search-query-input:focus {
@@ -295,6 +306,18 @@ mark {
 .mobile-menu-search-input {
     cursor: pointer;
     background-color: var(--background-color, #f5f5f5);
+    line-height: 1.5;
+    vertical-align: middle;
+    height: 2.5rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+}
+
+.site-search-input::placeholder, 
+.mobile-menu-search-input::placeholder {
+    line-height: 1.5;
+    vertical-align: middle;
 }
 
 #search-results-info {
