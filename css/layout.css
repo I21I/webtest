@@ -259,7 +259,7 @@ body.dark-theme .theme-icon-container svg.moon {
     }
 
     .theme-toggle {
-        display: none !important; /* モバイル表示時にヘッダーのテーマ切替ボタンを非表示 */
+        display: none !important; /* 画面幅900px以下の場合はヘッダーのテーマ切替ボタンを非表示 */
     }
 
     .mobile-search-toggle {
