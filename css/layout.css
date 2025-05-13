@@ -258,6 +258,10 @@ body.dark-theme .theme-icon-container svg.moon {
         display: none !important;
     }
 
+    .theme-toggle {
+        display: none !important; /* モバイル表示時にヘッダーのテーマ切替ボタンを非表示 */
+    }
+
     .mobile-search-toggle {
         display: block;
         order: 1
@@ -281,7 +285,7 @@ body.dark-theme .theme-icon-container svg.moon {
         visibility: visible;
     }
 
-        .header-right {
+    .header-right {
         display: flex;
         align-items: center;
     }
