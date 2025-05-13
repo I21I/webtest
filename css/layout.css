@@ -124,35 +124,6 @@ header {
     visibility: visible;
 }
 
-.mobile-menu-search {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border-color);
-    position: relative;
-}
-
-.mobile-menu-search-input {
-    width: 100%;
-    padding: 0.8rem 1rem 0.8rem 2.5rem;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    background-color: var(--background-color);
-    color: var(--text-color);
-}
-
-.mobile-menu-search-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px var(--primary-light);
-}
-
-.mobile-search-icon {
-    position: absolute;
-    left: 1.7rem;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-}
-
 .mobile-menu-nav {
     padding: 1rem 0;
 }
@@ -190,34 +161,16 @@ header {
     fill: var(--primary-color);
 }
 
-.mobile-search-toggle {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    margin-right: 0.5rem;
-}
-
-.mobile-search-toggle svg {
-    width: 1.5rem;
-    height: 1.5rem;
-    fill: var(--text-secondary);
-}
-
-.mobile-search-toggle:hover svg {
-    fill: var(--primary-color);
-}
-
+/* テーマトグルメニュー項目 */
 .theme-toggle-menu-item {
-    width: 100%;
-    text-align: left;
     background: none;
     border: none;
     cursor: pointer;
-    color: var(--text-color);
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
+    text-align: left;
+    width: 100%;
+}
+
+.theme-toggle-content {
     display: flex;
     align-items: center;
 }
@@ -229,7 +182,6 @@ header {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-right: 0.5rem;
 }
 
 .theme-icon-container svg {
@@ -238,16 +190,6 @@ header {
     fill: var(--text-color);
     position: absolute;
     transition: all 0.3s ease;
-}
-
-.theme-toggle-menu-item:hover {
-    background-color: var(--primary-light);
-    color: var(--primary-color);
-    border-left-color: var(--primary-color);
-}
-
-.theme-toggle-menu-item:hover svg {
-    fill: var(--primary-color);
 }
 
 body.dark-theme .theme-icon-container svg.sun {
@@ -275,7 +217,7 @@ body.dark-theme .theme-icon-container svg.moon {
         display: none !important;
     }
     
-    .menu-button, .mobile-search-toggle {
+    .menu-button {
         display: none !important;
     }
     
@@ -294,20 +236,11 @@ body.dark-theme .theme-icon-container svg.moon {
     }
 
     .site-search {
-        display: none;
-    }
-
-    .theme-toggle {
         display: none !important;
     }
 
-    .mobile-search-toggle {
-        display: block;
-    }
-
     .menu-button {
-        display: block !important;
-        margin-left: 0.5rem;
+        display: block;
     }
     
     .mobile-menu {
@@ -354,12 +287,6 @@ body.dark-theme .theme-icon-container svg.moon {
         overflow: visible;
         text-overflow: clip;
         white-space: nowrap;
-    }
-
-    .mobile-search-toggle svg,
-    .menu-button svg {
-        width: 1.3rem;
-        height: 1.3rem;
     }
     
     .container {
