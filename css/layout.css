@@ -149,6 +149,7 @@ header {
     border: none;
     cursor: pointer;
     padding: 0.5rem;
+    margin-left: 0.5rem;
 }
 
 .menu-button svg {
@@ -161,7 +162,25 @@ header {
     fill: var(--primary-color);
 }
 
-/* テーマトグルメニュー項目 */
+.mobile-search-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.mobile-search-toggle svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: var(--text-secondary);
+}
+
+.mobile-search-toggle:hover svg {
+    fill: var(--primary-color);
+}
+
 .theme-toggle-menu-item {
     background: none;
     border: none;
@@ -217,7 +236,7 @@ body.dark-theme .theme-icon-container svg.moon {
         display: none !important;
     }
     
-    .menu-button {
+    .menu-button, .mobile-search-toggle {
         display: none !important;
     }
     
@@ -237,6 +256,10 @@ body.dark-theme .theme-icon-container svg.moon {
 
     .site-search {
         display: none !important;
+    }
+
+    .mobile-search-toggle {
+        display: block;
     }
 
     .menu-button {
@@ -287,6 +310,12 @@ body.dark-theme .theme-icon-container svg.moon {
         overflow: visible;
         text-overflow: clip;
         white-space: nowrap;
+    }
+
+    .mobile-search-toggle svg,
+    .menu-button svg {
+        width: 1.3rem;
+        height: 1.3rem;
     }
     
     .container {
