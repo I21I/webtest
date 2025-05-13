@@ -190,6 +190,12 @@ header {
     fill: var(--primary-color);
 }
 
+.mobile-visible-theme-toggle {
+    margin: 0 0.5rem;
+    width: 32px;
+    height: 32px;
+}
+
 @media (min-width: 901px) {
     .mobile-menu {
         display: none !important;
@@ -218,6 +224,11 @@ header {
     }
 
     .theme-toggle {
+        display: block !important;
+        margin-right: 0.5rem;
+    }
+    
+    .mobile-theme-toggle {
         display: none;
     }
 
@@ -271,6 +282,16 @@ header {
         text-overflow: clip;
         white-space: nowrap;
     }
+
+    .mobile-visible-theme-toggle {
+        width: 28px;
+        height: 28px;
+        margin: 0 0.3rem;
+    }
+    
+    .mobile-visible-theme-toggle svg {
+        width: 18px;
+        height: 18px;
     }
     
     .container {
