@@ -153,6 +153,7 @@ window.addEventListener('popstate', function(event) {
 });
 
 window.isSearchDialogOpen = false;
+window._isInputProcessing = false; // 入力処理中フラグを追加
 
 /**
  * 検索フィールドクリック処理
@@ -251,33 +252,14 @@ function createSearchDialog() {
         closeSearchResults();
     });
     
-    // 検索入力欄のイベント設定
+    // 検索入力欄のイベント設定 - 根本的に修正
     const searchQueryDisplay = document.getElementById('search-query-display');
     if (searchQueryDisplay) {
-        // inputイベント（値が変更されるたび）
-        searchQueryDisplay.addEventListener('input', function() {
-            // 入力値を取得
-            const query = this.value;
-            
-            // クリアボタンの表示/非表示
-            const clearButton = document.getElementById('search-clear-button');
-            if (clearButton) {
-                clearButton.classList.toggle('visible', query.length > 0);
-            }
-            
-            // 入力が空の場合の処理
-            if (query === '') {
-                document.getElementById('search-results-content').innerHTML = 
-                    '<div class="search-no-results">キーワードを入力して検索してください</div>';
-                return;
-            }
-            
-            // 入力内容を元に検索実行
-            const trimmedQuery = query.trim();
-            if (trimmedQuery && window.debouncedSearch) {
-                window.debouncedSearch(trimmedQuery);
-            }
-        });
+        // inputイベントの処理を一本化
+        searchQueryDisplay.value = ''; // 初期値を明示的に空に設定
+        
+        // 完全に新しい方法でinitイベントを設定
+        searchQueryDisplay.addEventListener('input', handleSearchInputChange);
         
         // Enterキー押下時の処理
         searchQueryDisplay.addEventListener('keypress', function(e) {
@@ -288,32 +270,57 @@ function createSearchDialog() {
                 }
             }
         });
+        
+        // バックスペースキーの特別処理
+        searchQueryDisplay.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace' && this.value.length === 1) {
+                // 最後の1文字を消す場合、イベントをキャンセルして手動で処理
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // 完全に空にする
+                this.value = '';
+                
+                // クリアボタンの状態更新
+                const clearButton = document.getElementById('search-clear-button');
+                if (clearButton) {
+                    clearButton.classList.remove('visible');
+                }
+                
+                // 検索結果をクリア
+                document.getElementById('search-results-content').innerHTML = 
+                    '<div class="search-no-results">キーワードを入力して検索してください</div>';
+            }
+        });
     }
     
-    // クリアボタンのイベント
+    // クリアボタンのイベント - 根本的に修正
     const clearButton = document.getElementById('search-clear-button');
     if (clearButton) {
         clearButton.addEventListener('click', function(e) {
+            e.preventDefault();
             e.stopPropagation();
             
             const searchQueryDisplay = document.getElementById('search-query-display');
             if (searchQueryDisplay) {
-                // 修正: クリア時のinputイベント発火を防ぐため要素を複製して置き換え
-                const oldInput = searchQueryDisplay;
-                const newInput = oldInput.cloneNode(true);
-                oldInput.parentNode.replaceChild(newInput, oldInput);
+                // バグ修正: 一度イベントリスナーを削除
+                searchQueryDisplay.removeEventListener('input', handleSearchInputChange);
                 
-                // 値をクリア
-                newInput.value = '';
-                newInput.focus();
+                // 値を完全にクリア
+                searchQueryDisplay.value = '';
+                
+                // クリアボタンを非表示
                 this.classList.remove('visible');
                 
                 // 検索結果をクリア
                 document.getElementById('search-results-content').innerHTML = 
                     '<div class="search-no-results">キーワードを入力して検索してください</div>';
                 
-                // 新しいイベントハンドラを再設定
-                setupSearchQueryDisplayEvents(newInput);
+                // 少し遅延してからイベントリスナーを再設定
+                setTimeout(() => {
+                    searchQueryDisplay.addEventListener('input', handleSearchInputChange);
+                    searchQueryDisplay.focus();
+                }, 10);
             }
         });
     }
@@ -327,38 +334,40 @@ function createSearchDialog() {
     }
 }
 
-// 検索入力欄のイベント設定を関数化
-function setupSearchQueryDisplayEvents(element) {
-    if (!element) return;
+// 検索入力の変更ハンドラ - 完全に新しい実装
+function handleSearchInputChange(e) {
+    // 処理中なら無視
+    if (window._isInputProcessing) return;
     
-    element.addEventListener('input', function() {
+    // 処理中フラグを設定
+    window._isInputProcessing = true;
+    
+    try {
+        // 入力値を取得（この時点では処理しない）
         const query = this.value;
         
+        // クリアボタンの表示/非表示
         const clearButton = document.getElementById('search-clear-button');
         if (clearButton) {
             clearButton.classList.toggle('visible', query.length > 0);
         }
         
+        // 入力が完全に空の場合
         if (query === '') {
             document.getElementById('search-results-content').innerHTML = 
                 '<div class="search-no-results">キーワードを入力して検索してください</div>';
             return;
         }
         
+        // 入力内容に基づいて検索実行
         const trimmedQuery = query.trim();
         if (trimmedQuery && window.debouncedSearch) {
             window.debouncedSearch(trimmedQuery);
         }
-    });
-    
-    element.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const query = this.value.trim();
-            if (query) {
-                performSiteSearch(query);
-            }
-        }
-    });
+    } finally {
+        // 処理が終わったらフラグをクリア
+        window._isInputProcessing = false;
+    }
 }
 
 /**
@@ -401,21 +410,35 @@ function openSearchDialog() {
 function clearSearchInput(inputId) {
     const input = document.getElementById(inputId);
     if (input) {
-        // 修正: inputイベントが暴発しないよう、一旦要素を複製して置き換える
-        const oldInput = input;
-        const newInput = oldInput.cloneNode(true);
-        oldInput.parentNode.replaceChild(newInput, oldInput);
+        // 既存のイベントリスナーを一時的に無効化
+        const originalInputHandler = input.oninput;
+        input.oninput = null;
         
-        newInput.value = '';
-        newInput.focus();
+        // 値をクリア
+        input.value = '';
         
-        const parent = newInput.parentElement;
+        // クリアボタン状態を更新
+        const parent = input.parentElement;
         if (parent) {
             const clearButton = parent.querySelector('.search-clear-button');
             if (clearButton) {
                 clearButton.classList.remove('visible');
             }
         }
+        
+        // 検索結果をクリア
+        const resultsContent = document.getElementById('search-results-content');
+        if (resultsContent) {
+            resultsContent.innerHTML = '<div class="search-no-results">キーワードを入力して検索してください</div>';
+        }
+        
+        // イベントリスナーを遅延して再設定
+        setTimeout(() => {
+            if (typeof originalInputHandler === 'function') {
+                input.oninput = originalInputHandler;
+            }
+            input.focus();
+        }, 10);
     }
 }
 
@@ -432,12 +455,22 @@ function performSiteSearch(query) {
     }
     
     if (searchQueryDisplay) {
+        // 一時的にイベントリスナーを削除
+        searchQueryDisplay.removeEventListener('input', handleSearchInputChange);
+        
+        // 値を設定
         searchQueryDisplay.value = query;
         
+        // クリアボタンの状態更新
         const clearButton = document.getElementById('search-clear-button');
         if (clearButton) {
             clearButton.classList.toggle('visible', query.length > 0);
         }
+        
+        // イベントリスナーを遅延して再設定
+        setTimeout(() => {
+            searchQueryDisplay.addEventListener('input', handleSearchInputChange);
+        }, 10);
     }
     
     const queryLower = query.toLowerCase();
@@ -634,31 +667,6 @@ function debounce(func, wait) {
     };
 }
 
-// 修正: 検索クエリ変更イベントハンドラを改善
-function handleSearchQueryChange(e) {
-    // クエリ値を取得（トリムはここではしない）
-    const query = this.value;
-    
-    // クリアボタンの表示状態を更新
-    const clearButton = document.getElementById('search-clear-button');
-    if (clearButton) {
-        clearButton.classList.toggle('visible', query.length > 0);
-    }
-    
-    // クエリが完全に空の場合はプレースホルダーを表示して検索しない
-    if (query === '') {
-        document.getElementById('search-results-content').innerHTML = 
-            '<div class="search-no-results">キーワードを入力して検索してください</div>';
-        return;
-    }
-    
-    // トリムした結果が空でない場合のみ検索実行
-    const trimmedQuery = query.trim();
-    if (trimmedQuery) {
-        window.debouncedSearch(trimmedQuery);
-    }
-}
-
 function setupToolSearch() {
     const searchInput = document.getElementById('search-input');
     if (!searchInput) return;
@@ -695,33 +703,44 @@ function setupToolSearch() {
         searchContainer.appendChild(clearButton);
         
         clearButton.addEventListener('click', function(e) {
+            e.preventDefault();
             e.stopPropagation();
             
-            // 修正: inputイベントが暴発しないよう、一旦要素を複製して置き換える
-            const oldInput = searchInput;
-            const newInput = oldInput.cloneNode(true);
-            oldInput.parentNode.replaceChild(newInput, oldInput);
+            // 一時的にイベントリスナーを削除
+            const originalInputHandler = searchInput.oninput;
+            searchInput.oninput = null;
             
-            newInput.value = '';
-            newInput.focus();
+            // 値をクリア
+            searchInput.value = '';
+            
+            // クリアボタンを非表示
             this.classList.remove('visible');
             
+            // ツールのフィルタリングをリセット
             filterTools('');
             
-            // 新しい要素にイベントハンドラを再設定
-            newInput.addEventListener('input', function() {
-                const query = this.value.trim();
-                
-                const clearButton = searchContainer.querySelector('.search-clear-button');
-                if (clearButton) {
-                    clearButton.classList.toggle('visible', query.length > 0);
+            // 遅延してイベントリスナーを再設定
+            setTimeout(() => {
+                if (typeof originalInputHandler === 'function') {
+                    searchInput.oninput = originalInputHandler;
+                } else {
+                    searchInput.addEventListener('input', function() {
+                        const query = this.value.trim();
+                        
+                        const clearButton = searchContainer.querySelector('.search-clear-button');
+                        if (clearButton) {
+                            clearButton.classList.toggle('visible', query.length > 0);
+                        }
+                        
+                        window.debouncedFilterTools(query);
+                    });
                 }
-                
-                window.debouncedFilterTools(query);
-            });
+                searchInput.focus();
+            }, 10);
         });
     }
     
+    // ツール検索の入力イベント
     searchInput.addEventListener('input', function() {
         const query = this.value.trim();
         
@@ -731,6 +750,23 @@ function setupToolSearch() {
         }
         
         window.debouncedFilterTools(query);
+    });
+    
+    // 特殊なバックスペース処理を追加
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && this.value.length === 1) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            this.value = '';
+            
+            const clearButton = searchContainer.querySelector('.search-clear-button');
+            if (clearButton) {
+                clearButton.classList.remove('visible');
+            }
+            
+            filterTools('');
+        }
     });
     
     window.debouncedFilterTools = debounce(filterTools, 300);
@@ -760,6 +796,15 @@ function filterTools(query) {
             searchResults.innerHTML = '';
         } else {
             searchResults.innerHTML = `検索結果: ${visibleCount}件のツールが見つかりました`;
+        }
+    }
+    
+    const noResultsMessage = document.getElementById('no-results-message');
+    if (noResultsMessage) {
+        if (query.trim() === '' || visibleCount > 0) {
+            noResultsMessage.classList.add('hidden');
+        } else {
+            noResultsMessage.classList.remove('hidden');
         }
     }
 }
