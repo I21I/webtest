@@ -145,11 +145,11 @@ function resetTabsState() {
     }
 }
 
-// グローバル状態管理
+// グローバル状態管理 - 重要
 window.searchState = {
     isDialogOpen: false,
-    currentQuery: '',
-    debounceTimeout: null
+    currentQuery: '', // 現在の検索クエリを明示的に保持
+    debounceTimeout: null // debounceタイマーを管理
 };
 
 window.addEventListener('popstate', function(event) {
@@ -183,7 +183,7 @@ function handleSearchFieldClick(e) {
 }
 
 /**
- * 検索ダイアログを作成して開く
+ * 検索ダイアログを作成して開く (一度に実行)
  */
 function createAndOpenSearchDialog() {
     // 既存のダイアログ削除
@@ -192,8 +192,8 @@ function createAndOpenSearchDialog() {
     // ダイアログ作成
     const searchDialog = document.createElement('div');
     searchDialog.id = 'search-results';
-    searchDialog.style.display = 'flex';
-    searchDialog.style.opacity = '0';
+    searchDialog.style.display = 'flex'; // 初めから表示
+    searchDialog.style.opacity = '0'; // 初めは透明
     
     const searchHeader = document.createElement('div');
     searchHeader.className = 'search-results-header';
@@ -202,7 +202,7 @@ function createAndOpenSearchDialog() {
     searchField.className = 'search-field';
     searchField.innerHTML = `
         <div class="search-input-container">
-            <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索..." autocomplete="off" spellcheck="false">
+            <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索...">
             <span class="search-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
@@ -268,6 +268,8 @@ function createAndOpenSearchDialog() {
         const searchQueryDisplay = document.getElementById('search-query-display');
         if (searchQueryDisplay) {
             searchQueryDisplay.focus();
+            
+            // 重要: input欄の直接操作を一元管理する
             initializeSearchInput(searchQueryDisplay);
         }
         
@@ -301,28 +303,31 @@ function removeExistingSearchDialog() {
 }
 
 /**
- * 検索入力欄の初期化 - シンプルで確実なアプローチ
+ * 検索入力欄の初期化 - 最小限の変更
  */
 function initializeSearchInput(inputElement) {
-    // 主要なキーイベントを先に設定
+    // カスタムキーダウン処理
     inputElement.addEventListener('keydown', function(e) {
-        // 最後の1文字を消す場合の特別処理
+        // 最後の1文字でバックスペースの場合のみ処理
         if (e.key === 'Backspace' && this.value.length === 1) {
-            // デフォルト動作を停止して、即座に確実にクリア
+            // デフォルトのイベント処理を停止
             e.preventDefault();
             
-            // フィールドをクリア
+            // 値を即座に空にする
             this.value = '';
             window.searchState.currentQuery = '';
             
-            // クリアボタンの状態を更新
-            updateClearButtonVisibility('');
+            // クリアボタンを更新
+            const clearButton = document.getElementById('search-clear-button');
+            if (clearButton) {
+                clearButton.classList.remove('visible');
+            }
             
             // 検索結果をクリア
-            clearSearchResults();
-            
-            // これ以上処理しないよう中断
-            return false;
+            const searchResultsContent = document.getElementById('search-results-content');
+            if (searchResultsContent) {
+                searchResultsContent.innerHTML = '<div class="search-no-results">キーワードを入力して検索してください</div>';
+            }
         }
         
         // Enterキーの処理
@@ -334,28 +339,34 @@ function initializeSearchInput(inputElement) {
         }
     });
     
-    // 入力イベントの処理
+    // 入力イベント処理
     inputElement.addEventListener('input', function() {
-        // 値を取得して状態更新
         const value = this.value;
         window.searchState.currentQuery = value;
         
         // クリアボタンの表示/非表示
-        updateClearButtonVisibility(value);
+        const clearButton = document.getElementById('search-clear-button');
+        if (clearButton) {
+            clearButton.classList.toggle('visible', value.length > 0);
+        }
         
         // 値が空なら検索結果をクリア
         if (value === '') {
-            clearSearchResults();
+            const searchResultsContent = document.getElementById('search-results-content');
+            if (searchResultsContent) {
+                searchResultsContent.innerHTML = '<div class="search-no-results">キーワードを入力して検索してください</div>';
+            }
             return;
         }
         
         // 検索実行
-        debouncedSearch(value.trim());
-    });
-    
-    // フォーカス時のイベント
-    inputElement.addEventListener('focus', function() {
-        this.select(); // 選択状態にして入力しやすく
+        if (window.searchState.debounceTimeout) {
+            clearTimeout(window.searchState.debounceTimeout);
+        }
+        
+        window.searchState.debounceTimeout = setTimeout(function() {
+            performSiteSearch(value.trim());
+        }, 300);
     });
 }
 
@@ -690,8 +701,7 @@ function setupToolSearch() {
     
     // バックスペースキーの特別処理
     searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Backspace' && this.value.length <= 1) {
-            // デフォルト動作を停止して即座にクリア
+        if (e.key === 'Backspace' && this.value.length === 1) {
             e.preventDefault();
             
             // 値をクリア
@@ -705,6 +715,8 @@ function setupToolSearch() {
             
             // フィルタをリセット
             filterTools('');
+            
+            return false;
         }
     });
     
@@ -718,7 +730,7 @@ function setupToolSearch() {
             clearButton.classList.toggle('visible', query.length > 0);
         }
         
-        // 検索実行用関数
+        // debounce設定
         if (!window.debouncedFilterTools) {
             window.debouncedFilterTools = function(query) {
                 clearTimeout(window._filterToolsTimeout);
@@ -817,20 +829,16 @@ function setupMobileSearch() {
         
         mobileSiteSearchInput.parentNode.replaceChild(newInput, mobileSiteSearchInput);
         
-        // 検索フィールドクリック時の処理
         newInput.addEventListener('click', function(e) {
-            // イベント伝播を完全に停止
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            e.cancelBubble = true;
+            e.preventDefault();
+            e.stopPropagation();
             
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileMenu) {
                 mobileMenu.classList.remove('active');
             }
             
-            handleSearchFieldClick();
-            return false;
+            handleSearchFieldClick(e);
         });
     }
     
@@ -845,20 +853,16 @@ function setupMobileSearch() {
         
         mobileSearchToggle.parentNode.replaceChild(newToggle, mobileSearchToggle);
         
-        // 検索トグルボタンクリック時の処理
         newToggle.addEventListener('click', function(e) {
-            // イベント伝播を完全に停止
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            e.cancelBubble = true;
+            e.preventDefault();
+            e.stopPropagation();
             
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileMenu && mobileMenu.classList.contains('active')) {
                 mobileMenu.classList.remove('active');
             }
             
-            handleSearchFieldClick();
-            return false;
+            handleSearchFieldClick(e);
         });
     }
     
@@ -1014,19 +1018,8 @@ function setupSiteSearch() {
         siteSearchInput.parentNode.replaceChild(newInput, siteSearchInput);
         
         // イベント設定
-        newInput.addEventListener('click', function(e) {
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            handleSearchFieldClick();
-            return false;
-        });
-        
-        newInput.addEventListener('focus', function(e) {
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            handleSearchFieldClick();
-            return false;
-        });
+        newInput.addEventListener('click', handleSearchFieldClick);
+        newInput.addEventListener('focus', handleSearchFieldClick);
     }
 }
 
