@@ -119,3 +119,29 @@ body.dark-theme .mobile-theme-toggle-button svg.moon {
     margin-left: 0.8rem;
     color: var(--text-color);
 }
+
+/* テーマ切替ボタンがクリックできるようにする */
+.theme-toggle-menu-item {
+    background: none;
+    border: none;
+    cursor: pointer !important;
+    text-align: left;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+}
+
+#mobile-theme-toggle {
+    cursor: pointer !important;
+    position: relative;
+    z-index: 100;
+    pointer-events: auto !important;
+}
+
+.theme-toggle-content {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important;
+}
