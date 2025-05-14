@@ -155,7 +155,7 @@ window.addEventListener('popstate', function(event) {
 window.isSearchDialogOpen = false;
 
 /**
- * 検索フィールドクリック処理の修正
+ * 検索フィールドクリック処理
  */
 function handleSearchFieldClick(e) {
     if (e && e.preventDefault) {
