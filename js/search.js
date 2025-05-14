@@ -254,7 +254,7 @@ function createSearchDialog() {
     // 検索入力欄のイベント設定
     const searchQueryDisplay = document.getElementById('search-query-display');
     if (searchQueryDisplay) {
-        // 修正: inputイベントの処理を改善
+        // inputイベント（値が変更されるたび）
         searchQueryDisplay.addEventListener('input', function() {
             // 入力値を取得
             const query = this.value;
@@ -265,15 +265,14 @@ function createSearchDialog() {
                 clearButton.classList.toggle('visible', query.length > 0);
             }
             
-            // 入力が空の場合の処理（空文字チェックを厳密に行う）
+            // 入力が空の場合の処理
             if (query === '') {
                 document.getElementById('search-results-content').innerHTML = 
                     '<div class="search-no-results">キーワードを入力して検索してください</div>';
-                // 検索を実行しない
                 return;
             }
             
-            // 入力内容を元に検索実行（「トリムした結果が空でない」場合のみ）
+            // 入力内容を元に検索実行
             const trimmedQuery = query.trim();
             if (trimmedQuery && window.debouncedSearch) {
                 window.debouncedSearch(trimmedQuery);
@@ -299,7 +298,7 @@ function createSearchDialog() {
             
             const searchQueryDisplay = document.getElementById('search-query-display');
             if (searchQueryDisplay) {
-                // 修正: 値をクリアする前に一旦inputイベントハンドラを削除
+                // 修正: クリア時のinputイベント発火を防ぐため要素を複製して置き換え
                 const oldInput = searchQueryDisplay;
                 const newInput = oldInput.cloneNode(true);
                 oldInput.parentNode.replaceChild(newInput, oldInput);
@@ -328,7 +327,7 @@ function createSearchDialog() {
     }
 }
 
-// 修正: 検索入力欄のイベント設定を関数化して重複を防ぐ
+// 検索入力欄のイベント設定を関数化
 function setupSearchQueryDisplayEvents(element) {
     if (!element) return;
     
@@ -800,15 +799,40 @@ function setupMobileSearch() {
             }
         }
         
+        // クローン作成でイベントハンドラを初期化
         const clonedInput = mobileSiteSearchInput.cloneNode(true);
         mobileSiteSearchInput.parentNode.replaceChild(clonedInput, mobileSiteSearchInput);
         
+        // 新規イベントハンドラの設定
         clonedInput.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileMenu) {
+                mobileMenu.classList.remove('active');
+            }
+            
+            setTimeout(() => {
+                handleSearchFieldClick(e);
+            }, 50);
+        });
+    }
+    
+    // モバイル検索トグルボタンの処理も修正
+    const mobileSearchToggle = document.getElementById('mobile-search-toggle');
+    if (mobileSearchToggle) {
+        // 既存のイベントハンドラをクリア
+        const clonedToggle = mobileSearchToggle.cloneNode(true);
+        mobileSearchToggle.parentNode.replaceChild(clonedToggle, mobileSearchToggle);
+        
+        // 新しいイベントハンドラを設定
+        clonedToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && mobileMenu.classList.contains('active')) {
                 mobileMenu.classList.remove('active');
             }
             
@@ -948,14 +972,23 @@ function setupSiteSearch() {
             }
         }
         
-        siteSearchInput.addEventListener('click', handleSearchFieldClick);
-        siteSearchInput.addEventListener('focus', function(e) {
+        // 既存のイベントハンドラをクリア
+        const clonedInput = siteSearchInput.cloneNode(true);
+        siteSearchInput.parentNode.replaceChild(clonedInput, siteSearchInput);
+        
+        // 新しいイベントハンドラを設定
+        clonedInput.addEventListener('click', function(e) {
             e.preventDefault();
             handleSearchFieldClick(e);
         });
         
-        siteSearchInput.readOnly = true;
-        siteSearchInput.placeholder = 'サイト内検索...';
+        clonedInput.addEventListener('focus', function(e) {
+            e.preventDefault();
+            handleSearchFieldClick(e);
+        });
+        
+        clonedInput.readOnly = true;
+        clonedInput.placeholder = 'サイト内検索...';
     }
 }
 
@@ -1001,13 +1034,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // デスクトップでのサイト内検索
         const siteSearchInput = document.getElementById('site-search-input');
         if (siteSearchInput) {
-            siteSearchInput.addEventListener('click', handleSearchFieldClick);
+            // 既存のイベントハンドラをクリア
+            const clonedInput = siteSearchInput.cloneNode(true);
+            siteSearchInput.parentNode.replaceChild(clonedInput, siteSearchInput);
+            
+            // 新しいイベントハンドラを設定
+            clonedInput.addEventListener('click', handleSearchFieldClick);
         }
         
         // モバイルでのサイト内検索
         const mobileSearchToggle = document.getElementById('mobile-search-toggle');
         if (mobileSearchToggle) {
-            mobileSearchToggle.addEventListener('click', handleSearchFieldClick);
+            // 既存のイベントハンドラをクリア
+            const clonedToggle = mobileSearchToggle.cloneNode(true);
+            mobileSearchToggle.parentNode.replaceChild(clonedToggle, mobileSearchToggle);
+            
+            // 新しいイベントハンドラを設定
+            clonedToggle.addEventListener('click', handleSearchFieldClick);
         }
         
         // ESCキーで検索ダイアログを閉じる
