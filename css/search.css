@@ -21,6 +21,11 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+.site-search-input::placeholder {
+    line-height: normal;
+    vertical-align: middle;
+}
+
 .site-search-icon {
     position: absolute;
     left: 0.7rem;
@@ -185,6 +190,11 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+.mobile-menu-search-input::placeholder {
+    line-height: normal;
+    vertical-align: middle;
+}
+
 .mobile-search-icon {
     position: absolute;
     left: 1.7rem;
@@ -261,12 +271,18 @@
     vertical-align: middle;
 }
 
+#search-input::placeholder {
+    line-height: normal;
+    vertical-align: middle;
+}
+
 #search-input:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+/* ツール検索のアイコンサイズを固定 */
 .search-container .search-icon {
     position: absolute;
     left: 0.8rem;
@@ -344,6 +360,11 @@
     vertical-align: middle;
 }
 
+.search-query-input::placeholder {
+    line-height: normal;
+    vertical-align: middle;
+}
+
 /* モバイル検索トグルボタンをクリック可能にする */
 .mobile-search-toggle {
     z-index: 100;
@@ -384,44 +405,56 @@
     }
 }
 
-/* 入力欄のスタイル修正 - 入力テキストの位置ずれを解消 */
+/* 検索入力欄のテキスト位置修正 */
 .search-query-input,
 .site-search-input, 
 .mobile-menu-search-input,
 #search-input {
-    display: inline-block;
-    height: auto;
-    line-height: normal;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    box-sizing: border-box;
+    /* フレックス解除して基本的なスタイルに戻す */
+    display: inline-block !important;
+    /* 高さを指定 */
+    height: 36px !important;
+    /* 行の高さを指定（テキストの縦位置を制御） */
+    line-height: 36px !important;
+    /* パディングを調整してテキストを中央に配置 */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    /* ボックスサイジングを調整 */
+    box-sizing: border-box !important;
+    /* フォントサイズの微調整 */
+    font-size: 0.9rem !important;
 }
 
-/* プレースホルダーのスタイル修正 */
+/* プレースホルダーのスタイル調整 */
 .search-query-input::placeholder,
 .site-search-input::placeholder,
 .mobile-menu-search-input::placeholder,
 #search-input::placeholder {
-    line-height: normal;
-    vertical-align: middle;
+    line-height: 36px !important;
+    vertical-align: middle !important;
 }
 
-/* ツール検索のアイコンサイズを固定 */
+/* ツール検索アイコンのサイズを固定 */
 .search-container .search-icon {
-    width: 16px;
-    height: 16px;
+    width: 16px !important;
+    height: 16px !important;
 }
 
 .search-container .search-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 16px !important;
+    height: 16px !important;
 }
 
-/* 検索オーバーレイとダイアログのz-index調整 */
-.search-overlay {
-    z-index: 990;
+/* 検索アイコンの位置調整 */
+.search-icon,
+.site-search-icon,
+.mobile-search-icon {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
 }
 
-#search-results {
-    z-index: 991;
+/* 入力フィールドの内部余白調整 */
+#search-input,
+.site-search-input {
+    text-indent: 0 !important;
 }
