@@ -254,27 +254,33 @@ function createSearchDialog() {
     // 検索入力欄のイベント設定
     const searchQueryDisplay = document.getElementById('search-query-display');
     if (searchQueryDisplay) {
+        // inputイベント（値が変更されるたび）
         searchQueryDisplay.addEventListener('input', function() {
-            const query = this.value.trim();
+            // 入力値を取得（trim()せずにそのまま使用）
+            const query = this.value;
             
+            // クリアボタンの表示/非表示
             const clearButton = document.getElementById('search-clear-button');
             if (clearButton) {
                 clearButton.classList.toggle('visible', query.length > 0);
             }
             
+            // 入力が完全に空の場合の処理
             if (query.length === 0) {
                 document.getElementById('search-results-content').innerHTML = 
                     '<div class="search-no-results">キーワードを入力して検索してください</div>';
                 return;
             }
             
+            // 入力内容を元に検索実行（trimして空白を除去）
             if (window.debouncedSearch) {
-                window.debouncedSearch(query);
+                window.debouncedSearch(query.trim());
             } else {
-                performSiteSearch(query);
+                performSiteSearch(query.trim());
             }
         });
         
+        // Enterキー押下時の処理
         searchQueryDisplay.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const query = this.value.trim();
