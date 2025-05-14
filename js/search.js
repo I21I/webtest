@@ -202,12 +202,7 @@ function createAndOpenSearchDialog() {
     searchField.className = 'search-field';
     searchField.innerHTML = `
         <div class="search-input-container">
-            <input type="text" id="search-query-display" class="search-query-input" 
-                placeholder="サイト内を検索..." 
-                autocomplete="off" 
-                autocorrect="off" 
-                autocapitalize="off"
-                spellcheck="false">
+            <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索...">
             <span class="search-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
@@ -308,79 +303,51 @@ function removeExistingSearchDialog() {
 }
 
 /**
- * 検索入力欄の初期化 - IME対応と根本的な解決策
+ * 検索入力欄の初期化 - 単純明快な方法
  */
 function initializeSearchInput(inputElement) {
-    // 内部状態の管理
-    let isComposing = false;   // IME変換中かどうか
-    let lastValue = '';        // 前回の値
-
-    // compositionstart/end: IME変換の開始/終了を検知
-    inputElement.addEventListener('compositionstart', function() {
-        isComposing = true;
-    });
-
-    inputElement.addEventListener('compositionend', function() {
-        isComposing = false;
-        // IME確定後に処理
-        processInputValue(this.value);
-    });
-
-    // キーダウンイベント (最も先に発生)
+    // バックスペース処理を確実に実行
     inputElement.addEventListener('keydown', function(e) {
-        // Backspace処理 - 1文字の場合は特殊処理
+        // 最後の1文字を消す場合
         if (e.key === 'Backspace' && this.value.length === 1) {
-            // すべてのイベント伝播を完全に停止
+            // 以降の処理をすべて停止
             e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
             
             // 強制的に空にする
             this.value = '';
-            window.searchState.currentQuery = '';
-            lastValue = '';
             
-            // UI更新
-            updateClearButtonVisibility('');
+            // クリアボタンを非表示に
+            const clearButton = document.getElementById('search-clear-button');
+            if (clearButton) {
+                clearButton.classList.remove('visible');
+            }
+            
+            // 検索結果をクリア
             clearSearchResults();
             
-            // これ以上のイベント処理を防ぐ
             return false;
         }
         
-        // Enter キー処理
-        if (e.key === 'Enter' && !isComposing) {
+        // Enterキー処理
+        if (e.key === 'Enter') {
             const query = this.value.trim();
             if (query) {
                 performSiteSearch(query);
             }
         }
-    }, true); // キャプチャフェーズでイベントを捕捉 (最優先)
-
-    // input イベント (値が変更されたとき)
-    inputElement.addEventListener('input', function(e) {
-        // IME入力中は処理しない
-        if (isComposing) return;
-        
-        // 処理済みフラグ
-        if (e.processed) return;
-        e.processed = true;
-        
-        // 入力値を処理
-        processInputValue(this.value);
     });
-
-    // 入力値の処理を行う共通関数
-    function processInputValue(value) {
-        // 前回と同じ値なら処理しない
-        if (value === lastValue) return;
-        
-        // 現在の値を保存
-        lastValue = value;
+    
+    // 入力イベント処理
+    inputElement.addEventListener('input', function(e) {
+        // 現在の入力値を取得
+        const value = this.value;
         window.searchState.currentQuery = value;
         
-        // クリアボタンの状態を更新
-        updateClearButtonVisibility(value);
+        // クリアボタンの表示/非表示
+        const clearButton = document.getElementById('search-clear-button');
+        if (clearButton) {
+            clearButton.classList.toggle('visible', value.length > 0);
+        }
         
         // 値が空なら検索結果をクリア
         if (value === '') {
@@ -388,7 +355,7 @@ function initializeSearchInput(inputElement) {
             return;
         }
         
-        // 検索実行 (debounce処理)
+        // 検索実行
         if (window.searchState.debounceTimeout) {
             clearTimeout(window.searchState.debounceTimeout);
         }
@@ -396,12 +363,6 @@ function initializeSearchInput(inputElement) {
         window.searchState.debounceTimeout = setTimeout(() => {
             performSiteSearch(value.trim());
         }, 300);
-    }
-
-    // フォーカス時に選択
-    inputElement.addEventListener('focus', function() {
-        // フォーカス時に全選択
-        this.select();
     });
 }
 
@@ -734,23 +695,10 @@ function setupToolSearch() {
         });
     }
     
-    // IME入力対応
-    let isComposing = false;
-    
-    searchInput.addEventListener('compositionstart', function() {
-        isComposing = true;
-    });
-    
-    searchInput.addEventListener('compositionend', function() {
-        isComposing = false;
-        processInputValue(this.value);
-    });
-    
     // バックスペースキーの特別処理
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Backspace' && this.value.length === 1) {
             e.preventDefault();
-            e.stopPropagation();
             
             // 値をクリア
             this.value = '';
@@ -766,20 +714,16 @@ function setupToolSearch() {
             
             return false;
         }
-    }, true);
+    });
     
     // 通常の入力処理
     searchInput.addEventListener('input', function() {
-        if (isComposing) return;
-        processInputValue(this.value);
-    });
-    
-    // 入力値を処理する関数
-    function processInputValue(value) {
+        const query = this.value.trim();
+        
         // クリアボタンの表示/非表示
         const clearButton = searchContainer.querySelector('.search-clear-button');
         if (clearButton) {
-            clearButton.classList.toggle('visible', value.length > 0);
+            clearButton.classList.toggle('visible', query.length > 0);
         }
         
         // debounce設定
@@ -793,8 +737,8 @@ function setupToolSearch() {
         }
         
         // 検索実行
-        window.debouncedFilterTools(value.trim());
-    }
+        window.debouncedFilterTools(query);
+    });
 }
 
 /**
@@ -882,18 +826,15 @@ function setupMobileSearch() {
         mobileSiteSearchInput.parentNode.replaceChild(newInput, mobileSiteSearchInput);
         
         newInput.addEventListener('click', function(e) {
-            // イベント伝播を完全に停止
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            e.cancelBubble = true;
+            e.preventDefault();
+            e.stopPropagation();
             
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileMenu) {
                 mobileMenu.classList.remove('active');
             }
             
-            handleSearchFieldClick();
-            return false;
+            handleSearchFieldClick(e);
         });
     }
     
@@ -909,18 +850,15 @@ function setupMobileSearch() {
         mobileSearchToggle.parentNode.replaceChild(newToggle, mobileSearchToggle);
         
         newToggle.addEventListener('click', function(e) {
-            // イベント伝播を完全に停止
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            e.cancelBubble = true;
+            e.preventDefault();
+            e.stopPropagation();
             
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileMenu && mobileMenu.classList.contains('active')) {
                 mobileMenu.classList.remove('active');
             }
             
-            handleSearchFieldClick();
-            return false;
+            handleSearchFieldClick(e);
         });
     }
     
@@ -1076,19 +1014,8 @@ function setupSiteSearch() {
         siteSearchInput.parentNode.replaceChild(newInput, siteSearchInput);
         
         // イベント設定
-        newInput.addEventListener('click', function(e) {
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            handleSearchFieldClick();
-            return false;
-        });
-        
-        newInput.addEventListener('focus', function(e) {
-            if (e.stopPropagation) e.stopPropagation();
-            if (e.preventDefault) e.preventDefault();
-            handleSearchFieldClick();
-            return false;
-        });
+        newInput.addEventListener('click', handleSearchFieldClick);
+        newInput.addEventListener('focus', handleSearchFieldClick);
     }
 }
 
