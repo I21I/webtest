@@ -303,7 +303,7 @@ function removeExistingSearchDialog() {
 }
 
 /**
- * 検索入力欄の初期化 - 単純明快な方法
+ * 検索入力欄の初期化 - 修正版
  */
 function initializeSearchInput(inputElement) {
     // バックスペース処理を確実に実行
@@ -315,6 +315,15 @@ function initializeSearchInput(inputElement) {
             
             // 強制的に空にする
             this.value = '';
+            
+            // 重要: 状態をクリア
+            window.searchState.currentQuery = '';
+            
+            // 重要: debounceタイマーをクリア
+            if (window.searchState.debounceTimeout) {
+                clearTimeout(window.searchState.debounceTimeout);
+                window.searchState.debounceTimeout = null;
+            }
             
             // クリアボタンを非表示に
             const clearButton = document.getElementById('search-clear-button');
@@ -361,7 +370,11 @@ function initializeSearchInput(inputElement) {
         }
         
         window.searchState.debounceTimeout = setTimeout(() => {
-            performSiteSearch(value.trim());
+            // 重要: 現在の値と状態の値が一致していることを確認
+            if (this.value === window.searchState.currentQuery) {
+                performSiteSearch(value.trim());
+            }
+            window.searchState.debounceTimeout = null;
         }, 300);
     });
 }
@@ -389,6 +402,12 @@ function handleClearButtonClick(e) {
     // 値をクリア
     searchQueryDisplay.value = '';
     window.searchState.currentQuery = '';
+    
+    // debounceタイマーをクリア
+    if (window.searchState.debounceTimeout) {
+        clearTimeout(window.searchState.debounceTimeout);
+        window.searchState.debounceTimeout = null;
+    }
     
     // クリアボタンを非表示
     this.classList.remove('visible');
@@ -463,10 +482,11 @@ function debouncedSearch(query) {
 }
 
 /**
- * 実際の検索処理を実行
+ * 実際の検索処理を実行 - 修正版
  */
 function performSiteSearch(query) {
-    if (!query || query.trim() === '') return;
+    // 空のクエリか、現在の入力値と一致しない場合は処理しない
+    if (!query || query.trim() === '' || window.searchState.currentQuery !== query) return;
     
     const searchResultsContent = document.getElementById('search-results-content');
     if (!searchResultsContent) return;
@@ -475,11 +495,10 @@ function performSiteSearch(query) {
         window.searchIndex = generateSearchIndex();
     }
     
-    // 入力欄の値を設定（内部状態も同期）
+    // 入力欄の値を設定（内部状態と一致する場合のみ）
     const searchQueryDisplay = document.getElementById('search-query-display');
-    if (searchQueryDisplay) {
+    if (searchQueryDisplay && window.searchState.currentQuery === query) {
         searchQueryDisplay.value = query;
-        window.searchState.currentQuery = query;
         
         // クリアボタンの状態更新
         updateClearButtonVisibility(query);
