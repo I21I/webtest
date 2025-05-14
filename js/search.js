@@ -145,14 +145,20 @@ function resetTabsState() {
     }
 }
 
+// グローバル状態管理 - 重要
+window.searchState = {
+    isDialogOpen: false,
+    currentQuery: '', // 現在の検索クエリを明示的に保持
+    debounceTimeout: null, // debounceタイマーを管理
+    processingInput: false // 入力処理中かどうか
+};
+
 window.addEventListener('popstate', function(event) {
     const searchResults = document.getElementById('search-results');
     if (searchResults && searchResults.classList.contains('active')) {
         closeSearchResults();
     }
 });
-
-window.isSearchDialogOpen = false;
 
 /**
  * 検索フィールドクリック処理
@@ -163,7 +169,7 @@ function handleSearchFieldClick(e) {
         e.stopPropagation();
     }
     
-    if (window.isSearchDialogOpen) {
+    if (window.searchState.isDialogOpen) {
         return;
     }
     
@@ -173,37 +179,22 @@ function handleSearchFieldClick(e) {
         mobileMenu.classList.remove('active');
     }
     
-    createSearchDialog();
-    openSearchDialog();
-    
-    setTimeout(() => {
-        const searchQueryDisplay = document.getElementById('search-query-display');
-        if (searchQueryDisplay) {
-            searchQueryDisplay.focus();
-        }
-    }, 50);
+    // 検索ダイアログを作成して開く
+    createAndOpenSearchDialog();
 }
 
 /**
- * 検索ダイアログを作成する関数
+ * 検索ダイアログを作成して開く (一度に実行)
  */
-function createSearchDialog() {
-    // 既存の検索ダイアログを削除
-    const existingResults = document.getElementById('search-results');
-    if (existingResults) {
-        existingResults.parentNode.removeChild(existingResults);
-    }
+function createAndOpenSearchDialog() {
+    // 既存のダイアログ削除
+    removeExistingSearchDialog();
     
-    // 既存のオーバーレイを削除
-    const existingOverlay = document.getElementById('search-overlay');
-    if (existingOverlay) {
-        existingOverlay.parentNode.removeChild(existingOverlay);
-    }
-    
-    // 新しい検索ダイアログを作成
+    // ダイアログ作成
     const searchDialog = document.createElement('div');
     searchDialog.id = 'search-results';
-    searchDialog.style.display = 'none';
+    searchDialog.style.display = 'flex'; // 初めから表示
+    searchDialog.style.opacity = '0'; // 初めは透明
     
     const searchHeader = document.createElement('div');
     searchHeader.className = 'search-results-header';
@@ -252,172 +243,259 @@ function createSearchDialog() {
     const overlay = document.createElement('div');
     overlay.id = 'search-overlay';
     overlay.className = 'search-overlay';
+    overlay.style.display = 'block';
+    overlay.style.opacity = '0';
     document.body.appendChild(overlay);
     
     // オーバーレイクリックで閉じる処理
-    overlay.addEventListener('click', function() {
-        closeSearchResults();
-    });
+    overlay.addEventListener('click', closeSearchResults);
     
-    // 検索入力欄の要素を取得
-    const searchQueryDisplay = document.getElementById('search-query-display');
-    const clearButton = document.getElementById('search-clear-button');
-    const searchCloseButton = document.getElementById('search-close-button');
-    
-    // debounce関数がまだ定義されていない場合は定義
-    if (!window.debouncedSearch) {
-        window.debouncedSearch = debounce(performSiteSearch, 300);
-    }
-    
-    // 入力欄のイベント設定 - 単純化
-    if (searchQueryDisplay) {
-        // 初期値を空に設定
-        searchQueryDisplay.value = '';
+    // アニメーション用タイマー
+    setTimeout(() => {
+        // マウント完了後に表示
+        searchDialog.classList.add('active');
+        searchDialog.style.opacity = '1';
+        overlay.style.opacity = '1';
+        document.body.classList.add('search-open');
         
-        // カスタム入力イベント処理
-        searchQueryDisplay.addEventListener('input', function() {
-            // 現在の入力値を取得
-            const query = this.value;
-            
-            // クリアボタンの表示/非表示を設定
-            if (clearButton) {
-                clearButton.classList.toggle('visible', query.length > 0);
-            }
-            
-            // 入力値が空の場合のプレースホルダー表示
-            if (query === '') {
-                searchContent.innerHTML = '<div class="search-no-results">キーワードを入力して検索してください</div>';
-                return;
-            }
-            
-            // 検索を実行
-            if (query.trim()) {
-                window.debouncedSearch(query.trim());
-            }
-        });
+        // スマホ表示の場合のスタイル調整
+        if (window.innerWidth <= 768) {
+            searchDialog.classList.add('mobile-view');
+        }
         
-        // Enterキーの処理
-        searchQueryDisplay.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const query = this.value.trim();
-                if (query) {
-                    performSiteSearch(query);
-                }
-            }
-        });
-    }
-    
-    // クリアボタンのイベント処理
-    if (clearButton) {
-        clearButton.addEventListener('click', function() {
-            // 一度イベントの伝播を停止
-            event.stopPropagation();
+        window.searchState.isDialogOpen = true;
+        
+        // 入力欄にフォーカス
+        const searchQueryDisplay = document.getElementById('search-query-display');
+        if (searchQueryDisplay) {
+            searchQueryDisplay.focus();
             
-            if (searchQueryDisplay) {
-                // 直接値をクリア（新しい方法）
-                searchQueryDisplay.value = '';
-                clearButton.classList.remove('visible');
-                searchContent.innerHTML = '<div class="search-no-results">キーワードを入力して検索してください</div>';
-                
-                // inputイベントを手動で発火させない
-                
-                // フォーカスを戻す
-                searchQueryDisplay.focus();
-            }
-        });
+            // 重要: input欄の直接操作を一元管理する
+            initializeSearchInput(searchQueryDisplay);
+        }
+        
+        // クリアボタンの設定
+        const clearButton = document.getElementById('search-clear-button');
+        if (clearButton) {
+            clearButton.addEventListener('click', handleClearButtonClick);
+        }
+        
+        // 閉じるボタンの設定
+        const closeButton = document.getElementById('search-close-button');
+        if (closeButton) {
+            closeButton.addEventListener('click', closeSearchResults);
+        }
+    }, 10);
+}
+
+/**
+ * 既存の検索ダイアログを削除
+ */
+function removeExistingSearchDialog() {
+    const existingResults = document.getElementById('search-results');
+    if (existingResults) {
+        existingResults.parentNode.removeChild(existingResults);
     }
     
-    // 閉じるボタンのイベント
-    if (searchCloseButton) {
-        searchCloseButton.addEventListener('click', function() {
-            closeSearchResults();
-        });
-    }
-    
-    // バックスペースキー用の特別処理
-    if (searchQueryDisplay) {
-        searchQueryDisplay.addEventListener('keydown', function(e) {
-            // バックスペースキーが押され、入力が1文字だけの場合
-            if (e.key === 'Backspace' && this.value.length === 1) {
-                // デフォルトのバックスペース動作をキャンセル
-                e.preventDefault();
-                
-                // 表示中の値を完全に削除
-                this.value = '';
-                
-                // クリアボタンの状態更新
-                if (clearButton) {
-                    clearButton.classList.remove('visible');
-                }
-                
-                // 検索結果をクリア
-                searchContent.innerHTML = '<div class="search-no-results">キーワードを入力して検索してください</div>';
-                
-                // 追加のinputイベントを発火させない
-                return false;
-            }
-        });
+    const existingOverlay = document.getElementById('search-overlay');
+    if (existingOverlay) {
+        existingOverlay.parentNode.removeChild(existingOverlay);
     }
 }
 
 /**
- * 検索ダイアログを開く関数
+ * 検索入力欄の初期化 - 制御された入力管理
  */
-function openSearchDialog() {
-    if (window.isSearchDialogOpen) {
-        return;
-    }
-    
-    const searchResults = document.getElementById('search-results');
-    if (!searchResults) return;
-    
-    const searchOverlay = document.getElementById('search-overlay');
-    if (searchOverlay) {
-        searchOverlay.style.display = 'block';
+function initializeSearchInput(inputElement) {
+    // カスタムイベント処理
+    inputElement.addEventListener('keydown', function(e) {
+        // バックスペースキーの特別処理
+        if (e.key === 'Backspace') {
+            handleBackspaceKey(e, this);
+            return;
+        }
         
-        // レイアウト計算の強制
-        window.getComputedStyle(searchOverlay).getPropertyValue('opacity');
+        // Enterキーの処理
+        if (e.key === 'Enter') {
+            const query = window.searchState.currentQuery.trim();
+            if (query) {
+                performSiteSearch(query);
+            }
+            return;
+        }
+    });
+    
+    // 入力イベントをカスタム処理
+    inputElement.addEventListener('input', function(e) {
+        if (window.searchState.processingInput) return;
         
-        document.body.classList.add('search-open');
-    }
-    
-    searchResults.style.display = 'flex';
-    
-    // レイアウト計算の強制
-    window.getComputedStyle(searchResults).getPropertyValue('opacity');
-    
-    searchResults.classList.add('active');
-    window.isSearchDialogOpen = true;
-    
-    // スマホ表示の場合のスタイル調整
-    if (window.innerWidth <= 768) {
-        searchResults.classList.add('mobile-view');
-    } else {
-        searchResults.classList.remove('mobile-view');
+        window.searchState.processingInput = true;
+        
+        try {
+            // 現在の入力値を取得
+            const newValue = this.value;
+            
+            // グローバル状態を更新
+            window.searchState.currentQuery = newValue;
+            
+            // クリアボタンの表示/非表示
+            updateClearButtonVisibility(newValue);
+            
+            // 値が空なら検索結果をクリア
+            if (newValue === '') {
+                clearSearchResults();
+                return;
+            }
+            
+            // 検索実行
+            debouncedSearch(newValue.trim());
+        } finally {
+            window.searchState.processingInput = false;
+        }
+    });
+}
+
+/**
+ * クリアボタン表示/非表示の更新
+ */
+function updateClearButtonVisibility(value) {
+    const clearButton = document.getElementById('search-clear-button');
+    if (clearButton) {
+        clearButton.classList.toggle('visible', value.length > 0);
     }
 }
 
-function performSiteSearch(query) {
-    const searchResultsContent = document.getElementById('search-results-content');
-    const searchQueryDisplay = document.getElementById('search-query-display');
-    
-    if (!searchResultsContent) {
+/**
+ * バックスペースキーのカスタム処理
+ */
+function handleBackspaceKey(event, inputElement) {
+    // 1文字だけの時の特殊処理
+    if (window.searchState.currentQuery.length === 1) {
+        // デフォルトのバックスペース動作を停止
+        event.preventDefault();
+        
+        // 直接値を空に設定
+        inputElement.value = '';
+        window.searchState.currentQuery = '';
+        
+        // UIを更新
+        updateClearButtonVisibility('');
+        clearSearchResults();
+        
         return;
     }
+}
+
+/**
+ * クリアボタンのイベントハンドラ
+ */
+function handleClearButtonClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const searchQueryDisplay = document.getElementById('search-query-display');
+    if (!searchQueryDisplay) return;
+    
+    // 値をクリア
+    searchQueryDisplay.value = '';
+    window.searchState.currentQuery = '';
+    
+    // クリアボタンを非表示
+    this.classList.remove('visible');
+    
+    // 検索結果をクリア
+    clearSearchResults();
+    
+    // フォーカスを戻す
+    searchQueryDisplay.focus();
+}
+
+/**
+ * 検索結果表示の初期状態に戻す
+ */
+function clearSearchResults() {
+    const searchResultsContent = document.getElementById('search-results-content');
+    if (searchResultsContent) {
+        searchResultsContent.innerHTML = '<div class="search-no-results">キーワードを入力して検索してください</div>';
+    }
+}
+
+/**
+ * 検索結果ダイアログを閉じる
+ */
+function closeSearchResults() {
+    if (!window.searchState.isDialogOpen) return;
+    
+    const searchResults = document.getElementById('search-results');
+    const searchOverlay = document.getElementById('search-overlay');
+    
+    if (searchResults) {
+        searchResults.classList.remove('active');
+        searchResults.style.opacity = '0';
+    }
+    
+    if (searchOverlay) {
+        searchOverlay.style.opacity = '0';
+    }
+    
+    document.body.classList.remove('search-open');
+    
+    // debounceタイマーをクリア
+    if (window.searchState.debounceTimeout) {
+        clearTimeout(window.searchState.debounceTimeout);
+        window.searchState.debounceTimeout = null;
+    }
+    
+    // 状態をリセット
+    window.searchState.isDialogOpen = false;
+    window.searchState.currentQuery = '';
+    window.searchState.processingInput = false;
+    
+    // 遅延してDOM要素を削除
+    setTimeout(() => {
+        removeExistingSearchDialog();
+    }, 300);
+}
+
+/**
+ * debounce処理された検索実行
+ */
+function debouncedSearch(query) {
+    // 既存のタイマーをクリア
+    if (window.searchState.debounceTimeout) {
+        clearTimeout(window.searchState.debounceTimeout);
+    }
+    
+    // 新しいタイマーを設定
+    window.searchState.debounceTimeout = setTimeout(() => {
+        performSiteSearch(query);
+        window.searchState.debounceTimeout = null;
+    }, 300);
+}
+
+/**
+ * 実際の検索処理を実行
+ */
+function performSiteSearch(query) {
+    if (!query || query.trim() === '') return;
+    
+    const searchResultsContent = document.getElementById('search-results-content');
+    if (!searchResultsContent) return;
     
     if (!window.searchIndex) {
         window.searchIndex = generateSearchIndex();
     }
     
+    // 入力欄の値を設定（内部状態も同期）
+    const searchQueryDisplay = document.getElementById('search-query-display');
     if (searchQueryDisplay) {
-        // 値をセット（通常のinputイベントを発火しないように注意）
+        window.searchState.processingInput = true;
         searchQueryDisplay.value = query;
+        window.searchState.currentQuery = query;
+        window.searchState.processingInput = false;
         
         // クリアボタンの状態更新
-        const clearButton = document.getElementById('search-clear-button');
-        if (clearButton) {
-            clearButton.classList.toggle('visible', query.length > 0);
-        }
+        updateClearButtonVisibility(query);
     }
     
     const queryLower = query.toLowerCase();
@@ -485,6 +563,7 @@ function performSiteSearch(query) {
         
         searchResultsContent.innerHTML = html;
         
+        // 結果アイテムのクリックイベント設定
         document.querySelectorAll('.search-result-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 if (window.getSelection().toString()) return;
@@ -543,43 +622,11 @@ function handleUrlTabParam() {
 }
 
 /**
- * 検索ダイアログを閉じる関数
+ * 外部クリック検出
  */
-function closeSearchResults() {
-    if (!window.isSearchDialogOpen) {
-        return;
-    }
-    
-    const searchResults = document.getElementById('search-results');
-    const searchOverlay = document.getElementById('search-overlay');
-    
-    if (!searchResults) return;
-    
-    searchResults.classList.remove('active');
-    document.body.classList.remove('search-open');
-    
-    if (searchOverlay) {
-        searchOverlay.style.opacity = '0';
-    }
-    
-    setTimeout(() => {
-        if (!searchResults.classList.contains('active')) {
-            searchResults.style.display = 'none';
-            
-            if (searchOverlay) {
-                searchOverlay.style.display = 'none';
-            }
-            
-            window.isSearchDialogOpen = false;
-        }
-    }, 300);
-}
-
 function setupOutsideClickHandler() {
     document.addEventListener('click', function(e) {
-        if (!window.isSearchDialogOpen) {
-            return;
-        }
+        if (!window.searchState.isDialogOpen) return;
         
         const searchResults = document.getElementById('search-results');
         if (!searchResults) return;
@@ -587,6 +634,7 @@ function setupOutsideClickHandler() {
         const siteSearchInput = document.getElementById('site-search-input');
         const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
         
+        // 検索入力欄自体のクリックは無視
         if (siteSearchInput && (siteSearchInput === e.target || siteSearchInput.contains(e.target))) {
             return;
         }
@@ -595,21 +643,16 @@ function setupOutsideClickHandler() {
             return;
         }
         
+        // 検索結果外部のクリックで閉じる
         if (!searchResults.contains(e.target) && e.target.id !== 'search-overlay') {
             closeSearchResults();
         }
     });
 }
 
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        const context = this;
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(context, args), wait);
-    };
-}
-
+/**
+ * ツール検索機能の初期化
+ */
 function setupToolSearch() {
     const searchInput = document.getElementById('search-input');
     if (!searchInput) return;
@@ -619,8 +662,8 @@ function setupToolSearch() {
     
     searchContainer.style.position = 'relative';
     
+    // アイコン追加
     const existingIcon = searchContainer.querySelector('.search-icon');
-    
     if (!existingIcon) {
         const iconElement = document.createElement('span');
         iconElement.className = 'search-icon';
@@ -632,6 +675,7 @@ function setupToolSearch() {
         searchContainer.appendChild(iconElement);
     }
     
+    // クリアボタン追加
     if (!searchContainer.querySelector('.search-clear-button')) {
         const clearButton = document.createElement('button');
         clearButton.className = 'search-clear-button';
@@ -645,17 +689,18 @@ function setupToolSearch() {
         
         searchContainer.appendChild(clearButton);
         
+        // クリアボタンのイベント
         clearButton.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
-            // 直接値をクリア
+            // 入力欄をクリア
             searchInput.value = '';
             
             // クリアボタンを非表示
             this.classList.remove('visible');
             
-            // ツールのフィルタリングをリセット
+            // ツールフィルタをリセット
             filterTools('');
             
             // フォーカスを戻す
@@ -667,35 +712,51 @@ function setupToolSearch() {
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Backspace' && this.value.length === 1) {
             e.preventDefault();
+            
+            // 値をクリア
             this.value = '';
             
+            // クリアボタンを非表示
             const clearButton = searchContainer.querySelector('.search-clear-button');
             if (clearButton) {
                 clearButton.classList.remove('visible');
             }
             
+            // フィルタをリセット
             filterTools('');
+            
             return false;
         }
     });
     
-    // ツール検索の入力イベント
+    // 通常の入力処理
     searchInput.addEventListener('input', function() {
         const query = this.value.trim();
         
+        // クリアボタンの表示/非表示
         const clearButton = searchContainer.querySelector('.search-clear-button');
         if (clearButton) {
             clearButton.classList.toggle('visible', query.length > 0);
         }
         
+        // debounce設定
         if (!window.debouncedFilterTools) {
-            window.debouncedFilterTools = debounce(filterTools, 300);
+            window.debouncedFilterTools = function(query) {
+                clearTimeout(window._filterToolsTimeout);
+                window._filterToolsTimeout = setTimeout(() => {
+                    filterTools(query);
+                }, 300);
+            };
         }
         
+        // 検索実行
         window.debouncedFilterTools(query);
     });
 }
 
+/**
+ * ツールカードのフィルタリング
+ */
 function filterTools(query) {
     const toolCards = document.querySelectorAll('.tool-card');
     const queryLower = query.toLowerCase();
@@ -714,25 +775,22 @@ function filterTools(query) {
         }
     });
     
+    // 検索情報の表示
     const searchResults = document.getElementById('search-results-info');
     if (searchResults) {
-        if (query.trim() === '') {
-            searchResults.innerHTML = '';
-        } else {
-            searchResults.innerHTML = `検索結果: ${visibleCount}件のツールが見つかりました`;
-        }
+        searchResults.innerHTML = query.trim() === '' ? '' : `検索結果: ${visibleCount}件のツールが見つかりました`;
     }
     
+    // 検索結果なしメッセージの表示/非表示
     const noResultsMessage = document.getElementById('no-results-message');
     if (noResultsMessage) {
-        if (query.trim() === '' || visibleCount > 0) {
-            noResultsMessage.classList.add('hidden');
-        } else {
-            noResultsMessage.classList.remove('hidden');
-        }
+        noResultsMessage.classList.toggle('hidden', query.trim() === '' || visibleCount > 0);
     }
 }
 
+/**
+ * モバイル検索機能のセットアップ
+ */
 function setupMobileSearch() {
     const mobileSiteSearchInput = document.getElementById('mobile-site-search-input');
     if (mobileSiteSearchInput) {
@@ -740,6 +798,7 @@ function setupMobileSearch() {
         if (mobileSearchContainer) {
             mobileSearchContainer.style.position = 'relative';
             
+            // アイコン追加
             const existingIcon = mobileSearchContainer.querySelector('.mobile-search-icon') || 
                               mobileSearchContainer.querySelector('.search-icon');
             
@@ -754,6 +813,7 @@ function setupMobileSearch() {
                 mobileSearchContainer.appendChild(iconElement);
             }
             
+            // クリアボタン追加
             if (!mobileSearchContainer.querySelector('.search-clear-button')) {
                 const clearButton = document.createElement('button');
                 clearButton.className = 'search-clear-button';
@@ -768,12 +828,17 @@ function setupMobileSearch() {
             }
         }
         
-        // 既存の要素のクローンを作成し、イベントをクリア
-        const clonedInput = mobileSiteSearchInput.cloneNode(true);
-        mobileSiteSearchInput.parentNode.replaceChild(clonedInput, mobileSiteSearchInput);
+        // イベント設定
+        const newInput = document.createElement('input');
+        newInput.type = 'text';
+        newInput.className = mobileSiteSearchInput.className;
+        newInput.id = mobileSiteSearchInput.id;
+        newInput.placeholder = mobileSiteSearchInput.placeholder;
+        newInput.readOnly = true;
         
-        // 新しいイベントハンドラを設定
-        clonedInput.addEventListener('click', function(e) {
+        mobileSiteSearchInput.parentNode.replaceChild(newInput, mobileSiteSearchInput);
+        
+        newInput.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
@@ -782,21 +847,22 @@ function setupMobileSearch() {
                 mobileMenu.classList.remove('active');
             }
             
-            setTimeout(() => {
-                handleSearchFieldClick(e);
-            }, 50);
+            handleSearchFieldClick(e);
         });
     }
     
-    // モバイル検索トグルボタンの処理
+    // モバイル検索トグル
     const mobileSearchToggle = document.getElementById('mobile-search-toggle');
     if (mobileSearchToggle) {
-        // 既存のイベントをクリア
-        const clonedToggle = mobileSearchToggle.cloneNode(true);
-        mobileSearchToggle.parentNode.replaceChild(clonedToggle, mobileSearchToggle);
+        const newToggle = document.createElement('button');
+        newToggle.className = mobileSearchToggle.className;
+        newToggle.id = mobileSearchToggle.id;
+        newToggle.setAttribute('aria-label', mobileSearchToggle.getAttribute('aria-label'));
+        newToggle.innerHTML = mobileSearchToggle.innerHTML;
         
-        // 新しいイベントハンドラを設定
-        clonedToggle.addEventListener('click', function(e) {
+        mobileSearchToggle.parentNode.replaceChild(newToggle, mobileSearchToggle);
+        
+        newToggle.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
@@ -805,28 +871,26 @@ function setupMobileSearch() {
                 mobileMenu.classList.remove('active');
             }
             
-            setTimeout(() => {
-                handleSearchFieldClick(e);
-            }, 50);
+            handleSearchFieldClick(e);
         });
     }
     
-    window.addEventListener('resize', debounce(handleWindowResize, 200));
-    
-    handleWindowResize();
+    // リサイズイベント
+    window.addEventListener('resize', function() {
+        const searchResults = document.getElementById('search-results');
+        if (!searchResults) return;
+        
+        if (window.innerWidth <= 768) {
+            searchResults.classList.add('mobile-view');
+        } else {
+            searchResults.classList.remove('mobile-view');
+        }
+    });
 }
 
-function handleWindowResize() {
-    const searchResults = document.getElementById('search-results');
-    if (!searchResults) return;
-    
-    if (window.innerWidth <= 768) {
-        searchResults.classList.add('mobile-view');
-    } else {
-        searchResults.classList.remove('mobile-view');
-    }
-}
-
+/**
+ * タブ切り替え機能の初期化
+ */
 function fixTabSwitching() {
     document.querySelectorAll('.tabs .tab').forEach(tab => {
         const clone = tab.cloneNode(true);
@@ -860,6 +924,9 @@ function fixTabSwitching() {
     });
 }
 
+/**
+ * 初期タブの設定
+ */
 function setupInitialTabs() {
     const urlParams = new URLSearchParams(window.location.search);
     const tabParam = urlParams.get('tab');
@@ -891,6 +958,9 @@ function setupInitialTabs() {
     });
 }
 
+/**
+ * ハッシュ変更イベントの設定
+ */
 function setupHashChangeHandler() {
     window.addEventListener('hashchange', function() {
         if (window.location.hash === '#install-section') {
@@ -906,6 +976,9 @@ function setupHashChangeHandler() {
     });
 }
 
+/**
+ * サイト内検索機能の初期化
+ */
 function setupSiteSearch() {
     const siteSearchInput = document.getElementById('site-search-input');
     if (siteSearchInput) {
@@ -913,6 +986,7 @@ function setupSiteSearch() {
         if (searchWrapper) {
             searchWrapper.style.position = 'relative';
             
+            // 検索アイコン
             const existingIcon = searchWrapper.querySelector('.site-search-icon') || 
                                searchWrapper.querySelector('.search-icon');
             
@@ -927,6 +1001,7 @@ function setupSiteSearch() {
                 searchWrapper.appendChild(iconElement);
             }
             
+            // クリアボタン
             if (!searchWrapper.querySelector('.search-clear-button')) {
                 const clearButton = document.createElement('button');
                 clearButton.className = 'search-clear-button';
@@ -941,95 +1016,45 @@ function setupSiteSearch() {
             }
         }
         
-        // 既存の要素のクローンを作成し、イベントをクリア
-        const clonedInput = siteSearchInput.cloneNode(true);
-        siteSearchInput.parentNode.replaceChild(clonedInput, siteSearchInput);
+        // 入力欄の作り直し
+        const newInput = document.createElement('input');
+        newInput.type = 'text';
+        newInput.className = siteSearchInput.className;
+        newInput.id = siteSearchInput.id;
+        newInput.placeholder = '検索...';
+        newInput.readOnly = true;
         
-        // 新しいイベントハンドラを設定
-        clonedInput.addEventListener('click', function(e) {
-            e.preventDefault();
-            handleSearchFieldClick(e);
-        });
+        siteSearchInput.parentNode.replaceChild(newInput, siteSearchInput);
         
-        clonedInput.addEventListener('focus', function(e) {
-            e.preventDefault();
-            handleSearchFieldClick(e);
-        });
-        
-        clonedInput.readOnly = true;
-        clonedInput.placeholder = 'サイト内検索...';
+        // イベント設定
+        newInput.addEventListener('click', handleSearchFieldClick);
+        newInput.addEventListener('focus', handleSearchFieldClick);
     }
 }
 
+/**
+ * ドキュメント読み込み完了時の処理
+ */
 document.addEventListener('DOMContentLoaded', function() {
-    window.debouncedSearch = debounce(performSiteSearch, 300);
-    
+    // 各種機能の初期化
     setupSiteSearch();
-    
     setupOutsideClickHandler();
-    
-    const overlay = document.createElement('div');
-    overlay.id = 'search-overlay';
-    overlay.className = 'search-overlay';
-    overlay.addEventListener('click', function(e) {
-        e.stopPropagation();
-        closeSearchResults();
-    });
-    document.body.appendChild(overlay);
-    
     setupMobileSearch();
-    
     setupToolSearch();
-    
     fixTabSwitching();
-    
     setupHashChangeHandler();
-    
     setupInitialTabs();
-    
     handleUrlTabParam();
     
+    // ESCキーで検索ダイアログを閉じる
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && window.searchState.isDialogOpen) {
+            closeSearchResults();
+        }
+    });
+    
+    // 検索インデックスの生成は遅延して実行
     setTimeout(() => {
         generateSearchIndex();
     }, 500);
-});
-
-/**
- * サイト内検索のイベントリスナーを確実に設定
- */
-document.addEventListener('DOMContentLoaded', function() {
-    // サイト内検索のイベント設定
-    function setupSearchEvents() {
-        // デスクトップでのサイト内検索
-        const siteSearchInput = document.getElementById('site-search-input');
-        if (siteSearchInput) {
-            // 既存のイベントハンドラをクリア
-            const clonedInput = siteSearchInput.cloneNode(true);
-            siteSearchInput.parentNode.replaceChild(clonedInput, siteSearchInput);
-            
-            // 新しいイベントハンドラを設定
-            clonedInput.addEventListener('click', handleSearchFieldClick);
-        }
-        
-        // モバイルでのサイト内検索
-        const mobileSearchToggle = document.getElementById('mobile-search-toggle');
-        if (mobileSearchToggle) {
-            // 既存のイベントハンドラをクリア
-            const clonedToggle = mobileSearchToggle.cloneNode(true);
-            mobileSearchToggle.parentNode.replaceChild(clonedToggle, mobileSearchToggle);
-            
-            // 新しいイベントハンドラを設定
-            clonedToggle.addEventListener('click', handleSearchFieldClick);
-        }
-        
-        // ESCキーで検索ダイアログを閉じる
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && window.isSearchDialogOpen) {
-                closeSearchResults();
-            }
-        });
-    }
-    
-    // ページ読み込み完了後に実行
-    setTimeout(setupSearchEvents, 500);
 });
