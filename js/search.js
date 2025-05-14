@@ -150,7 +150,8 @@ window.searchState = {
     isDialogOpen: false,
     currentQuery: '', // 現在の検索クエリを明示的に保持
     debounceTimeout: null, // debounceタイマーを管理
-    processingInput: false // 入力処理中かどうか
+    processingInput: false, // 入力処理中かどうか
+    lastBackspaceTime: 0 // バックスペース処理の時間を記録
 };
 
 window.addEventListener('popstate', function(event) {
@@ -333,7 +334,22 @@ function initializeSearchInput(inputElement) {
         
         try {
             // 現在の入力値を取得
-            const newValue = this.value;
+            let newValue = this.value;
+            
+            // バックスペース後の不正な再入力を検出
+            const now = Date.now();
+            if (window.searchState.lastBackspaceTime && 
+                now - window.searchState.lastBackspaceTime < 100 && // 100ミリ秒以内
+                window.searchState.currentQuery === '' && 
+                newValue.length === 1) {
+                
+                // 不正な再入力を修正
+                this.value = '';
+                newValue = '';
+            }
+            
+            // バックスペースタイムをリセット
+            window.searchState.lastBackspaceTime = 0;
             
             // グローバル状態を更新
             window.searchState.currentQuery = newValue;
@@ -382,7 +398,10 @@ function handleBackspaceKey(event, inputElement) {
         updateClearButtonVisibility('');
         clearSearchResults();
         
-        return;
+        // バックスペース処理の時間を記録
+        window.searchState.lastBackspaceTime = Date.now();
+        
+        return false;
     }
 }
 
@@ -450,6 +469,7 @@ function closeSearchResults() {
     window.searchState.isDialogOpen = false;
     window.searchState.currentQuery = '';
     window.searchState.processingInput = false;
+    window.searchState.lastBackspaceTime = 0;
     
     // 遅延してDOM要素を削除
     setTimeout(() => {
