@@ -151,7 +151,7 @@ window.searchState = {
     currentQuery: '', // 現在の検索クエリを明示的に保持
     debounceTimeout: null, // debounceタイマーを管理
     processingInput: false, // 入力処理中かどうか
-    lastBackspaceTime: 0 // バックスペース処理の時間を記録
+    lastKeyWasBackspace: false // 直前のキーがバックスペースかどうか
 };
 
 window.addEventListener('popstate', function(event) {
@@ -308,12 +308,49 @@ function removeExistingSearchDialog() {
  * 検索入力欄の初期化 - 制御された入力管理
  */
 function initializeSearchInput(inputElement) {
-    // カスタムイベント処理
+    // input イベントをまず設定
+    inputElement.addEventListener('input', function(e) {
+        // 現在の入力値を取得
+        const newValue = this.value;
+            
+        // 前回の値が空で、現在の値が1文字だけなら、それはバックスペース後の不正な再入力の可能性がある
+        if (window.searchState.currentQuery === '' && newValue.length === 1) {
+            // 不正な再入力を修正する可能性がある - 直前のキーがバックスペースだったか確認
+            if (window.searchState.lastKeyWasBackspace) {
+                // 不正な再入力なので修正
+                this.value = '';
+                return;
+            }
+        }
+            
+        // グローバル状態を更新
+        window.searchState.currentQuery = newValue;
+        window.searchState.lastKeyWasBackspace = false;
+            
+        // クリアボタンの表示/非表示
+        updateClearButtonVisibility(newValue);
+            
+        // 値が空なら検索結果をクリア
+        if (newValue === '') {
+            clearSearchResults();
+            return;
+        }
+            
+        // 検索実行
+        debouncedSearch(newValue.trim());
+    });
+    
+    // キーダウンイベントは後に設定（順序が重要）
     inputElement.addEventListener('keydown', function(e) {
-        // バックスペースキーの特別処理
+        // バックスペースキーの処理
         if (e.key === 'Backspace') {
+            // バックスペースが押されたことを記録
+            window.searchState.lastKeyWasBackspace = true;
             handleBackspaceKey(e, this);
             return;
+        } else {
+            // バックスペース以外のキーではフラグをリセット
+            window.searchState.lastKeyWasBackspace = false;
         }
         
         // Enterキーの処理
@@ -323,50 +360,6 @@ function initializeSearchInput(inputElement) {
                 performSiteSearch(query);
             }
             return;
-        }
-    });
-    
-    // 入力イベントをカスタム処理
-    inputElement.addEventListener('input', function(e) {
-        if (window.searchState.processingInput) return;
-        
-        window.searchState.processingInput = true;
-        
-        try {
-            // 現在の入力値を取得
-            let newValue = this.value;
-            
-            // バックスペース後の不正な再入力を検出
-            const now = Date.now();
-            if (window.searchState.lastBackspaceTime && 
-                now - window.searchState.lastBackspaceTime < 100 && // 100ミリ秒以内
-                window.searchState.currentQuery === '' && 
-                newValue.length === 1) {
-                
-                // 不正な再入力を修正
-                this.value = '';
-                newValue = '';
-            }
-            
-            // バックスペースタイムをリセット
-            window.searchState.lastBackspaceTime = 0;
-            
-            // グローバル状態を更新
-            window.searchState.currentQuery = newValue;
-            
-            // クリアボタンの表示/非表示
-            updateClearButtonVisibility(newValue);
-            
-            // 値が空なら検索結果をクリア
-            if (newValue === '') {
-                clearSearchResults();
-                return;
-            }
-            
-            // 検索実行
-            debouncedSearch(newValue.trim());
-        } finally {
-            window.searchState.processingInput = false;
         }
     });
 }
@@ -385,23 +378,24 @@ function updateClearButtonVisibility(value) {
  * バックスペースキーのカスタム処理
  */
 function handleBackspaceKey(event, inputElement) {
-    // 1文字だけの時の特殊処理
+    // 現在値が1文字のときの特殊処理
     if (window.searchState.currentQuery.length === 1) {
-        // デフォルトのバックスペース動作を停止
-        event.preventDefault();
+        // デフォルトのバックスペース動作を停止しない（重要な変更点）
+        // event.preventDefault(); このコードを削除
         
-        // 直接値を空に設定
-        inputElement.value = '';
-        window.searchState.currentQuery = '';
-        
-        // UIを更新
-        updateClearButtonVisibility('');
-        clearSearchResults();
-        
-        // バックスペース処理の時間を記録
-        window.searchState.lastBackspaceTime = Date.now();
-        
-        return false;
+        // 次のイベントループで値を確認して修正
+        setTimeout(() => {
+            // inputの値を再確認
+            if (inputElement.value.length > 0) {
+                // 値が残っていたら強制的にクリア
+                inputElement.value = '';
+                window.searchState.currentQuery = '';
+                
+                // UIを更新
+                updateClearButtonVisibility('');
+                clearSearchResults();
+            }
+        }, 0);
     }
 }
 
@@ -469,7 +463,7 @@ function closeSearchResults() {
     window.searchState.isDialogOpen = false;
     window.searchState.currentQuery = '';
     window.searchState.processingInput = false;
-    window.searchState.lastBackspaceTime = 0;
+    window.searchState.lastKeyWasBackspace = false;
     
     // 遅延してDOM要素を削除
     setTimeout(() => {
@@ -731,21 +725,28 @@ function setupToolSearch() {
     // バックスペースキーの特別処理
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Backspace' && this.value.length === 1) {
-            e.preventDefault();
+            // バックスペースフラグを設定
+            window.toolSearchLastBackspace = true;
             
-            // 値をクリア
-            this.value = '';
-            
-            // クリアボタンを非表示
-            const clearButton = searchContainer.querySelector('.search-clear-button');
-            if (clearButton) {
-                clearButton.classList.remove('visible');
-            }
-            
-            // フィルタをリセット
-            filterTools('');
-            
-            return false;
+            // 次のイベントループで値を確認
+            setTimeout(() => {
+                // 値が残っていたら強制クリア
+                if (this.value.length > 0 && window.toolSearchLastBackspace) {
+                    this.value = '';
+                    
+                    // クリアボタンを非表示
+                    const clearButton = searchContainer.querySelector('.search-clear-button');
+                    if (clearButton) {
+                        clearButton.classList.remove('visible');
+                    }
+                    
+                    // フィルタをリセット
+                    filterTools('');
+                }
+                
+                // フラグをリセット
+                window.toolSearchLastBackspace = false;
+            }, 0);
         }
     });
     
@@ -758,6 +759,9 @@ function setupToolSearch() {
         if (clearButton) {
             clearButton.classList.toggle('visible', query.length > 0);
         }
+        
+        // バックスペースフラグリセット
+        window.toolSearchLastBackspace = false;
         
         // debounce設定
         if (!window.debouncedFilterTools) {
