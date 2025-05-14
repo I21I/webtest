@@ -120,28 +120,62 @@ body.dark-theme .mobile-theme-toggle-button svg.moon {
     color: var(--text-color);
 }
 
-/* テーマ切替ボタンがクリックできるようにする */
-.theme-toggle-menu-item {
-    background: none;
-    border: none;
-    cursor: pointer !important;
-    text-align: left;
-    width: 100%;
-    position: relative;
-    z-index: 10;
-}
-
-#mobile-theme-toggle {
-    cursor: pointer !important;
-    position: relative;
-    z-index: 100;
-    pointer-events: auto !important;
-}
-
-.theme-toggle-content {
+/* モバイルメニュー内のテーマ切替スタイル修正 */
+.mobile-menu-theme-toggle {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.mobile-theme-toggle-label {
+    color: var(--text-color);
+    font-size: 0.95rem;
+}
+
+.mobile-theme-toggle-button {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    cursor: pointer !important;
     position: relative;
-    z-index: 10;
-    pointer-events: auto !important;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.mobile-theme-toggle-button:hover {
+    background-color: var(--primary-light);
+}
+
+.mobile-theme-toggle-button svg {
+    width: 22px;
+    height: 22px;
+    fill: var(--text-color);
+    transition: all 0.3s ease;
+    position: absolute;
+}
+
+.mobile-theme-toggle-button svg.sun {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+.mobile-theme-toggle-button svg.moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+}
+
+body.dark-theme .mobile-theme-toggle-button svg.sun {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+}
+
+body.dark-theme .mobile-theme-toggle-button svg.moon {
+    opacity: 1;
+    transform: rotate(0) scale(1);
 }
