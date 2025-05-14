@@ -66,7 +66,7 @@ body.dark-theme .theme-toggle svg.moon {
 .mobile-menu-theme-toggle {
     display: flex;
     align-items: center;
-    justify-content: flex-end; /* ボタンを右端に配置 */
+    justify-content: flex-start; /* 右端配置から左揃えに変更 */
     padding: 0.8rem 1rem;
     border-top: 1px solid var(--border-color);
 }
@@ -83,6 +83,7 @@ body.dark-theme .theme-toggle svg.moon {
     position: relative;
     border-radius: 50%;
     transition: background-color 0.3s;
+    margin-right: auto; /* 追加：左に寄せるため */
 }
 
 .mobile-theme-toggle-button:hover {
