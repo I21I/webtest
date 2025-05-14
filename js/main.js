@@ -36,16 +36,40 @@ document.addEventListener('DOMContentLoaded', function() {
             ];
         });
     
-    const themeToggle = document.getElementById('theme-toggle');
-    const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
-    
-    if (themeToggle && typeof toggleTheme === 'function') {
-        themeToggle.addEventListener('click', toggleTheme);
+    // テーマ切替用関数
+    function setupThemeToggles() {
+        // ヘッダーのテーマ切替ボタン
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle && typeof toggleTheme === 'function') {
+            themeToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleTheme();
+            });
+        }
+        
+        // モバイルメニュー内のテーマ切替ボタン
+        const mobileThemeToggle = document.getElementById('mobile-theme-toggle');
+        if (mobileThemeToggle) {
+            // 既存のイベントハンドラをクリアするため、要素を複製
+            const newMobileThemeToggle = mobileThemeToggle.cloneNode(true);
+            if (mobileThemeToggle.parentNode) {
+                mobileThemeToggle.parentNode.replaceChild(newMobileThemeToggle, mobileThemeToggle);
+            }
+            
+            // 新しいイベントリスナーを設定
+            newMobileThemeToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof toggleTheme === 'function') {
+                    toggleTheme();
+                }
+            });
+        }
     }
     
-    if (mobileThemeToggle && typeof toggleTheme === 'function') {
-        mobileThemeToggle.addEventListener('click', toggleTheme);
-    }
+    // ページ読み込み後にイベント設定を実行
+    setTimeout(setupThemeToggles, 500);
     
     const menuButton = document.getElementById('menu-button');
     if (menuButton && typeof toggleMobileMenu === 'function') {
