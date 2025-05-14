@@ -145,13 +145,11 @@ function resetTabsState() {
     }
 }
 
-// グローバル状態管理 - 重要
+// グローバル状態管理
 window.searchState = {
     isDialogOpen: false,
-    currentQuery: '', // 現在の検索クエリを明示的に保持
-    debounceTimeout: null, // debounceタイマーを管理
-    processingInput: false, // 入力処理中かどうか
-    lastKeyWasBackspace: false // 直前のキーがバックスペースかどうか
+    currentQuery: '',
+    debounceTimeout: null
 };
 
 window.addEventListener('popstate', function(event) {
@@ -185,7 +183,7 @@ function handleSearchFieldClick(e) {
 }
 
 /**
- * 検索ダイアログを作成して開く (一度に実行)
+ * 検索ダイアログを作成して開く
  */
 function createAndOpenSearchDialog() {
     // 既存のダイアログ削除
@@ -194,8 +192,8 @@ function createAndOpenSearchDialog() {
     // ダイアログ作成
     const searchDialog = document.createElement('div');
     searchDialog.id = 'search-results';
-    searchDialog.style.display = 'flex'; // 初めから表示
-    searchDialog.style.opacity = '0'; // 初めは透明
+    searchDialog.style.display = 'flex';
+    searchDialog.style.opacity = '0';
     
     const searchHeader = document.createElement('div');
     searchHeader.className = 'search-results-header';
@@ -204,7 +202,7 @@ function createAndOpenSearchDialog() {
     searchField.className = 'search-field';
     searchField.innerHTML = `
         <div class="search-input-container">
-            <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索...">
+            <input type="text" id="search-query-display" class="search-query-input" placeholder="サイト内を検索..." autocomplete="off" spellcheck="false">
             <span class="search-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zm-8 6a8 8 0 1 1 14.32 4.906l5.387 5.387a1 1 0 0 1-1.414 1.414l-5.387-5.387A8 8 0 0 1 2 10z"></path>
@@ -270,8 +268,6 @@ function createAndOpenSearchDialog() {
         const searchQueryDisplay = document.getElementById('search-query-display');
         if (searchQueryDisplay) {
             searchQueryDisplay.focus();
-            
-            // 重要: input欄の直接操作を一元管理する
             initializeSearchInput(searchQueryDisplay);
         }
         
@@ -305,62 +301,61 @@ function removeExistingSearchDialog() {
 }
 
 /**
- * 検索入力欄の初期化 - 制御された入力管理
+ * 検索入力欄の初期化 - シンプルで確実なアプローチ
  */
 function initializeSearchInput(inputElement) {
-    // input イベントをまず設定
-    inputElement.addEventListener('input', function(e) {
-        // 現在の入力値を取得
-        const newValue = this.value;
-            
-        // 前回の値が空で、現在の値が1文字だけなら、それはバックスペース後の不正な再入力の可能性がある
-        if (window.searchState.currentQuery === '' && newValue.length === 1) {
-            // 不正な再入力を修正する可能性がある - 直前のキーがバックスペースだったか確認
-            if (window.searchState.lastKeyWasBackspace) {
-                // 不正な再入力なので修正
-                this.value = '';
-                return;
-            }
-        }
-            
-        // グローバル状態を更新
-        window.searchState.currentQuery = newValue;
-        window.searchState.lastKeyWasBackspace = false;
-            
-        // クリアボタンの表示/非表示
-        updateClearButtonVisibility(newValue);
-            
-        // 値が空なら検索結果をクリア
-        if (newValue === '') {
-            clearSearchResults();
-            return;
-        }
-            
-        // 検索実行
-        debouncedSearch(newValue.trim());
-    });
-    
-    // キーダウンイベントは後に設定（順序が重要）
+    // 主要なキーイベントを先に設定
     inputElement.addEventListener('keydown', function(e) {
-        // バックスペースキーの処理
-        if (e.key === 'Backspace') {
-            // バックスペースが押されたことを記録
-            window.searchState.lastKeyWasBackspace = true;
-            handleBackspaceKey(e, this);
-            return;
-        } else {
-            // バックスペース以外のキーではフラグをリセット
-            window.searchState.lastKeyWasBackspace = false;
+        // 最後の1文字を消す場合の特別処理
+        if (e.key === 'Backspace' && this.value.length === 1) {
+            // デフォルト動作を停止して、即座に確実にクリア
+            e.preventDefault();
+            
+            // フィールドをクリア
+            this.value = '';
+            window.searchState.currentQuery = '';
+            
+            // クリアボタンの状態を更新
+            updateClearButtonVisibility('');
+            
+            // 検索結果をクリア
+            clearSearchResults();
+            
+            // これ以上処理しないよう中断
+            return false;
         }
         
         // Enterキーの処理
         if (e.key === 'Enter') {
-            const query = window.searchState.currentQuery.trim();
+            const query = this.value.trim();
             if (query) {
                 performSiteSearch(query);
             }
+        }
+    });
+    
+    // 入力イベントの処理
+    inputElement.addEventListener('input', function() {
+        // 値を取得して状態更新
+        const value = this.value;
+        window.searchState.currentQuery = value;
+        
+        // クリアボタンの表示/非表示
+        updateClearButtonVisibility(value);
+        
+        // 値が空なら検索結果をクリア
+        if (value === '') {
+            clearSearchResults();
             return;
         }
+        
+        // 検索実行
+        debouncedSearch(value.trim());
+    });
+    
+    // フォーカス時のイベント
+    inputElement.addEventListener('focus', function() {
+        this.select(); // 選択状態にして入力しやすく
     });
 }
 
@@ -371,31 +366,6 @@ function updateClearButtonVisibility(value) {
     const clearButton = document.getElementById('search-clear-button');
     if (clearButton) {
         clearButton.classList.toggle('visible', value.length > 0);
-    }
-}
-
-/**
- * バックスペースキーのカスタム処理
- */
-function handleBackspaceKey(event, inputElement) {
-    // 現在値が1文字のときの特殊処理
-    if (window.searchState.currentQuery.length === 1) {
-        // デフォルトのバックスペース動作を停止しない（重要な変更点）
-        // event.preventDefault(); このコードを削除
-        
-        // 次のイベントループで値を確認して修正
-        setTimeout(() => {
-            // inputの値を再確認
-            if (inputElement.value.length > 0) {
-                // 値が残っていたら強制的にクリア
-                inputElement.value = '';
-                window.searchState.currentQuery = '';
-                
-                // UIを更新
-                updateClearButtonVisibility('');
-                clearSearchResults();
-            }
-        }, 0);
     }
 }
 
@@ -462,8 +432,6 @@ function closeSearchResults() {
     // 状態をリセット
     window.searchState.isDialogOpen = false;
     window.searchState.currentQuery = '';
-    window.searchState.processingInput = false;
-    window.searchState.lastKeyWasBackspace = false;
     
     // 遅延してDOM要素を削除
     setTimeout(() => {
@@ -503,10 +471,8 @@ function performSiteSearch(query) {
     // 入力欄の値を設定（内部状態も同期）
     const searchQueryDisplay = document.getElementById('search-query-display');
     if (searchQueryDisplay) {
-        window.searchState.processingInput = true;
         searchQueryDisplay.value = query;
         window.searchState.currentQuery = query;
-        window.searchState.processingInput = false;
         
         // クリアボタンの状態更新
         updateClearButtonVisibility(query);
@@ -724,29 +690,21 @@ function setupToolSearch() {
     
     // バックスペースキーの特別処理
     searchInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Backspace' && this.value.length === 1) {
-            // バックスペースフラグを設定
-            window.toolSearchLastBackspace = true;
+        if (e.key === 'Backspace' && this.value.length <= 1) {
+            // デフォルト動作を停止して即座にクリア
+            e.preventDefault();
             
-            // 次のイベントループで値を確認
-            setTimeout(() => {
-                // 値が残っていたら強制クリア
-                if (this.value.length > 0 && window.toolSearchLastBackspace) {
-                    this.value = '';
-                    
-                    // クリアボタンを非表示
-                    const clearButton = searchContainer.querySelector('.search-clear-button');
-                    if (clearButton) {
-                        clearButton.classList.remove('visible');
-                    }
-                    
-                    // フィルタをリセット
-                    filterTools('');
-                }
-                
-                // フラグをリセット
-                window.toolSearchLastBackspace = false;
-            }, 0);
+            // 値をクリア
+            this.value = '';
+            
+            // クリアボタンを非表示
+            const clearButton = searchContainer.querySelector('.search-clear-button');
+            if (clearButton) {
+                clearButton.classList.remove('visible');
+            }
+            
+            // フィルタをリセット
+            filterTools('');
         }
     });
     
@@ -760,10 +718,7 @@ function setupToolSearch() {
             clearButton.classList.toggle('visible', query.length > 0);
         }
         
-        // バックスペースフラグリセット
-        window.toolSearchLastBackspace = false;
-        
-        // debounce設定
+        // 検索実行用関数
         if (!window.debouncedFilterTools) {
             window.debouncedFilterTools = function(query) {
                 clearTimeout(window._filterToolsTimeout);
@@ -862,16 +817,20 @@ function setupMobileSearch() {
         
         mobileSiteSearchInput.parentNode.replaceChild(newInput, mobileSiteSearchInput);
         
+        // 検索フィールドクリック時の処理
         newInput.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            // イベント伝播を完全に停止
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+            e.cancelBubble = true;
             
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileMenu) {
                 mobileMenu.classList.remove('active');
             }
             
-            handleSearchFieldClick(e);
+            handleSearchFieldClick();
+            return false;
         });
     }
     
@@ -886,16 +845,20 @@ function setupMobileSearch() {
         
         mobileSearchToggle.parentNode.replaceChild(newToggle, mobileSearchToggle);
         
+        // 検索トグルボタンクリック時の処理
         newToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            // イベント伝播を完全に停止
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+            e.cancelBubble = true;
             
             const mobileMenu = document.getElementById('mobile-menu');
             if (mobileMenu && mobileMenu.classList.contains('active')) {
                 mobileMenu.classList.remove('active');
             }
             
-            handleSearchFieldClick(e);
+            handleSearchFieldClick();
+            return false;
         });
     }
     
@@ -1051,8 +1014,19 @@ function setupSiteSearch() {
         siteSearchInput.parentNode.replaceChild(newInput, siteSearchInput);
         
         // イベント設定
-        newInput.addEventListener('click', handleSearchFieldClick);
-        newInput.addEventListener('focus', handleSearchFieldClick);
+        newInput.addEventListener('click', function(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+            handleSearchFieldClick();
+            return false;
+        });
+        
+        newInput.addEventListener('focus', function(e) {
+            if (e.stopPropagation) e.stopPropagation();
+            if (e.preventDefault) e.preventDefault();
+            handleSearchFieldClick();
+            return false;
+        });
     }
 }
 
